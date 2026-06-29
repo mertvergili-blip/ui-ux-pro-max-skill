@@ -1,0 +1,10 @@
+.env
+*.key
+*.json
+__pycache__/
+.venv/
+assets/raw_clips/
+assets/temp/
+outputs/final_videos/
+logs/
+.DS_Store

@@ -1,0 +1,2 @@
+video_id,checked_at,qc_status,checklist_failed,reviewer_notes
+001,2026-06-29T23:00:58Z,needs_manual_review,,Pipeline scaffolded with sample script/scene/sound/metadata; no real Kling clips generated yet (dry-run only).
