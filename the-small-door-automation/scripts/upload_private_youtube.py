@@ -1,74 +1,142 @@
 #!/usr/bin/env python3
 """Upload a finished, QC-approved video to YouTube as PRIVATE only.
 
-Defaults to dry-run. Requires --live AND valid YouTube OAuth credentials in
-.env AND qc_status=approved_private_upload in video_queue.csv to perform a
-real upload. Never sets visibility to public.
+Prerequisites:
+  1. Run `python3 scripts/youtube_auth.py` once to create
+     credentials/youtube_token.json.
+  2. QC status for the video must be `approved_private_upload`.
+
+Defaults to dry-run. Requires --live to perform a real upload.
+Public upload is structurally blocked — visibility is hard-coded to 'private'.
 
 Usage:
-    python3 scripts/upload_private_youtube.py --video-id 001            # dry-run
-    python3 scripts/upload_private_youtube.py --video-id 001 --live      # real upload (private only)
+    python3 scripts/upload_private_youtube.py --video-id 001          # dry-run
+    python3 scripts/upload_private_youtube.py --video-id 001 --live    # real upload
 """
 import argparse
 import json
+import sys
+from pathlib import Path
 
-from utils import get_logger, load_env, metadata_path, read_video_queue, safe_log_context, update_video_row
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from utils import get_logger, metadata_path, read_video_queue, update_video_row
 
 logger = get_logger("upload_private_youtube", "upload.log")
+
+TOKEN_FILE = ROOT / "credentials" / "youtube_token.json"
+SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+
+UPLOAD_VISIBILITY = "private"
+
+
+def get_credentials():
+    from google.auth.transport.requests import Request
+    from google.oauth2.credentials import Credentials
+
+    if not TOKEN_FILE.exists():
+        raise FileNotFoundError(
+            f"Token not found: {TOKEN_FILE}\n"
+            "Run `python3 scripts/youtube_auth.py` first."
+        )
+    creds = Credentials.from_authorized_user_file(str(TOKEN_FILE), SCOPES)
+    if creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+        TOKEN_FILE.write_text(creds.to_json())
+    return creds
 
 
 def get_video_row(video_id: str) -> dict:
     for row in read_video_queue():
         if row["video_id"] == video_id:
             return row
-    raise ValueError(f"video_id {video_id} not found")
+    raise ValueError(f"video_id {video_id} not found in video_queue.csv")
 
 
-def call_youtube_upload_api(video_id: str, metadata: dict, env: dict, live: bool) -> dict:
-    """Placeholder for the real YouTube Data API v3 upload.
+def upload_video(video_id: str, metadata: dict) -> str:
+    from googleapiclient.discovery import build
+    from googleapiclient.http import MediaFileUpload
 
-    Real implementation: use google-auth-oauthlib + googleapiclient with
-    env['YOUTUBE_CLIENT_ID'] / env['YOUTUBE_CLIENT_SECRET'] /
-    env['YOUTUBE_REFRESH_TOKEN'], call videos.insert with
-    status={'privacyStatus': 'private'}. Never log credentials.
-    """
-    if not live:
-        logger.info("[DRY-RUN] Would upload video_id=%s as private with metadata: %s",
-                    video_id, safe_log_context(metadata))
-        return {"status": "dry_run", "youtube_url": None}
+    video_path = ROOT / "outputs" / "final_videos" / f"{video_id}.mp4"
+    if not video_path.exists():
+        raise FileNotFoundError(
+            f"Final video not found: {video_path}\n"
+            "Run `python3 scripts/assemble_short.py --video-id {video_id} --live` first."
+        )
 
-    if not env.get("YOUTUBE_REFRESH_TOKEN"):
-        raise RuntimeError("Live upload requested but YOUTUBE_REFRESH_TOKEN missing from .env")
+    creds = get_credentials()
+    youtube = build("youtube", "v3", credentials=creds)
 
-    # TODO: implement real googleapiclient videos.insert call here.
-    raise NotImplementedError("Real YouTube upload is not implemented yet. Add it here before using --live.")
+    description = metadata["description"] + "\n\n" + " ".join(metadata["hashtags"])
+
+    body = {
+        "snippet": {
+            "title": metadata["title"],
+            "description": description,
+            "tags": [tag.lstrip("#") for tag in metadata["hashtags"]],
+            "categoryId": "22",
+        },
+        "status": {
+            "privacyStatus": UPLOAD_VISIBILITY,
+            "selfDeclaredMadeForKids": False,
+        },
+    }
+
+    media = MediaFileUpload(str(video_path), mimetype="video/mp4", resumable=True)
+    request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
+
+    response = None
+    logger.info("Uploading video_id=%s as private...", video_id)
+    while response is None:
+        _, response = request.next_chunk()
+
+    youtube_url = f"https://youtu.be/{response['id']}"
+    logger.info("Uploaded video_id=%s → %s", video_id, youtube_url)
+    return youtube_url
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--video-id", required=True)
-    parser.add_argument("--live", action="store_true")
+    parser.add_argument("--live", action="store_true", help="Perform real private upload (requires credentials)")
     args = parser.parse_args()
 
     row = get_video_row(args.video_id)
     if row.get("qc_status") != "approved_private_upload":
         raise SystemExit(
             f"Refusing to upload: qc_status='{row.get('qc_status')}', "
-            "must be 'approved_private_upload'."
+            "must be 'approved_private_upload'. "
+            "Run `scripts/run_qc.py --video-id {args.video_id} --result approved_private_upload` first."
         )
 
-    metadata = json.loads(metadata_path(args.video_id, "metadata").read_text())
-    env = load_env()
+    meta_path = metadata_path(args.video_id, "metadata")
+    if not meta_path.exists():
+        raise FileNotFoundError(f"Metadata not found: {meta_path}")
+    metadata = json.loads(meta_path.read_text())
 
-    result = call_youtube_upload_api(args.video_id, metadata, env, args.live)
+    if not args.live:
+        logger.info(
+            "[DRY-RUN] Would upload video_id=%s as private with title: %s",
+            args.video_id, metadata["title"],
+        )
+        print(f"DRY-RUN: would upload '{metadata['title']}' as private.")
+        print("Pass --live to perform the real upload.")
+        return
+
+    youtube_url = upload_video(args.video_id, metadata)
 
     update_video_row(
         args.video_id,
-        youtube_upload_status="uploaded_private" if args.live else "not_uploaded",
-        youtube_url=result.get("youtube_url") or "",
+        youtube_upload_status="uploaded_private",
+        youtube_url=youtube_url,
         publish_status="private_pending",
     )
-    print(f"Upload result for video_id={args.video_id}: {result['status']}")
+
+    ai_note = metadata.get("ai_disclosure_note", "")
+    print(f"\nUploaded as private: {youtube_url}")
+    if ai_note:
+        print(f"\nAI DISCLOSURE NOTE (apply in YouTube Studio before publishing):\n{ai_note}")
 
 
 if __name__ == "__main__":

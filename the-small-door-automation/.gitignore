@@ -1,6 +1,7 @@
 .env
 *.key
 *.json
+credentials/
 __pycache__/
 .venv/
 assets/raw_clips/
