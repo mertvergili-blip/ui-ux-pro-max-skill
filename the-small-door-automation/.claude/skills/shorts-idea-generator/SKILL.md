@@ -27,3 +27,11 @@ Generates new video concepts for The Small Door and appends them to
 - Keep titles 45–70 characters per `prompts/title_templates.md`.
 - Append new rows via `scripts/generate_ideas.py` (CSV-first; Google Sheets
   sync is optional and additive, never required).
+- Follow the "WTF-but-cinematic" creative direction in `data/channel_bible.md`:
+  ordinary object + impossible hidden world + WTF reveal + tiny living
+  system + cinematic quality + final question. Prefer clearly photogenic,
+  instantly recognizable objects over vague/abstract ones.
+- Score every idea with the WTF Watchability Score (7 axes, /10 each) before
+  it can move past script/scene-prompt stage. Total must be ≥45/60 to
+  proceed to live Kling generation; below that, keep it script-only or
+  rework it — never spend generation credits on a low-scoring idea.

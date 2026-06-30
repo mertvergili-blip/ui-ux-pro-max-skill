@@ -63,6 +63,45 @@ noticed. Every video should leave the viewer asking: "what's behind the door?"
 - YouTube Shorts, 9:16 vertical, 25–35 seconds.
 - Short English subtitles, ASMR sound design, no long voice-over.
 
+## Creative Direction Update (post-021): WTF-but-Cinematic
+
+The channel is no longer "just cozy hidden worlds." Cozy/mysterious is still
+the visual tone, but the *idea* must now hit harder. Every new idea follows:
+
+**Ordinary object + impossible hidden world + WTF reveal + tiny living
+system + cinematic quality + final question.**
+
+Rules for this:
+
+- Not random AI nonsense — the absurd idea must still make internal sense
+  as a tiny "living system" (it has logic, routine, inhabitants, stakes).
+- Not a kids' video. Not cheap horror. No jumpscares. No gore/violence.
+- Still no real people/celebrities/copyrighted characters, no brands/logos.
+- Visuals stay premium, cinematic, dark/cozy — the *idea* can be absurd, the
+  *image quality* must not be.
+- The viewer must react "what is this??" within the first 1 second.
+- The video must end on a line that makes people want to comment.
+- Prefer a small list of clearly photogenic, instantly recognizable
+  everyday objects over vague/abstract ones: fridge, toaster, mirror, shoe,
+  pillow, cereal box, coffee cup, old book, toothbrush, sock drawer,
+  washing machine, jewelry box, candle, matchbox.
+
+### WTF Watchability Score (required before any live generation)
+
+Score every idea 0–10 on each axis before approving it for scripting/Kling:
+
+1. First-1-second curiosity power
+2. Object clarity (is it instantly recognizable?)
+3. Absurd idea power
+4. Visual payoff
+5. Comment potential
+6. Rewatch potential
+7. Production risk (10 = low risk/easy to execute, 0 = high risk)
+
+**Total must be ≥ 45/60 to proceed to live Kling generation.** Below that,
+the idea stays in script/scene-prompt stage only (or gets reworked) —
+never spend generation credits on it.
+
 ## Five-Part Story Formula
 
 1. **0–2s — Hook:** a strong curiosity statement. *"I opened the fridge at 3AM."*
