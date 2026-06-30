@@ -25,9 +25,16 @@ Tagline: *Tiny hidden worlds behind ordinary things.*
 idea (shorts-idea-generator) → script (cinematic-scriptwriter) →
 scene prompts (scene-prompt-engineer) → Kling tasks (kling-video-producer) →
 sound plan (asmr-sound-designer) → subtitles/edit plan (subtitle-and-edit-planner) →
-ffmpeg assembly (assemble_short.py) → QC (safety-copyright-qc) →
-metadata (metadata-seo-writer) → private upload (youtube-private-uploader) →
-analytics (analytics-reviewer)
+ffmpeg assembly (assemble_short.py) → technical QC (safety-copyright-qc) →
+retention edit review (viral-retention-editor) → sound review
+(shorts-sound-director) → platform packaging (platform-reels-adapter) →
+metadata (metadata-seo-writer) → human approval → private upload
+(youtube-private-uploader) → analytics (analytics-reviewer)
+
+`viral-retention-editor`, `shorts-sound-director`, and
+`platform-reels-adapter` are custom, repo-owned skills (not third-party
+marketplace skills) — they never call generation/upload APIs themselves,
+only produce review output and packaging text for human approval.
 
 ## Key files
 
