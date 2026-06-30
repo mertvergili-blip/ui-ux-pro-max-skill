@@ -210,6 +210,29 @@ class KlingClient:
             time.sleep(poll_interval)
         raise KlingAPIError(f"Kling task {task_id} timed out after {timeout}s")
 
+    def check_auth(self) -> dict:
+        """Lightweight, non-billable credential check.
+
+        Polls a task id that almost certainly does not exist. Polling a
+        single task does not create a generation job, so this should not
+        consume generation credits. A 401/403 means the key itself is
+        rejected; any other response (e.g. "task not found") means the key
+        authenticated successfully — Kling validates auth before it looks
+        up the task. This cannot report the actual credit balance: no
+        documented balance/billing endpoint is used here (see check_kling_balance.py).
+        """
+        import uuid
+
+        probe_id = f"balance-check-{uuid.uuid4().hex[:12]}"
+        try:
+            self._request("GET", f"/v1/videos/text2video/{probe_id}")
+            return {"auth_ok": True, "detail": "unexpected success on probe id"}
+        except KlingAPIError as exc:
+            msg = str(exc)
+            if "HTTP 401" in msg or "HTTP 403" in msg:
+                return {"auth_ok": False, "detail": "key rejected (401/403)"}
+            return {"auth_ok": True, "detail": "key accepted, probe task not found (expected)"}
+
     @staticmethod
     def extract_video_url(task_data: dict) -> str:
         videos = (task_data.get("task_result") or {}).get("videos") or []

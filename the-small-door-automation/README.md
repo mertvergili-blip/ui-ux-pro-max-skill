@@ -128,6 +128,17 @@ first.
   the pipeline stops before assembly — nothing broken gets uploaded.
 - **Error details**: check `logs/errors.log` (Kling API/network errors,
   never contains your keys) and `logs/generation.log` (step-by-step log).
+- **"Account balance not enough" (Kling error code 1102)**: this means the
+  *API key's* balance is empty, not your code or your account in general.
+  Run `python3 scripts/check_kling_balance.py` first — it confirms whether
+  your key authenticates at all (without spending any credits), but it
+  **cannot** show your actual credit balance: Kling does not publish a
+  balance-check API endpoint. **Kling web wallet credits and Kling Open
+  Platform / API credits can be separate balances** — having credit on the
+  consumer website does not guarantee the API key has any. Confirm your
+  real API balance directly in **KlingAI Open Platform → API Console →
+  Billing / Resource Package** (or your reseller's billing dashboard) before
+  retrying `--live-kling`.
 - **QC fails** (wrong duration, wrong resolution, missing subtitles, etc.):
   `python3 scripts/run_qc.py --video-id 001 --auto` prints exactly which
   checks failed. Fix the underlying issue (e.g. re-run assembly) and re-run QC.
