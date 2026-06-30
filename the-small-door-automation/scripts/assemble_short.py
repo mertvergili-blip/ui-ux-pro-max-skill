@@ -16,11 +16,12 @@ Usage:
     python3 scripts/assemble_short.py --video-id 001 --live      # actually runs ffmpeg
 """
 import argparse
+import json
 import shutil
 import subprocess
 from pathlib import Path
 
-from utils import OUTPUTS_DIR, ROOT, get_logger, update_video_row
+from utils import OUTPUTS_DIR, ROOT, get_logger, metadata_path, update_video_row
 
 logger = get_logger("assemble_short", "generation.log")
 
@@ -50,7 +51,25 @@ def find_sound_file(video_id: str) -> Path | None:
     return None
 
 
-def normalize_clips(clips: list[Path], temp_dir: Path, live: bool) -> list[Path]:
+def load_planned_durations(video_id: str) -> dict[int, float]:
+    """Map scene_number -> planned_duration from kling_results.json, if present.
+    Missing/unreadable file just means no trimming is applied."""
+    path = metadata_path(video_id, "kling_results")
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return {}
+    durations = {}
+    for r in data.get("results", []):
+        if r.get("status") == "success" and r.get("planned_duration"):
+            durations[r["scene_number"]] = r["planned_duration"]
+    return durations
+
+
+def normalize_clips(clips: list[Path], temp_dir: Path, live: bool, planned_durations: dict[int, float] | None = None) -> list[Path]:
+    planned_durations = planned_durations or {}
     temp_dir.mkdir(parents=True, exist_ok=True)
     normalized = []
     for clip in clips:
@@ -61,8 +80,18 @@ def normalize_clips(clips: list[Path], temp_dir: Path, live: bool) -> list[Path]
             "-vf", f"scale={TARGET_RESOLUTION}:force_original_aspect_ratio=increase,crop={TARGET_RESOLUTION},fps={TARGET_FPS}",
             "-c:v", "libx264", "-pix_fmt", "yuv420p",
             "-c:a", "aac", "-ar", "48000",
-            str(out),
         ]
+        # Trim down to the scene's originally planned duration. Kling only
+        # generates 5s/10s clips, so this only ever shortens, never extends,
+        # a clip beyond what was actually generated.
+        scene_num = None
+        digits = "".join(ch for ch in clip.stem if ch.isdigit())
+        if digits:
+            scene_num = int(digits)
+        planned = planned_durations.get(scene_num)
+        if planned:
+            cmd += ["-t", str(planned)]
+        cmd.append(str(out))
         if not live:
             logger.info("[DRY-RUN] normalize: %s", " ".join(cmd))
             continue
@@ -90,7 +119,8 @@ def assemble(video_id: str, live: bool) -> Path:
     out_path = OUTPUTS_DIR / "final_videos" / f"{video_id}_final.mp4"
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    normalized = normalize_clips(clips, temp_dir, live)
+    planned_durations = load_planned_durations(video_id)
+    normalized = normalize_clips(clips, temp_dir, live, planned_durations)
 
     if not live:
         logger.info(

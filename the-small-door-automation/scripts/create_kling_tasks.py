@@ -48,18 +48,30 @@ def call_kling_api(client, video_id: str, scene: dict, attempt: int, live: bool)
     out_dir = ROOT / "assets" / "raw_clips" / video_id
     out_path = out_dir / f"scene_{scene_num:02d}.mp4"
 
+    # Kling only accepts a generated clip duration of 5 or 10 seconds.
+    # Scenes shorter/longer than that (per the script's pacing) are trimmed
+    # to their planned length during ffmpeg assembly instead.
+    planned_duration = scene.get("duration", 5)
+    kling_duration = "5" if planned_duration <= 7 else "10"
+
     try:
         task_id = client.create_text2video_task(
             prompt=scene["visual_prompt"],
             negative_prompt=scene.get("negative_prompt", ""),
-            duration=str(max(5, round(scene.get("duration", 5)))),
+            duration=kling_duration,
         )
         logger.info("Scene %s attempt %s: Kling task_id=%s submitted", scene_num, attempt, task_id)
         task_data = client.wait_for_task(task_id, task_type="text2video")
         video_url = client.extract_video_url(task_data)
         client.download_video(video_url, out_path)
         logger.info("Scene %s attempt %s: downloaded to %s", scene_num, attempt, out_path)
-        return {"status": "success", "output_file": str(out_path.relative_to(ROOT)), "task_id": task_id}
+        return {
+            "status": "success",
+            "output_file": str(out_path.relative_to(ROOT)),
+            "task_id": task_id,
+            "planned_duration": planned_duration,
+            "generated_duration": kling_duration,
+        }
     except KlingAPIError as exc:
         logger.warning("Scene %s attempt %s failed: %s", scene_num, attempt, exc)
         return {"status": "failed", "error": str(exc)}

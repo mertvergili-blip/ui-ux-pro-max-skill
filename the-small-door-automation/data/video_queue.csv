@@ -1,5 +1,5 @@
 video_id,status,object,hidden_world,title,hook,script,scene_count,provider,output_file,youtube_upload_status,youtube_url,publish_status,views,average_view_duration,retention_notes,comments_count,subscriber_gain,notes,qc_status
-001,clips_ready,fridge,tiny train station,I found a tiny train station inside my fridge,I opened the fridge at 3AM.,,5,kling,,not_uploaded,,private_pending,,,,,,Subseries: Fridge Worlds,needs_manual_review
+001,needs_manual_review,fridge,tiny train station,I found a tiny train station inside my fridge,I opened the fridge at 3AM.,,5,kling,,not_uploaded,,private_pending,,,,,,Subseries: Fridge Worlds,needs_manual_review
 002,idea,old book,midnight bakery,A bakery opened inside my old book,I opened an old book at midnight.,,5,kling,,not_uploaded,,private_pending,,,,,,Subseries: Book Worlds,pending
 003,idea,coffee cup,glowing forest,There was a glowing forest inside my coffee cup,My coffee cup never went cold.,,5,kling,,not_uploaded,,private_pending,,,,,,Subseries: Cup Worlds,pending
 004,idea,drawer,hotel for lost buttons,I found a hotel for lost buttons in my drawer,A button went missing from my coat.,,5,kling,,not_uploaded,,private_pending,,,,,,Subseries: Drawer Worlds,pending
