@@ -1,35 +1,39 @@
 1
-00:00:00,200 --> 00:00:02,200
-My toaster popped out a tiny championship belt.
+00:00:00,200 --> 00:00:02,800
+I heard cheering from the toaster.
 
 2
-00:00:02,500 --> 00:00:03,600
-Not toast. A belt.
+00:00:03,200 --> 00:00:04,600
+It wasn't making toast.
 
 3
-00:00:03,900 --> 00:00:07,500
-Inside: a boxing ring, the size of a coin.
+00:00:04,900 --> 00:00:06,900
+It was a boxing match.
 
 4
-00:00:07,800 --> 00:00:11,200
-Two bread slices, gloved up, circling each other.
+00:00:08,200 --> 00:00:10,500
+Wheat bread was winning.
 
 5
-00:00:11,500 --> 00:00:15,000
-The crowd is made of crumbs. They're cheering.
+00:00:11,800 --> 00:00:14,500
+Then dark rye switched hands.
 
 6
-00:00:15,300 --> 00:00:18,600
-A bell rings. Round two.
+00:00:15,300 --> 00:00:16,400
+One punch.
 
 7
-00:00:19,000 --> 00:00:22,500
-One slice goes down.
+00:00:16,700 --> 00:00:18,800
+White bread went down.
 
 8
-00:00:22,800 --> 00:00:26,500
-The toaster dings like nothing happened.
+00:00:22,300 --> 00:00:24,000
+The toaster dinged.
 
 9
-00:00:27,000 --> 00:00:29,800
-White or wheat — who do you think wins?
+00:00:24,300 --> 00:00:26,500
+The winner came out.
+
+10
+00:00:26,800 --> 00:00:29,600
+Should I eat the winner?
