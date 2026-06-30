@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Minimal client for the official KlingAI Open Platform video API.
+"""Minimal client for the Kling video API.
 
-Auth: KlingAI uses a short-lived JWT built from an Access Key (AK) and
-Secret Key (SK) — NOT the raw keys themselves are sent on the wire. A new
-JWT is generated per request (or reused for <30 min) and sent as
-`Authorization: Bearer <jwt>`.
+Auth: two modes are supported, depending on what your provider issued.
+  - KLING_API_KEY: a single bearer key, sent as-is in
+    `Authorization: Bearer <KLING_API_KEY>`. This is the common case for
+    resellers/aggregators that front the Kling models with one API key.
+  - KLING_ACCESS_KEY + KLING_SECRET_KEY: the official KlingAI Open Platform
+    access/secret pair. A short-lived JWT is built from them and sent as
+    `Authorization: Bearer <jwt>`; the raw keys are never sent on the wire.
+Set whichever pair your provider gave you in `.env` — only one is required.
 
 Endpoints (per https://app.klingai.com/global/dev/document-api):
     POST {base}/v1/videos/text2video         create a text-to-video task
@@ -71,17 +75,24 @@ class KlingAPIError(RuntimeError):
 
 class KlingClient:
     def __init__(self, env: dict):
+        api_key = env.get("KLING_API_KEY", "").strip()
         access_key = env.get("KLING_ACCESS_KEY", "").strip()
         secret_key = env.get("KLING_SECRET_KEY", "").strip()
-        if not access_key or not secret_key:
+
+        if api_key:
+            self._auth_mode = "bearer"
+            self._api_key = api_key
+        elif access_key and secret_key:
+            self._auth_mode = "jwt"
+            self._access_key = access_key
+            self._secret_key = secret_key
+        else:
             raise KlingConfigError(
-                "Missing Kling credentials. Set KLING_ACCESS_KEY and "
-                "KLING_SECRET_KEY in .env (see .env.example). The Kling "
-                "Open Platform issues these as an Access Key / Secret Key "
-                "pair, not a single API key."
+                "Missing Kling credentials. Set either KLING_API_KEY (a "
+                "single bearer key) or both KLING_ACCESS_KEY and "
+                "KLING_SECRET_KEY in .env (see .env.example)."
             )
-        self._access_key = access_key
-        self._secret_key = secret_key
+
         self.base_url = (env.get("KLING_BASE_URL") or DEFAULT_BASE_URL).rstrip("/")
         self.model = env.get("KLING_DEFAULT_MODEL") or DEFAULT_MODEL
         self.aspect_ratio = env.get("KLING_DEFAULT_ASPECT_RATIO") or "9:16"
@@ -112,12 +123,17 @@ class KlingClient:
         self._token_expires_at = now + JWT_TTL_SECONDS
         return token
 
+    def _bearer_token(self) -> str:
+        if self._auth_mode == "bearer":
+            return self._api_key
+        return self._jwt()
+
     def _request(self, method: str, path: str, body: dict | None = None) -> dict:
         url = f"{self.base_url}{path}"
         data = json.dumps(body).encode("utf-8") if body is not None else None
         req = urllib.request.Request(url, data=data, method=method)
         req.add_header("Content-Type", "application/json")
-        req.add_header("Authorization", f"Bearer {self._jwt()}")
+        req.add_header("Authorization", f"Bearer {self._bearer_token()}")
         try:
             with urllib.request.urlopen(req, timeout=60) as resp:
                 payload = json.loads(resp.read().decode("utf-8"))
