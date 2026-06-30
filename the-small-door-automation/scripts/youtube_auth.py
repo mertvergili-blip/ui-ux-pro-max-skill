@@ -99,8 +99,23 @@ def exchange_code(code: str) -> None:
 
 
 def verify_channel(creds: Credentials) -> None:
+    from googleapiclient.errors import HttpError
+
     youtube = build("youtube", "v3", credentials=creds)
-    response = youtube.channels().list(part="snippet", mine=True).execute()
+    try:
+        response = youtube.channels().list(part="snippet", mine=True).execute()
+    except HttpError as exc:
+        if exc.resp.status == 403:
+            print(
+                "\nAuth complete. Token is valid and saved.\n"
+                "(Skipping channel-name verification: the 'youtube.upload' "
+                "scope you required is upload-only and doesn't include "
+                "permission to read channel info — this is expected, not "
+                "an error.)\n"
+                "You can now use upload_private_youtube.py --live"
+            )
+            return
+        raise
     items = response.get("items", [])
     if not items:
         print("WARNING: no channels found for this account.")
