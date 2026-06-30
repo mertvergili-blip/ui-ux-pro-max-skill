@@ -1,0 +1,39 @@
+# Video 022 — Viral Caption Plan (TikTok/Reels style)
+
+Status: planning only. No render performed.
+
+## Style
+
+Bold white text, thick black outline/drop shadow, centered near the middle
+of the frame (not small bottom-corner subtitles), TikTok/Reels viral
+caption look, high contrast, readable on a phone screen at a glance.
+Critical words/punch moments rendered larger or stronger. Final question
+rendered large and clear.
+
+- Max 3-5 words per line.
+- Lines synced tightly to the action/voice beat they describe.
+- Punch-moment captions (scene 4) hit harder/bigger than the rest.
+
+## Caption flow
+
+| Time | Caption |
+|---|---|
+| 0:00–0:03 | I heard yelling / from my toaster. |
+| 0:03–0:06 | It wasn't making toast. |
+| 0:06–0:08 | It was a fight. |
+| 0:08–0:11 | Wheat bread / was talking trash. |
+| 0:11–0:14 | "Touch me / and you're crumbs." |
+| 0:14–0:17 | Then rye / switched hands. |
+| 0:17–0:20 | ONE PUNCH. |
+| 0:20–0:23 | White bread / went down. |
+| 0:23–0:26 | The toaster dinged. |
+| 0:26–0:30 | Should I eat / the winner? |
+
+## Implementation note
+
+Existing `subtitle-and-edit-planner` / `assemble_short.py` pipeline burns
+bottom-aligned small subtitles by default. Centered/bold/large viral-style
+captions are a new rendering requirement and will need either a new ASS
+style (font size, position, outline) or a separate caption-burn step before
+this can run live — to be implemented when live generation is approved,
+not part of this planning-only update.
