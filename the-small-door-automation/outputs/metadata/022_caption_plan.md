@@ -14,11 +14,10 @@ rendered large and clear.
 - Lines synced tightly to the action/voice beat they describe.
 - Punch-moment captions (scene 4) hit harder/bigger than the rest.
 - Censored swears are always rendered censored on screen (`f***`, `b****`),
-  never spelled out in full. Two strategies coexist: line 4 ("I'll f*** you
-  up, mate.") is spoken uncensored in the audio — only the caption is
-  censored, no audio beep; line 7 ("Breakfast is over, b****.") is censored
-  in both audio (beep) and caption, so the caption never gets ahead of or
-  contradicts that beep.
+  never spelled out in full. Both profanity lines (4 and 7) are spoken
+  uncensored in the audio — no beep on either — with censoring applied only
+  to the on-screen caption: line 4 "I'll f*** you up, mate.", line 7
+  "Breakfast is over, b****."
 
 ## Caption flow (finalized 7-line voice flow)
 
