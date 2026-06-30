@@ -15,15 +15,16 @@ logger = get_logger("generate_scene_prompts", "generation.log")
 BASE_VISUAL_STYLE = (
     "cinematic macro shot, miniature hidden world, cozy magical realism, "
     "dark room, warm tiny lights, soft shadows, shallow depth of field, "
-    "realistic textures, no humans, no logos, no text, no brand packaging, "
+    "realistic textures, no logos, no text, no brand packaging, "
     "no cartoon style"
 )
 
 NEGATIVE_PROMPT = (
-    "human face, real person, celebrity, brand logo, readable brand text, "
-    "copyrighted character, cartoon, toy-like, childish colors, "
+    "real person, celebrity, recognizable face, famous character, "
+    "copyrighted character, brand logo, readable brand text, horror, gore, "
+    "violence, scary monster, cartoonish, toy-like, childish colors, "
     "oversaturated, plastic look, distorted objects, unreadable subtitles, "
-    "extra limbs, scary horror, gore, violence"
+    "extra limbs"
 )
 
 

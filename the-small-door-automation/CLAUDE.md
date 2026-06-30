@@ -12,7 +12,10 @@ Tagline: *Tiny hidden worlds behind ordinary things.*
 
 ## Hard rules (never violate)
 
-- No human faces, real people, celebrities, brands, logos, or copyrighted characters.
+- No real people, recognizable real faces, celebrities, brands, logos, or
+  copyrighted characters. Original fictional tiny characters (conductor,
+  baker, tailor, clockmaker, operator, shopkeeper, shadow figures,
+  miniature silhouettes) are allowed, never as recognizable real people.
 - No long voice-over / no narrator. Only short English subtitles + ASMR sound + ambience.
 - Every video: 25–35 seconds, 9:16 vertical.
 - Every video upload defaults to **private**. Public release is a manual human decision.

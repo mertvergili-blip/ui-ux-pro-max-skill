@@ -26,8 +26,22 @@ Converts each of the 5 scenes from a script into a Kling-ready prompt.
 ```
 cinematic macro shot, miniature hidden world, cozy magical realism, dark room,
 warm tiny lights, soft shadows, shallow depth of field, realistic textures,
-no humans, no logos, no text, no brand packaging, no cartoon style
+no logos, no text, no brand packaging, no cartoon style
 ```
+
+## Original tiny characters (optional, when the scene calls for one)
+
+A scene may feature one original fictional tiny character (conductor,
+baker, tailor, clockmaker, hotel clerk, operator, shopkeeper, shadow
+figure, miniature silhouette) to bring the world to life. When used:
+
+- Phrase it explicitly as fictional, e.g. "an original tiny operator
+  character ... seen as a small cinematic silhouette, no recognizable
+  face, no celebrity, no real person, no brand, no copyrighted character".
+- Prefer silhouette / backlit / shadow / at-a-distance framing over a
+  recognizable close-up human face.
+- At most one character per scene, never more prominent than the
+  miniature world itself.
 
 ## Rules
 

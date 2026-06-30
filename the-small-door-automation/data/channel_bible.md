@@ -2,8 +2,13 @@
 
 ## Identity
 
-The Small Door is a faceless, global YouTube Shorts channel revealing tiny,
-magical worlds hidden behind, inside, or under ordinary objects.
+The Small Door is a global YouTube Shorts channel revealing tiny, magical
+worlds hidden behind, inside, or under ordinary objects. The channel has
+no human host or face — but its miniature worlds can be inhabited by
+original fictional tiny characters (a tiny train conductor, baker,
+tailor, clockmaker, hotel clerk, shopkeeper, operator, shadow figures,
+miniature silhouettes). These are never real people, celebrities, or
+copyrighted characters.
 
 **Tagline:** Tiny hidden worlds behind ordinary things.
 
@@ -19,12 +24,28 @@ subtitles, ASMR sound, and ambience.
 
 ## Hard Bans
 
-- No human faces, no real people, no celebrities.
+- No real people, no recognizable real faces, no celebrities.
 - No brand names, logos, or readable brand text.
 - No copyrighted characters.
 - No narrator voice-over.
 - No horror, gore, or violence.
 - No toy-like / plastic / oversaturated cartoon visuals.
+
+## Original Tiny Characters (allowed)
+
+The miniature worlds may include original fictional tiny characters —
+e.g. a tiny train conductor, baker, tailor, clockmaker, hotel clerk,
+shopkeeper, operator, shadow figures, miniature silhouettes. Rules for
+using them:
+
+- Never a real person, real-person impression, celebrity, or copyrighted
+  character.
+- No recognizable, photorealistic human face in close-up — prefer
+  silhouette, shadow, backlit, or obscured/at-a-distance framing.
+- Style stays cinematic, mysterious, cozy, magical-realism — not
+  cartoonish, not childish, not horror, not realistic-celebrity-like.
+- One clear character per scene at most; never the focal point over the
+  miniature world itself.
 
 ## Visual World
 

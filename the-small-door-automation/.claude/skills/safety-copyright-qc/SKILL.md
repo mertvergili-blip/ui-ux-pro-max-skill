@@ -19,7 +19,9 @@ Runs the final checklist before a video is allowed to reach
 - Is there a comment-driving question?
 - Is the video too similar to previous videos?
 - Any copyrighted character/logo/brand present?
-- Any human face or real-person impression present?
+- Any real person, recognizable real face, or real-person impression
+  present? (original fictional tiny characters in silhouette/shadow are
+  allowed — flag only if a character reads as a real/recognizable person)
 - Does it look like a kids' channel?
 - Is it too bright/toy-like/cartoonish?
 - Is an AI disclosure note needed?

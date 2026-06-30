@@ -11,8 +11,14 @@ any content for this channel.
 ## What to enforce
 
 - Not a kids' channel. No oversaturated cartoon look, no childish colors.
-- No human faces, no real people, no celebrities, no brands, no logos, no
-  copyrighted characters.
+- No real people, no recognizable real faces, no celebrities, no brands,
+  no logos, no copyrighted characters.
+- Original fictional tiny characters (conductor, baker, tailor,
+  clockmaker, hotel clerk, operator, shopkeeper, shadow figures,
+  miniature silhouettes) ARE allowed — they make the miniature worlds
+  feel alive. They must never be real-person impressions, celebrities,
+  or copyrighted characters, and should favor silhouette/shadow/obscured
+  framing over recognizable close-up human faces.
 - Cinematic, cozy, mysterious, magical-realism atmosphere. Dark but warm.
 - Every video: 25–35 seconds.
 - Subtitles: short, English only.
