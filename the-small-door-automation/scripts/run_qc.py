@@ -59,12 +59,16 @@ def _ffprobe(video_path) -> dict:
     return json.loads(result.stdout)
 
 
-def run_auto_checks(video_id: str) -> tuple[bool, list[str], dict]:
-    """Returns (passed, failed_check_names, details)."""
+def run_auto_checks(video_id: str, file_suffix: str = "final") -> tuple[bool, list[str], dict]:
+    """Returns (passed, failed_check_names, details).
+
+    file_suffix selects outputs/final_videos/<video_id>_<file_suffix>.mp4
+    (e.g. "final" or "sound_edit")."""
     failed = []
     details = {}
 
-    video_path = OUTPUTS_DIR / "final_videos" / f"{video_id}_final.mp4"
+    video_path = OUTPUTS_DIR / "final_videos" / f"{video_id}_{file_suffix}.mp4"
+    details["video_file"] = video_path.name
     details["final_video_exists"] = video_path.exists()
     if not video_path.exists():
         failed.append("final_video_exists")
@@ -90,6 +94,11 @@ def run_auto_checks(video_id: str) -> tuple[bool, list[str], dict]:
             details["resolution"] = f"{width}x{height}"
             if (width, height) != EXPECTED_RESOLUTION:
                 failed.append("resolution_1080x1920")
+
+        audio_stream = next((s for s in probe["streams"] if s["codec_type"] == "audio"), None)
+        details["audio_stream_exists"] = audio_stream is not None
+        if audio_stream is None:
+            failed.append("audio_stream_exists")
     except (subprocess.CalledProcessError, FileNotFoundError, KeyError, ValueError) as exc:
         logger.warning("ffprobe failed for %s: %s", video_path, exc)
         failed.append("ffprobe_readable")
@@ -132,6 +141,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--video-id", required=True)
     parser.add_argument("--auto", action="store_true", help="Run automated technical checks")
+    parser.add_argument("--file-suffix", default="final", help="final_videos/<video_id>_<suffix>.mp4 to check (default: final)")
     parser.add_argument("--result", choices=sorted(VALID_RESULTS), help="Manually record a QC result")
     parser.add_argument("--failed", default="", help="comma-separated checklist items that failed (manual mode)")
     parser.add_argument("--notes", default="")
@@ -141,7 +151,7 @@ def main():
         raise SystemExit("Pass --auto for technical checks or --result for a manual content QC verdict.")
 
     if args.auto:
-        passed, failed_checks, details = run_auto_checks(args.video_id)
+        passed, failed_checks, details = run_auto_checks(args.video_id, file_suffix=args.file_suffix)
         result = "approved_private_upload" if passed else "needs_manual_review"
         record_result(args.video_id, result, ",".join(failed_checks), f"auto-check: {json.dumps(details)}")
         print(f"Auto QC for video_id={args.video_id}: {result}")
