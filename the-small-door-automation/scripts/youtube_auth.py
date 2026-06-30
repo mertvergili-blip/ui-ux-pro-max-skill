@@ -1,29 +1,32 @@
 #!/usr/bin/env python3
 """Perform the one-time YouTube OAuth 2.0 flow and save a reusable token.
 
-Usage:
-    python3 scripts/youtube_auth.py
+This runs in two steps because this environment is headless (no local
+browser to catch the OAuth redirect):
 
-What it does:
-  1. Reads credentials/youtube_client_secret.json (Desktop App credentials).
-  2. Opens a browser window for Google login / consent.
-  3. Saves the resulting token to credentials/youtube_token.json.
-  4. Prints the authenticated channel title so you can confirm the right
-     account is connected.
+Step 1 — get the authorization URL:
+    python3 scripts/youtube_auth.py --get-url
+
+Open the printed URL in your own browser, sign in with the Google account
+that owns "The Small Door" channel, approve, and copy the code Google shows
+you.
+
+Step 2 — exchange that code for a token:
+    python3 scripts/youtube_auth.py --code "PASTE_CODE_HERE"
+
+This saves credentials/youtube_token.json and prints the connected channel
+name to confirm the right account is linked.
 
 What it does NOT do:
   - Upload anything.
   - Set anything public.
   - Modify any video or channel settings.
-
-Run this script exactly once from the project root to authorise the pipeline.
-After that, upload_private_youtube.py reads the saved token automatically.
 """
 
+import argparse
 import sys
 from pathlib import Path
 
-# ── Ensure scripts/ is importable regardless of cwd ────────────────────────
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -36,35 +39,63 @@ SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
 
 CLIENT_SECRET_FILE = ROOT / "credentials" / "youtube_client_secret.json"
 TOKEN_FILE = ROOT / "credentials" / "youtube_token.json"
+# Temporary PKCE verifier, written by --get-url and consumed by --code.
+# Step 1 and step 2 run as separate processes, so the verifier can't just
+# live in memory. Deleted as soon as the token exchange succeeds.
+VERIFIER_FILE = ROOT / "credentials" / ".pkce_verifier"
+
+# Matches the redirect_uris registered in the Desktop App client secret JSON.
+# After you approve in your browser, it will try to load http://localhost/...
+# and fail to connect (expected, nothing is listening there) — but the
+# authorization code will be visible in the browser's address bar as the
+# `code=` query parameter. Copy it from there.
+REDIRECT_URI = "http://localhost"
 
 
-def get_credentials() -> Credentials:
-    creds: Credentials | None = None
-
-    if TOKEN_FILE.exists():
-        creds = Credentials.from_authorized_user_file(str(TOKEN_FILE), SCOPES)
-
-    if creds and creds.valid:
-        return creds
-
-    if creds and creds.expired and creds.refresh_token:
-        creds.refresh(Request())
-    else:
-        if not CLIENT_SECRET_FILE.exists():
-            raise FileNotFoundError(
-                f"Client secret file not found: {CLIENT_SECRET_FILE}\n"
-                "Download it from Google Cloud Console → APIs & Services → "
-                "Credentials and save as credentials/youtube_client_secret.json"
-            )
-        flow = InstalledAppFlow.from_client_secrets_file(
-            str(CLIENT_SECRET_FILE), SCOPES
+def make_flow() -> InstalledAppFlow:
+    if not CLIENT_SECRET_FILE.exists():
+        raise FileNotFoundError(
+            f"Client secret file not found: {CLIENT_SECRET_FILE}\n"
+            "Save it as credentials/youtube_client_secret.json first."
         )
-        creds = flow.run_local_server(port=0)
+    flow = InstalledAppFlow.from_client_secrets_file(str(CLIENT_SECRET_FILE), SCOPES)
+    flow.redirect_uri = REDIRECT_URI
+    return flow
 
+
+def print_auth_url() -> None:
+    flow = make_flow()
+    auth_url, _ = flow.authorization_url(prompt="consent")
+    VERIFIER_FILE.parent.mkdir(parents=True, exist_ok=True)
+    VERIFIER_FILE.write_text(flow.code_verifier)
+    print("\n" + "=" * 70)
+    print("1. Open this URL in your browser:")
+    print(auth_url)
+    print("=" * 70)
+    print("2. Sign in with the Google account for 'The Small Door' channel.")
+    print("3. Click Allow.")
+    print("4. Your browser will try to open http://localhost/... and show")
+    print("   'this site can't be reached' — that is expected, ignore it.")
+    print("5. Look at the address bar. Copy everything after 'code=' and")
+    print("   before the next '&' symbol. That is your authorization code.")
+    print("6. Send that code back here.")
+
+
+def exchange_code(code: str) -> None:
+    if not VERIFIER_FILE.exists():
+        raise FileNotFoundError(
+            "No pending authorization found. Run --get-url first, then "
+            "use the code from that same run."
+        )
+    flow = make_flow()
+    flow.code_verifier = VERIFIER_FILE.read_text().strip()
+    flow.fetch_token(code=code)
+    creds = flow.credentials
     TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
     TOKEN_FILE.write_text(creds.to_json())
+    VERIFIER_FILE.unlink(missing_ok=True)
     print(f"Token saved to {TOKEN_FILE}")
-    return creds
+    verify_channel(creds)
 
 
 def verify_channel(creds: Credentials) -> None:
@@ -81,12 +112,16 @@ def verify_channel(creds: Credentials) -> None:
 
 
 def main() -> None:
-    print("Starting YouTube OAuth flow...")
-    print("Scope: youtube.upload (private upload only)")
-    print(f"Client secret: {CLIENT_SECRET_FILE}")
-    print()
-    creds = get_credentials()
-    verify_channel(creds)
+    parser = argparse.ArgumentParser()
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--get-url", action="store_true", help="Print the authorization URL (step 1)")
+    group.add_argument("--code", help="Authorization code from Google (step 2)")
+    args = parser.parse_args()
+
+    if args.get_url:
+        print_auth_url()
+    elif args.code:
+        exchange_code(args.code.strip())
 
 
 if __name__ == "__main__":
