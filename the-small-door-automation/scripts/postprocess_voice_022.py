@@ -206,8 +206,8 @@ def process_line(variant: str, line: dict, live: bool) -> Path:
     return out_path
 
 
-def build_montage(variant: str, live: bool) -> Path:
-    out_path = montage_path(variant)
+def build_montage(variant: str, live: bool, montage_override: Path | None = None) -> Path:
+    out_path = montage_override or montage_path(variant)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     temp_dir = OUTPUTS_DIR.parent / "assets" / "temp" / f"{VIDEO_ID}_voice_style_test_{variant}"
 
@@ -250,18 +250,36 @@ def build_montage(variant: str, live: bool) -> Path:
     return out_path
 
 
-def run(live: bool) -> None:
-    for variant in VARIANTS:
+def run(live: bool, variants: list[str] | None = None, montage_override: Path | None = None) -> None:
+    variants = variants or list(VARIANTS)
+    for variant in variants:
         for line in VOICE_LINES:
             process_line(variant, line, live)
-        build_montage(variant, live)
+        build_montage(variant, live, montage_override if len(variants) == 1 else None)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--live", action="store_true")
+    parser.add_argument(
+        "--variant", choices=list(VARIANTS), default=None,
+        help="Process only this variant (default: all three).",
+    )
+    parser.add_argument(
+        "--montage-out", default=None,
+        help="Override the montage output filename under outputs/audio/ "
+             "(only valid with --variant, i.e. a single-variant run).",
+    )
     args = parser.parse_args()
-    run(args.live)
+
+    variants = [args.variant] if args.variant else None
+    montage_override = None
+    if args.montage_out:
+        if not args.variant:
+            parser.error("--montage-out requires --variant (single-variant run).")
+        montage_override = OUTPUTS_DIR / "audio" / args.montage_out
+
+    run(args.live, variants=variants, montage_override=montage_override)
 
 
 if __name__ == "__main__":
