@@ -8,5 +8,6 @@ assets/raw_clips/
 assets/temp/
 assets/voice/
 outputs/final_videos/
+outputs/audio/
 logs/
 .DS_Store

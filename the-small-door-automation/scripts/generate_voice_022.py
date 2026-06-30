@@ -39,26 +39,54 @@ ELEVENLABS_TTS_URL = "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
 # list_elevenlabs_voices.py and approved by the user. None of these are a
 # real person's or celebrity's cloned voice, or an existing copyrighted
 # character voice — they are stock ElevenLabs library voices.
+# Direction text updated for a "dirty cartoon fighter" performance instead of
+# clean/professional TTS — see outputs/metadata/022_voice_audio_plan.md for
+# the full per-character dramaturgy. Same voice_ids kept (closest available
+# matches in the account's premade library); stability lowered and style
+# raised on every preset to push ElevenLabs toward a rougher, less polished,
+# more expressive read. The remaining "ugly/dirty" character comes from
+# scripts/postprocess_voice_022.py (pitch shift, EQ, bitcrush, soft-clip),
+# applied locally to the already-generated mp3s — no new ElevenLabs call.
 VOICE_PRESETS = {
     "referee_crumb": {
         "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
-        "direction": "Liam — Energetic, Social Media Creator: tiny fast referee, energetic, slightly high-pitched, clear",
-        "settings": {"stability": 0.35, "similarity_boost": 0.6, "style": 0.7},
+        "direction": (
+            "Liam — Energetic, Social Media Creator, pushed rough: tiny, fast, "
+            "cracked-voice ring announcer shouting without a mic, slightly "
+            "panicked, high pitch, blurts the line out instead of announcing "
+            "it smoothly — not a polished social-media host."
+        ),
+        "settings": {"stability": 0.18, "similarity_boost": 0.55, "style": 0.95},
     },
     "wheat_bread": {
         "voice_id": "SOYHLrjzK2X1ezoPC6cr",
-        "direction": "Harry — Fierce Warrior: aggressive, angry wheat bread fighter, clear and punchy",
-        "settings": {"stability": 0.3, "similarity_boost": 0.6, "style": 0.8},
+        "direction": (
+            "Harry — Fierce Warrior, pushed rough: small, nasal, shrill, "
+            "self-important tiny fighter acting way tougher than it is — "
+            "trash talk should sound absurd and cartoonish, not like a real "
+            "threat; raspy/irritating edge instead of a clean punchy delivery."
+        ),
+        "settings": {"stability": 0.15, "similarity_boost": 0.5, "style": 1.0},
     },
     "dark_rye": {
         "voice_id": "N2lVS1w4EtoT3dr4eOWO",
-        "direction": "Callum — Husky Trickster: deeper, cocky, confident dark rye fighter, funny but threatening",
-        "settings": {"stability": 0.45, "similarity_boost": 0.65, "style": 0.6},
+        "direction": (
+            "Callum — Husky Trickster, pushed rough: thick, dry, deadpan, "
+            "low-energy villain who never raises his voice — funnier and more "
+            "threatening because he stays calm and bored-sounding; close-mic, "
+            "gravelly, never smooth/cinematic."
+        ),
+        "settings": {"stability": 0.25, "similarity_boost": 0.55, "style": 0.85},
     },
     "crowd_crumbs": {
         "voice_id": "IKne3meq5aSn9XLyUdCD",
-        "direction": "Charlie — Deep, Confident, Energetic: tiny crowd gasp, layered, chaotic, short",
-        "settings": {"stability": 0.2, "similarity_boost": 0.5, "style": 0.9},
+        "direction": (
+            "Charlie — Deep, Confident, Energetic, pushed rough: one messy, "
+            "chaotic reaction take, not a clean single gasp; this raw take "
+            "becomes the base layer that postprocess_voice_022.py multiplies "
+            "into a 3-layer crowd burst with pitch/delay/pan variation."
+        ),
+        "settings": {"stability": 0.1, "similarity_boost": 0.45, "style": 1.0},
     },
 }
 
