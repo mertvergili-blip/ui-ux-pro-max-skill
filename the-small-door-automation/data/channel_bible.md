@@ -126,6 +126,34 @@ Rainy Night Stories, Clock Worlds, Bottle Worlds, Tiny Shops, Hidden Transit,
 Tiny Nature, Candle Worlds, Paper Worlds, Home Appliance Worlds, Box Worlds,
 Small Door Core.
 
+## The Small Door Visual Clarity Rule
+
+Derived once from a set of user-provided reference images (toaster
+bread-boxing match, used only as a one-time quality/readability
+benchmark for fixing video 022 — never to be reused literally or copied
+verbatim into future prompts). Applies to every video going forward,
+self-applied without needing new reference images each time:
+
+- Main character(s) stay centered and very clearly readable — never
+  reduced to background detail.
+- Objects can act human (face, eyes, mouth, arms/gloves, small
+  accessories) as long as they stay original, non-copyrighted, and
+  on-brand.
+- The action must be understandable at first glance, even with sound and
+  subtitles off.
+- The inner world / tiny society around the main character(s) must read
+  clearly — not too dark, not too abstract.
+- Priority order: clear WTF action first, cinematic mood second —
+  cinematic atmosphere must never come at the cost of readability.
+- Composition leaves clear, safe space (center or top/bottom safe areas)
+  for captions — nothing critical sits where captions will be burned in.
+- Fast, clear, funny, WTF viral-short feel over slow/moody ambiguity.
+
+When designing a new idea: (1) design original characters, (2) clarify
+the scene's action, (3) keep the main character centered, (4) leave
+caption-safe space, (5) self-check readability before approving for
+scripting/Kling.
+
 ## Publishing Rule
 
 The system never publishes publicly on its own. Every video is produced as

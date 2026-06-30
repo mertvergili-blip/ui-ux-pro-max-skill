@@ -43,6 +43,24 @@ figure, miniature silhouette) to bring the world to life. When used:
 - At most one character per scene, never more prominent than the
   miniature world itself.
 
+## The Small Door Visual Clarity Rule (apply to every scene)
+
+- Main character(s) centered and clearly readable, never reduced to
+  background detail.
+- Objects can act human (face/eyes/mouth/arms/accessories) if original
+  and on-brand.
+- Action must be understandable at a glance, without subtitles or sound.
+- Inner world / mini-society must read clearly — not too dark, not too
+  abstract.
+- Clear WTF action takes priority over "cinematic" mood; cinematic
+  texture is secondary and must never obscure subject/action.
+- Leave clear caption-safe space (center or safe margins) in the
+  composition.
+
+(One-time visual benchmark derived from user reference images for video
+022 — apply the standard above, do not copy those images' content
+literally into new prompts.)
+
 ## Rules
 
 - One clear subject and one clear action per scene — don't stack more than

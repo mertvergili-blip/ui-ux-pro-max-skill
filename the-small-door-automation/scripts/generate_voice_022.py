@@ -35,29 +35,29 @@ VOICE_DIR = OUTPUTS_DIR.parent / "assets" / "voice" / VIDEO_ID
 
 ELEVENLABS_TTS_URL = "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
 
-# Placeholder ElevenLabs voice_ids — replace with real voice IDs chosen/
-# designed in the ElevenLabs dashboard (Voice Lab / Voice Design) before
-# any --live run. None of these may be a real person's or celebrity's
-# cloned voice, or an existing copyrighted character voice.
+# Real ElevenLabs voice_ids, chosen from the account's available voices via
+# list_elevenlabs_voices.py and approved by the user. None of these are a
+# real person's or celebrity's cloned voice, or an existing copyrighted
+# character voice — they are stock ElevenLabs library voices.
 VOICE_PRESETS = {
     "referee_crumb": {
-        "voice_id": "REPLACE_WITH_REFEREE_VOICE_ID",
-        "direction": "tiny fast referee, energetic, slightly high-pitched, clear",
+        "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+        "direction": "Liam — Energetic, Social Media Creator: tiny fast referee, energetic, slightly high-pitched, clear",
         "settings": {"stability": 0.35, "similarity_boost": 0.6, "style": 0.7},
     },
     "wheat_bread": {
-        "voice_id": "REPLACE_WITH_WHEAT_BREAD_VOICE_ID",
-        "direction": "aggressive, slightly squeaky, angry wheat bread fighter, clear and punchy",
+        "voice_id": "SOYHLrjzK2X1ezoPC6cr",
+        "direction": "Harry — Fierce Warrior: aggressive, angry wheat bread fighter, clear and punchy",
         "settings": {"stability": 0.3, "similarity_boost": 0.6, "style": 0.8},
     },
     "dark_rye": {
-        "voice_id": "REPLACE_WITH_DARK_RYE_VOICE_ID",
-        "direction": "deeper, cocky, confident dark rye fighter, funny but threatening",
+        "voice_id": "N2lVS1w4EtoT3dr4eOWO",
+        "direction": "Callum — Husky Trickster: deeper, cocky, confident dark rye fighter, funny but threatening",
         "settings": {"stability": 0.45, "similarity_boost": 0.65, "style": 0.6},
     },
     "crowd_crumbs": {
-        "voice_id": "REPLACE_WITH_CROWD_VOICE_ID",
-        "direction": "tiny crowd gasp, layered, chaotic, short",
+        "voice_id": "IKne3meq5aSn9XLyUdCD",
+        "direction": "Charlie — Deep, Confident, Energetic: tiny crowd gasp, layered, chaotic, short",
         "settings": {"stability": 0.2, "similarity_boost": 0.5, "style": 0.9},
     },
 }
