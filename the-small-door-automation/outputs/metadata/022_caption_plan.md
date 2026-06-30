@@ -13,21 +13,26 @@ rendered large and clear.
 - Max 3-5 words per line.
 - Lines synced tightly to the action/voice beat they describe.
 - Punch-moment captions (scene 4) hit harder/bigger than the rest.
+- Censored swears are always rendered censored on screen (`f***`, `b****`),
+  never spelled out in full — matches the audio censor-beep, never ahead of
+  or contradicting it.
 
-## Caption flow
+## Caption flow (finalized 7-line voice flow)
 
 | Time | Caption |
 |---|---|
 | 0:00–0:03 | I heard yelling / from my toaster. |
 | 0:03–0:06 | It wasn't making toast. |
 | 0:06–0:08 | It was a fight. |
-| 0:08–0:11 | Wheat bread / was talking trash. |
-| 0:11–0:14 | "Touch me / and you're crumbs." |
-| 0:14–0:17 | Then rye / switched hands. |
-| 0:17–0:20 | ONE PUNCH. |
+| 0:08–0:10 | "You're burnt, rye." |
+| 0:10–0:12 | "Say that again." |
+| 0:12–0:15 | "I'll f*** you up." |
+| 0:15–0:18 | "Wrong toaster." |
+| 0:18–0:20 | ONE PUNCH. |
 | 0:20–0:23 | White bread / went down. |
 | 0:23–0:26 | The toaster dinged. |
-| 0:26–0:30 | Should I eat / the winner? |
+| 0:26–0:28 | "Breakfast is over, b****." |
+| 0:28–0:30 | Should I eat / the winner? |
 
 ## Implementation note
 

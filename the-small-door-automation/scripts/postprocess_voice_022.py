@@ -31,6 +31,15 @@ logger = get_logger("postprocess_voice_022", "generation.log")
 SAMPLE_RATE = 44100
 VIDEO_ID = "022"
 
+# Locked decision (user, voice-style test round): variant "cartoon" (B —
+# UGLY CARTOON) is the final post-process chain for video 022. "light" stays
+# as a safer Shorts/Reels fallback variant; "extreme" stays as an optional
+# louder/meme-ier alternative. Neither is used in the final mix unless the
+# user explicitly switches FINAL_VARIANT. mix_voice_and_sfx_022.py should
+# read processed voice from processed_dir(FINAL_VARIANT), i.e.
+# assets/voice/022_processed_cartoon/, once new lines are generated live.
+FINAL_VARIANT = "cartoon"
+
 # Each variant defines: output dir suffix, montage filename, per-character
 # -af filter chain, and the crowd 3-layer filter_complex params (pitch
 # ratios / delays / volumes per layer). alimiter always caps peaks so none
