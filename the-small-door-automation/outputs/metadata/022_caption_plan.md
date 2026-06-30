@@ -14,8 +14,11 @@ rendered large and clear.
 - Lines synced tightly to the action/voice beat they describe.
 - Punch-moment captions (scene 4) hit harder/bigger than the rest.
 - Censored swears are always rendered censored on screen (`f***`, `b****`),
-  never spelled out in full — matches the audio censor-beep, never ahead of
-  or contradicting it.
+  never spelled out in full. Two strategies coexist: line 4 ("I'll f*** you
+  up, mate.") is spoken uncensored in the audio — only the caption is
+  censored, no audio beep; line 7 ("Breakfast is over, b****.") is censored
+  in both audio (beep) and caption, so the caption never gets ahead of or
+  contradicts that beep.
 
 ## Caption flow (finalized 7-line voice flow)
 
@@ -26,7 +29,7 @@ rendered large and clear.
 | 0:06–0:08 | It was a fight. |
 | 0:08–0:10 | "You're burnt, rye." |
 | 0:10–0:12 | "Say that again." |
-| 0:12–0:15 | "I'll f*** you up." |
+| 0:12–0:15 | "I'll f*** you up, mate." |
 | 0:15–0:18 | "Wrong toaster." |
 | 0:18–0:20 | ONE PUNCH. |
 | 0:20–0:23 | White bread / went down. |

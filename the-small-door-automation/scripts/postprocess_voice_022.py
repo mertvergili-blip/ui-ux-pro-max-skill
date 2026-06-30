@@ -250,12 +250,19 @@ def build_montage(variant: str, live: bool, montage_override: Path | None = None
     return out_path
 
 
-def run(live: bool, variants: list[str] | None = None, montage_override: Path | None = None) -> None:
+def run(
+    live: bool,
+    variants: list[str] | None = None,
+    montage_override: Path | None = None,
+    line_ids: list[str] | None = None,
+) -> None:
     variants = variants or list(VARIANTS)
+    lines = VOICE_LINES if not line_ids else [l for l in VOICE_LINES if l["id"] in line_ids]
     for variant in variants:
-        for line in VOICE_LINES:
+        for line in lines:
             process_line(variant, line, live)
-        build_montage(variant, live, montage_override if len(variants) == 1 else None)
+        if not line_ids:
+            build_montage(variant, live, montage_override if len(variants) == 1 else None)
 
 
 def main():
@@ -270,6 +277,10 @@ def main():
         help="Override the montage output filename under outputs/audio/ "
              "(only valid with --variant, i.e. a single-variant run).",
     )
+    parser.add_argument(
+        "--line-id", action="append", default=None,
+        help="Process only this line id (repeatable). Skips montage build. Default: all lines.",
+    )
     args = parser.parse_args()
 
     variants = [args.variant] if args.variant else None
@@ -279,7 +290,7 @@ def main():
             parser.error("--montage-out requires --variant (single-variant run).")
         montage_override = OUTPUTS_DIR / "audio" / args.montage_out
 
-    run(args.live, variants=variants, montage_override=montage_override)
+    run(args.live, variants=variants, montage_override=montage_override, line_ids=args.line_id)
 
 
 if __name__ == "__main__":
