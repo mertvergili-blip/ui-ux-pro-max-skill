@@ -18,9 +18,18 @@ Usage:
     python3 scripts/generate_retention_edit.py --video-id 001 --live     # actually runs ffmpeg
 """
 import argparse
+import shutil
 import subprocess
 from pathlib import Path
 
+from assemble_short import (
+    TARGET_FPS,
+    TARGET_RESOLUTION,
+    build_concat_file,
+    find_scene_clips,
+    load_planned_durations,
+    normalize_clips,
+)
 from utils import OUTPUTS_DIR, ROOT, get_logger
 
 logger = get_logger("generate_retention_edit", "generation.log")
@@ -136,11 +145,12 @@ def synthesize_ambience(duration: float, out_wav: Path, live: bool) -> None:
 
 
 def build_retention_edit(video_id: str, live: bool) -> Path:
-    base_video = OUTPUTS_DIR / "final_videos" / f"{video_id}_final.mp4"
-    if not base_video.exists():
-        raise FileNotFoundError(
-            f"Base video not found: {base_video}. Run assemble_short.py --video-id {video_id} --live first."
-        )
+    """IMPORTANT: this re-concatenates the original (subtitle-free) raw clips
+    rather than reusing <id>_final.mp4. <id>_final.mp4 already has the
+    original subtitles burned into the pixels by assemble_short.py - mixing
+    new subtitles on top of that would double-burn overlapping text. Visuals
+    (clip order/footage) are otherwise identical to the original assembly."""
+    clips = find_scene_clips(video_id)
     subtitles = ROOT / "assets" / "subtitles" / f"{video_id}_retention.srt"
     if not subtitles.exists():
         raise FileNotFoundError(f"Retention subtitles not found: {subtitles}.")
@@ -150,17 +160,28 @@ def build_retention_edit(video_id: str, live: bool) -> Path:
     temp_dir.mkdir(parents=True, exist_ok=True)
     ambience_wav = temp_dir / "ambience.wav"
 
+    planned_durations = load_planned_durations(video_id)
+
     if not live:
         print(
-            f"DRY-RUN: base={base_video.name} duration=<probed at runtime>, "
+            f"DRY-RUN: re-normalize {len(clips)} clean (subtitle-free) raw clips, "
             f"subtitles={subtitles.name} (6 punchy lines, down from 9), "
-            f"-> synth ambience.wav -> mux with original video -> burn subtitles "
+            f"-> synth ambience.wav -> concat clips -> mix ambience -> burn subtitles once "
             f"-> {out_path}"
         )
+        normalize_clips(clips, temp_dir, live=False, planned_durations=planned_durations)
         synthesize_ambience(25.533333, ambience_wav, live=False)
         return out_path
 
-    duration = probe_duration(base_video)
+    normalized = normalize_clips(clips, temp_dir, live=True, planned_durations=planned_durations)
+    concat_path = build_concat_file(temp_dir, normalized)
+    concat_video = temp_dir / "concat_raw.mp4"
+    subprocess.run(
+        ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(concat_path), "-c", "copy", str(concat_video)],
+        check=True,
+    )
+
+    duration = probe_duration(concat_video)
     synthesize_ambience(duration, ambience_wav, live=True)
 
     subtitles_escaped = str(subtitles).replace("\\", "/").replace(":", "\\:")
@@ -168,7 +189,7 @@ def build_retention_edit(video_id: str, live: bool) -> Path:
 
     cmd = [
         "ffmpeg", "-y",
-        "-i", str(base_video),
+        "-i", str(concat_video),
         "-i", str(ambience_wav),
         "-vf", vf,
         "-c:v", "libx264", "-pix_fmt", "yuv420p",
@@ -178,6 +199,7 @@ def build_retention_edit(video_id: str, live: bool) -> Path:
         str(out_path),
     ]
     subprocess.run(cmd, check=True)
+    shutil.rmtree(temp_dir, ignore_errors=True)
     logger.info("Built retention edit for video_id=%s -> %s", video_id, out_path)
     print(f"Retention edit written: {out_path}")
     return out_path
