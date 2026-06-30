@@ -39,26 +39,28 @@ the rendered caption it appears as "I'll [bleep] you up" or similar
 placeholder; in the audio mix, the profane word is covered by a short
 censor-beep/tone, not spoken aloud uncensored.
 
-## Open decision — needs explicit user approval before any generation
+## Decision: ElevenLabs (approved, dry-run infra only so far)
 
-Voice generation method is **not chosen yet**. Two paths, no default
-selected:
+User approved ElevenLabs for actual spoken character lines (local/ffmpeg-
+only SFX was explicitly rejected as insufficient — "sadece bleep + caption
+yeterli değil"). Infra has been built but **no live call has been made**:
 
-1. **Local/safe-only path** (no new API): pitch-shifted/processed short
-   recorded or synthesized SFX-style "voice" hits (grunts, short
-   exclamations) combined with the bold centered captions doing the verbal
-   heavy lifting — i.e. captions carry the actual words, audio carries tone
-   and punch (formant-shifted blips, percussive vocal-like hits via
-   ffmpeg). This stays entirely within the existing local/ffmpeg toolchain
-   already used for `generate_sound_edit_022.py`.
-2. **TTS/voice API path** (e.g. ElevenLabs, inference.sh, or similar) for
-   actual spoken character lines. **Not to be used without explicit user
-   sign-off**, per direct instruction: "Benim onayım olmadan ElevenLabs,
-   inference.sh, belt veya başka yeni API kullanma."
+- `.env.example`: added `ELEVENLABS_API_KEY=` (empty placeholder).
+- `.gitignore`: added `assets/voice/` (generated audio never committed).
+- `scripts/utils.py`: `ELEVENLABS_API_KEY` added to `SENSITIVE_KEYS` so it's
+  never logged.
+- `scripts/generate_voice_022.py`: generates the 6 lines below via
+  ElevenLabs TTS. Defaults to `--dry-run` (prints plan, no network call);
+  `--live` requires `ELEVENLABS_API_KEY` in `.env` and real `voice_id`s
+  filled into `VOICE_PRESETS` (currently placeholders).
+- `scripts/mix_voice_and_sfx_022.py`: layers the generated voice files onto
+  the existing synthesized SFX bed (same ambience as
+  `generate_sound_edit_022.py`) plus a short censor-beep over the swear
+  word in line 04, output to `outputs/final_videos/022_voice_test.mp4`.
+  Also dry-run by default.
 
-Until the user picks one, the production-ready default assumed by this
-plan is **path 1** (local/safe SFX + bleep + caption combination), since
-it requires no new API and no credit spend.
+Neither script has been run with `--live`. No ElevenLabs API key has been
+entered anywhere by Claude — the user must add it to `.env` directly.
 
 ## Mix / loudness direction
 
