@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "21st-registry": {
+      "source": "21st-dev/registry",
+      "sourceType": "github",
+      "skillPath": "skills/21st-registry/SKILL.md",
+      "computedHash": "b6240ab445dab2773bb57f7884dc81056e8cf2729983ea6c36797c170d3e1484"
+    },
     "assistant-ui": {
       "source": "assistant-ui/skills",
       "sourceType": "github",
