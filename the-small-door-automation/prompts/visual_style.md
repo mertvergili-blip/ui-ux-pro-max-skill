@@ -24,6 +24,32 @@ Referans setinden çıkarılan ortak görsel dil. Birebir kopyalama yasak.
 - Karakterler tam aydınlık — hiçbir yüz veya aksiyon gölgede kalmaz
 - Arka plan hafif daha karanlık — ana karakterleri öne çıkarır
 
+## Reference Set 02 — Character Chaos Panels (2026-07-01)
+
+İkinci referans seti. Birebir kopyalama yasak. Karakterler, sahneler ve
+özellikle görsellerdeki YAZILAR tekrar üretilmez.
+
+**Bu setten güçlenen kurallar:**
+
+- **Role costume principle (güçlendirildi):** Her karakterin tek bir güçlü
+  aksesuarı rolünü/türünü anında tanımlar — beanie+plan=burglar,
+  helmet+flag=astronaut, cowboy hat+holster=gunslinger, necktie=office worker,
+  gold chain=streetwise rival, opera cape=performer. Aksesuar olmadan karakter
+  prompt'a yazılmaz.
+- **Facial acting principle:** Karakterin yüzü sahnenin hikâyesini taşır.
+  Göz + kaş + ağız net değilse sahne başarısız. Korku = büyük gözler + açık
+  ağız; öfke = V kaşlar + sırıtma/bağırma; panik = fırlamış gözler.
+- **Character contrast principle:** Aynı sahnede ≥2 karakter varsa net
+  kontrast zorunlu — agresif vs korkmuş, sakin vs panik, BÜYÜK vs küçük,
+  açık renk vs koyu renk, güçlü vs çaresiz. (Boyut kontrastı yeni araç.)
+- **Multi-scene continuity:** Bir karakter birden çok sahnedeyse rengi +
+  aksesuarı + silüeti birebir sabit kalır.
+
+**KRİTİK — yazılar öğrenilmez:** Referanslardaki panel başlıkları, neon
+yazılar, el yazısı notlar, tabelalar, error ekranları ve konuşma balonu
+metinleri stilin parçası değildir. Generated cliplerde ASLA text/caption/
+neon/tabela/UI text/logo/watermark üretilmez. Captionlar sadece post'ta eklenir.
+
 ## Character Chaos Style (primary — use for all videos)
 
 ```
@@ -91,8 +117,10 @@ violence, scary horror, preschool cartoon, messy AI, unclear action,
 unclear characters, distorted faces, extra limbs, plastic toy look,
 unreadable scene, abstract shapes, overly dark, hidden characters, blurry
 fighters, text, caption, subtitle, watermark, on-screen letters, written
-words, too wide shot making characters tiny, characters same color as each
-other
+words, neon sign text, speech bubble, signage, shop sign, error screen text,
+UI text, handwritten note, panel title, poster text, too wide shot making
+characters tiny, characters same color as each other, missing eyes or mouth
+on characters
 ```
 
 ## Legacy Cinematic Style (pre-022, reference only)

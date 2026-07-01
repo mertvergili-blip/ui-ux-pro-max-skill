@@ -26,6 +26,37 @@ Before writing any scene prompt, define the characters:
 These character definitions must carry through ALL scenes unchanged
 (continuity_notes field).
 
+## Mandatory: Role Costume Before Any Prompt (Reference Set 02)
+
+Bir karakter prompt'a yazılmadan önce ROL KOSTÜMÜ zorunludur. Her karakterin
+tek bir güçlü aksesuarı rolünü/türünü anında tanımlamalı:
+beanie+plan=burglar, helmet+flag=astronaut, cowboy hat+holster=gunslinger,
+necktie=office worker, gold chain=streetwise rival, opera cape=performer,
+visor=dealer, wig+gavel=judge, eye patch+hook=pirate.
+
+Aksesuarsız karakter YASAK. Multi-scene hikayede aksesuar tüm sahnelerde
+birebir sabit kalır (continuity_notes).
+
+## Mandatory: Talking / Action Character Face Must Be Large and Readable
+
+Her sahnede konuşan veya ana aksiyonu yapan karakterin yüzü frame'de büyük
+ve okunur olmalı (göz + kaş + ağız net). Konuşan karakter kameraya veya 3/4
+dönük olmalı — diyalog sırasında sırtı dönük karakter YASAK. Ağız hareketi
+diyalog sahnelerinde prompt'a açıkça yazılır (pipeline audio-driven lip-sync
+DESTEKLEMEZ — mouth movement görsel olarak istenir).
+
+Boyut kontrastı (büyük tehditkâr vs küçük çaresiz) rol dağılımını okutmak
+için renk kontrastına ek araç olarak kullanılabilir.
+
+## Mandatory: No Text / Logo / Caption Inside Generated Clips
+
+Referans görsellerdeki panel başlıkları, neon yazılar, el yazısı notlar,
+tabelalar, error/UI ekranları ve konuşma balonu metinleri stilin parçası
+DEĞİLDİR ve prompt'a taşınmaz. Her sahnede clip içinde text, caption, neon
+yazı, tabela, UI text, konuşma balonu, logo, marka, watermark, okunabilir
+yazı ÜRETİLMEZ. Tüm captionlar yalnızca post-edit aşamasında eklenir. Bu
+kural negative prompt ile de zorlanır (aşağıya bakınız).
+
 ## Per-Scene Output Fields
 
 - `scene_number`
@@ -88,8 +119,10 @@ violence, scary horror, preschool cartoon, messy AI, unclear action,
 unclear characters, distorted faces, extra limbs, plastic toy look,
 unreadable scene, abstract shapes, overly dark, hidden characters, blurry
 fighters, text, caption, subtitle, watermark, on-screen letters, written
-words, too wide shot making characters tiny, characters same color as each
-other, missing eyes or mouth on characters
+words, neon sign text, speech bubble, signage, shop sign, error screen text,
+UI text, handwritten note, panel title, poster text, too wide shot making
+characters tiny, characters same color as each other, missing eyes or mouth
+on characters, back-facing character during dialogue
 ```
 
 ## Camera Rules

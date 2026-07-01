@@ -71,6 +71,25 @@ Ses kapalı, altyazı yok — sadece görüntüye bak:
 - [ ] Klip içine caption/text gömülmemiş (captionlar sadece post'ta)
 - [ ] Çok çocuksu / preschool estetik yok
 
+## Reference Set 02 — Ek Kontrol Maddeleri (2026-07-01)
+
+Her sahne için, generation öncesi ve sonrası:
+
+- [ ] Karakterin rol kostümü/aksesuarı var mı? (tek aksesuar rolü/türü
+      anında tanıtmalı — aksesuarsız karakter yasak)
+- [ ] Ana karakterin (özellikle konuşan/aksiyon yapan) yüzü frame'de
+      yeterince büyük mü? (göz + kaş + ağız net okunuyor mu?)
+- [ ] Sahne tek bakışta anlaşılır mı? ("ne oluyor" 1 saniyede belli mi?)
+- [ ] Karakterler birbirinden renk / silüet / aksesuar / BOYUT ile
+      ayrılıyor mu? (büyük vs küçük kontrastı da geçerli)
+- [ ] Arka plan kalabalığı/crowd ana karakteri boğuyor mu?
+      (küçük ve arkada olmalı — boğuyorsa düzelt)
+- [ ] Clip içinde yanlışlıkla yazı / logo / text / neon / tabela / UI text /
+      konuşma balonu oluşma riski var mı? (varsa negative prompt güçlendir)
+- [ ] Multi-scene hikaye ise: karakterin aksesuarı + rengi + silüeti tüm
+      sahnelerde birebir aynı mı?
+- [ ] Konuşan karakter kameraya/3-4 dönük mü? (sırtı dönük diyalog yasak)
+
 ## Referans Görsel Politikası
 
 Bu projeye yüklenen tüm referans görseller:

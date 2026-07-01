@@ -91,6 +91,49 @@ mantığıyla üretilir.
   ana aksiyonu boğmaz
 - İç mekan ışıklandırması: sıcak amber/altın ışık, karakterler tam aydınlık
 
+## Additional Character Chaos Reference Set (Set 02 — 2026-07-01)
+
+İkinci referans seti kanala yüklendi. Bu görseller de birebir kopyalanmaz —
+karakterler, sahneler, panel başlıkları, neon yazılar ve tabelalar tekrar
+üretilmez. Sadece görsel dil, karakter tipi, rol kostümü, yüz oyunculuğu,
+kompozisyon ve kaos seviyesi için referanstır.
+
+**Referans set 02 içeriği:**
+1. Çok sahneli tek hikaye (donut vs coffee cup): toaster hook → disco reveal
+   → argument → chase → mousetrap twist. Aynı iki karakter (altın zincir +
+   sneakers) tüm sahnelerde tutarlı taşınıyor.
+2. Çeşitlilik seti (5 bağımsız tür): bank heist (banana burglar + strawberry),
+   fridge monster (dev cookie vs küçük milk carton), space (taco astronaut +
+   alien), office meltdown (öfkeli coffee mug + error ekranı), wild-west
+   showdown (popcorn cowboy vs hot dog cowboy).
+
+**Set 02'den çıkarılan YENİ tasarım dersleri (önceki seti güçlendirir):**
+
+- **Boyut kontrastı** yeni bir kontrast aracı: dev/tehditkâr karakter vs
+  küçük/çaresiz karakter (cookie monster vs milk carton). Renk kontrastına ek
+  olarak boyut da rol dağılımını anında okutur.
+- **Aksesuar sürekliliği (çok sahneli hikaye):** Bir karakter birden çok
+  sahnede görünüyorsa, rol kostümü/aksesuarı (zincir, sneakers, şapka) tüm
+  sahnelerde birebir aynı kalmalı. İzleyici aynı karakteri tanımalı.
+- **Duygusal ark tutarlılığı:** Saldıran tüm hikaye boyunca saldıran, kurban
+  tüm hikaye boyunca kurban; twist bu rolleri tersine çevirdiğinde etki doğar
+  (karma).
+- **Chase/motion okunabilirliği:** Kaçan karakterin yüzü (korku: büyük gözler,
+  açık ağız) ile kovalayan karakterin yüzü (öfke: V kaşlar, sırıtma) net
+  şekilde farklı olmalı — hareket bulanıklığında kimin kim olduğu kaybolmamalı.
+- **Genre/rol kostümü genişliği:** Tek aksesuar tüm türü tanımlıyor —
+  beanie + plan = burglar, kask + bayrak = astronaut, cowboy şapkası + fişeklik
+  = gunslinger, kravat = office worker. Aksesuar = anlık tür + rol.
+
+**KRİTİK UYARI — Set 02'deki yazılar öğrenilmez:**
+Bu referans görsellerinde panel başlıkları ("SCENE 1 – HOOK"), el yazısı notlar
+("KEEP OUT MY BUSINESS"), neon yazılar ("KARMA IS SWEET", "YOU'RE NOT EVEN REAL
+COFFEE"), tabelalar ("SALOON", "TACO TUESDAY"), UI/error ekranları ("ERROR 404")
+ve konuşma balonu metinleri var. **Bunlar stilin parçası DEĞİLDİR ve final
+Kling sahnelerine ASLA taşınmaz.** Generated cliplerde text, caption, neon
+yazı, tabela, UI text, konuşma balonu, logo, marka, watermark, okunabilir
+yazı istenmiyor. Tüm captionlar yalnızca post-edit aşamasında eklenir.
+
 ## The Small Door Character Chaos Visual Identity
 
 ### Core visual identity
