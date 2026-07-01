@@ -51,8 +51,13 @@ def call_kling_api(client, video_id: str, scene: dict, attempt: int, live: bool)
     # Kling only accepts a generated clip duration of 5 or 10 seconds.
     # Scenes shorter/longer than that (per the script's pacing) are trimmed
     # to their planned length during ffmpeg assembly instead.
+    # Use explicit kling_duration from scene JSON if present; otherwise fall
+    # back to the heuristic (<=7s -> 5s). Dialogue/mouth-movement scenes that
+    # need >5s of source footage must set kling_duration=10 explicitly.
     planned_duration = scene.get("duration", 5)
-    kling_duration = "5" if planned_duration <= 7 else "10"
+    kling_duration = str(scene["kling_duration"]) if "kling_duration" in scene else (
+        "5" if planned_duration <= 7 else "10"
+    )
 
     try:
         task_id = client.create_text2video_task(
