@@ -12,5 +12,6 @@ assets/temp/
 assets/voice/
 outputs/final_videos/
 outputs/audio/
+outputs/previews/
 logs/
 .DS_Store
