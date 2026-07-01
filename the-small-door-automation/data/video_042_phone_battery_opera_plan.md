@@ -331,15 +331,53 @@ Charger's frustration mirrors the viewer's. Battery's logic is absurd but intern
 
 ---
 
+## 11. FINAL SCENE PROMPT SUMMARY (scene-prompt-engineer output)
+
+Status: DONE — prompts written to `outputs/metadata/042_scenes.json`.
+NO generation performed. Character Chaos rules + Reference Set 02 applied.
+
+**Locked characters (identical across all scenes):**
+- Battery: solid opaque pale faded yellow/white (NOT transparent/orb) +
+  large flowing RED opera cape + suffering face (V eyebrows, open aria mouth)
+- Charger: bright vivid orange cable + FACE ON PLUG END (panic eyes, open
+  shout mouth) + running/pointing panic pose
+- Audience: generic colored squares/circles, small, background, no logos
+
+**Color contrast lock:** pale white/yellow vs bright orange — never confused.
+
+| Scene | Beat | One-line action | Talking + mouth | Must be visible |
+|-------|------|-----------------|-----------------|-----------------|
+| 1 | HOOK | Camera pushes through generic phone screen → curtain | none | generic phone, empty battery bar (no text), curtain transition |
+| 2 | REVEAL | Curtain parts → Battery in spotlight, death-aria pose | Battery, mouth open/close on aria | Battery ≥50% frame, RED cape billowing, full face, spotlight |
+| 3 | BUILD | Charger runs in from stage right, Battery ignores | Battery slow + Charger fast panic, both mouths visible | pale vs orange contrast, both faces angled to camera |
+| 4 | PUNCHLINE | Charger points to outlet, Battery: "Those are the same thing." | all 3 lines, mouths visible, Battery deadpan-minimal | pointing gesture, battery ignoring, charger head-clutch defeat |
+| 5 | COLLAPSE | Theatrical backward collapse, cape billows, cut to black | subtle whisper mouths | comedic (not sad) collapse, cape, charger lunge, collapse BEFORE black |
+
+**Brand safety:** audio "Spotify" → caption "Spotily" → ZERO Spotify/app/
+phone-UI visuals. Battery level = bar shape only, never rendered text.
+
+**Mouth movement:** pipeline does NOT support audio-driven lip-sync →
+prompt-based visible mouth movement on every dialogue beat; talking
+character faces camera or 3/4; "back-facing during dialogue" in negatives.
+
+**Top risks watched:** transparent battery, tiny/missing cape, faceless
+charger, audience real logos, closed mouth on dialogue, Scene-1 UI text,
+Scene-5 early fade-to-black, color drift, too-wide dialogue framing.
+(Full risk table + per-scene negatives in `042_scenes.json`.)
+
+**Visual clarity checklist:** all Character Chaos + Reference Set 02 checks
+PASS / CONTROLLED (see `visual_clarity_checklist_result` in the JSON).
+
 ## NEXT STEPS (when ready)
 
-1. Human approves this plan
-2. cinematic-scriptwriter skill → full script JSON
-3. scene-prompt-engineer skill → 5 scene prompts
-4. Human approves prompts
-5. Kling generation (with explicit human confirmation)
-6. Voice generation (ElevenLabs, with explicit human confirmation)
-7. Assembly + mix + captions
-8. QC → private upload
+1. Human approves this plan ✅ (Version B approved)
+2. cinematic-scriptwriter skill → full script JSON ✅ (`042_script.json`)
+3. scene-prompt-engineer skill → 5 scene prompts ✅ (`042_scenes.json`)
+4. Human approves prompts ⬅ **WE ARE HERE — awaiting approval**
+5. Kling generation (with explicit human confirmation) — NOT STARTED
+6. Voice generation (ElevenLabs, with explicit human confirmation) — NOT STARTED
+7. Assembly + mix + captions — NOT STARTED
+8. QC → private upload — NOT STARTED
 
-**DO NOT PROCEED to step 2 without explicit human approval of this plan.**
+**DO NOT PROCEED to step 5 without explicit human approval of these prompts.**
+No Kling, no ElevenLabs, no voice, no video, no mix, no upload at this stage.
