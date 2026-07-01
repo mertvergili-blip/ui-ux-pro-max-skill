@@ -143,3 +143,8 @@
 @keyframes strike {
   to { right: 0; }
 }
+
+@keyframes slow-spin {
+  from { transform: rotateZ(0deg) rotateY(0deg); }
+  to { transform: rotateZ(360deg) rotateY(360deg); }
+}

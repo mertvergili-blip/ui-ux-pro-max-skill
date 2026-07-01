@@ -35,6 +35,18 @@ const FOLDERS: FolderData[] = [
   },
 ];
 
+const PIECE_POS_STYLES = {
+  p1: { left: "6%", transitionDelay: "0.08s" },
+  p2: { left: "32%", transitionDelay: "0.15s" },
+  p3: { left: "58%", transitionDelay: "0.22s" },
+} as const;
+
+const PIECE_OPEN_TRANSFORMS = {
+  p1: "translateY(-46px) rotate(-9deg) scale(1)",
+  p2: "translateY(-58px) rotate(2deg) scale(1)",
+  p3: "translateY(-46px) rotate(9deg) scale(1)",
+} as const;
+
 function Piece({
   pos,
   accent,
@@ -50,18 +62,6 @@ function Piece({
   const elRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
 
-  const posStyles = {
-    p1: { left: "6%", transitionDelay: "0.08s" },
-    p2: { left: "32%", transitionDelay: "0.15s" },
-    p3: { left: "58%", transitionDelay: "0.22s" },
-  };
-
-  const openTransforms = {
-    p1: "translateY(-46px) rotate(-9deg) scale(1)",
-    p2: "translateY(-58px) rotate(2deg) scale(1)",
-    p3: "translateY(-46px) rotate(9deg) scale(1)",
-  };
-
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (!elRef.current) return;
     dragging.current = true;
@@ -73,7 +73,7 @@ function Piece({
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!dragging.current || !elRef.current) return;
     const dy = Math.max(0, e.clientY - startY.current);
-    elRef.current.style.transform = `${openTransforms[pos]} translateY(${dy}px)`;
+    elRef.current.style.transform = `${PIECE_OPEN_TRANSFORMS[pos]} translateY(${dy}px)`;
     elRef.current.style.opacity = String(1 - Math.min(dy / 140, 0.7));
   }, [pos]);
 
@@ -95,12 +95,13 @@ function Piece({
       ref={elRef}
       className="absolute bottom-2 aspect-[3/4] w-[38%] rounded-[3px] border border-white/[0.08] shadow-lg"
       style={{
-        ...posStyles[pos],
+        ...PIECE_POS_STYLES[pos],
         background: `color-mix(in srgb, ${accent} 70%, var(--color-ink))`,
         opacity: isOpen ? 1 : 0,
-        transform: isOpen ? openTransforms[pos] : "translateY(10px) scale(0.8)",
-        transition: "transform 0.45s cubic-bezier(.2,.9,.25,1.2), opacity 0.35s",
-        transitionDelay: isOpen ? posStyles[pos].transitionDelay : "0s",
+        transform: isOpen ? PIECE_OPEN_TRANSFORMS[pos] : "translateY(10px) scale(0.8)",
+        transition: `transform 0.45s cubic-bezier(.2,.9,.25,1.2) ${
+          isOpen ? PIECE_POS_STYLES[pos].transitionDelay : "0s"
+        }, opacity 0.35s`,
         pointerEvents: isOpen ? "auto" : "none",
         cursor: isOpen ? "grab" : "default",
         touchAction: "none",

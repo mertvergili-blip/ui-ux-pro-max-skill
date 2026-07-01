@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
+import { useStore, selectCreativeEnergy } from "@/lib/store";
+import { FinancePulse } from "@/components/shared/finance-pulse";
 
 function HeadlineReveal() {
   const words = "Bugün sakin bir gün. Bir teslim tarihi *yaklaşıyor.*".split(" ");
@@ -33,27 +35,27 @@ function HeadlineReveal() {
 }
 
 function TaskItem({
+  id,
   idx,
   text,
-  defaultDone,
+  done,
 }: {
+  id: string;
   idx: string;
   text: string;
-  defaultDone?: boolean;
+  done: boolean;
 }) {
-  const [done, setDone] = useState(defaultDone ?? false);
+  const toggleTask = useStore((s) => s.toggleTask);
 
   return (
     <div
       className="group flex cursor-pointer select-none items-center gap-3.5 text-[13.5px]"
-      onClick={() => setDone(!done)}
+      onClick={() => toggleTask(id)}
     >
       <span className="w-3.5 font-serif text-xs italic text-muted">{idx}</span>
       <span
         className={`relative flex h-[15px] w-[15px] flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200 group-hover:scale-[1.15] ${
-          done
-            ? "border-gold bg-gold"
-            : "border-gold bg-transparent"
+          done ? "border-gold bg-gold" : "border-gold bg-transparent"
         }`}
       >
         <svg viewBox="0 0 16 16" className="h-full w-full">
@@ -79,55 +81,17 @@ function TaskItem({
   );
 }
 
-function StreakCounter({ target }: { target: number }) {
-  const [count, setCount] = useState(0);
-  const started = useRef(false);
-
-  useEffect(() => {
-    if (started.current) return;
-    started.current = true;
-    let n = 0;
-    const tick = () => {
-      n++;
-      setCount(n);
-      if (n < target) setTimeout(tick, 70);
-    };
-    setTimeout(tick, 900);
-  }, [target]);
-
-  return (
-    <p className="font-heading text-[28px]">
-      {count}
-      <small className="ml-1.5 font-sans text-xs text-muted">gün</small>
-    </p>
-  );
-}
-
 export function StudioView() {
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatText, setChatText] = useState("");
-
-  const openChat = () => {
-    setChatOpen(!chatOpen);
-    if (!chatOpen) {
-      typeText(
-        "Seni dinliyorum. Bugünü, stresini ya da bir fikri anlat — görevlerine, takvimine ya da koleksiyonlarına ben ekleyeyim."
-      );
-    }
-  };
-
-  const typeText = (str: string) => {
-    setChatText("");
-    let i = 0;
-    const iv = setInterval(() => {
-      setChatText(str.slice(0, i) + "▌");
-      i++;
-      if (i > str.length) {
-        clearInterval(iv);
-        setChatText(str);
-      }
-    }, 16);
-  };
+  const tasks = useStore((s) => s.tasks);
+  const streak = useStore((s) => s.streak);
+  const journalEntries = useStore((s) => s.journalEntries);
+  const creativeEnergy = useMemo(
+    () => selectCreativeEnergy(journalEntries),
+    [journalEntries]
+  );
+  const notes = useStore((s) => s.notes);
+  const toggleAiPanel = useStore((s) => s.toggleAiPanel);
+  const latestNote = notes[notes.length - 1];
 
   return (
     <motion.div
@@ -158,31 +122,41 @@ export function StudioView() {
             Today
           </p>
           <div className="flex flex-col gap-3.5">
-            <TaskItem idx="01" text="Brief · Croquis taslaklarını tamamla" />
-            <TaskItem
-              idx="02"
-              text="Ritual · Sabah moodboard incelemesi"
-              defaultDone
-            />
-            <TaskItem
-              idx="03"
-              text="Creative Challenge · 3 yeni referans topla"
-            />
+            {tasks.map((t) => (
+              <TaskItem key={t.id} {...t} />
+            ))}
           </div>
+
+          {latestNote && (
+            <div
+              className="mt-9 max-w-[420px] cursor-pointer border-t border-line pt-5"
+              onClick={toggleAiPanel}
+            >
+              <p className="mb-2 text-[9.5px] uppercase tracking-[3px] text-muted">
+                Studio Assistant Note
+              </p>
+              <p className="text-[13px] leading-relaxed text-bone-dim">
+                {latestNote.content}
+              </p>
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-col gap-5 border-l border-line pl-7">
+        <div className="flex flex-col gap-6 border-l border-line pl-7">
           <div>
             <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
               Streak
             </p>
-            <StreakCounter target={12} />
+            <p className="font-heading text-[28px]">
+              {streak}
+              <small className="ml-1.5 font-sans text-xs text-muted">gün</small>
+            </p>
           </div>
           <div>
             <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
               Creative Energy
             </p>
-            <p className="font-serif text-lg italic text-gold">Flowing</p>
+            <p className="font-serif text-lg italic text-gold">{creativeEnergy}</p>
           </div>
           <div>
             <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
@@ -191,32 +165,9 @@ export function StudioView() {
             <p className="font-heading text-[15px]">Koleksiyon III</p>
             <p className="mt-0.5 text-[11.5px] text-muted">6 gün kaldı</p>
           </div>
-        </div>
-      </div>
-
-      <div
-        className="mt-11 inline-flex cursor-pointer items-center gap-3 text-[10.5px] uppercase tracking-[2.5px] text-muted"
-        onClick={openChat}
-      >
-        <span className="h-1.5 w-1.5 animate-[pulse-glow_2.4s_infinite] rounded-full bg-gold" />
-        <span>Talk to your Studio</span>
-      </div>
-
-      <div
-        className="max-w-[500px] overflow-hidden transition-all duration-500"
-        style={{
-          maxHeight: chatOpen ? 150 : 0,
-          transitionTimingFunction: "cubic-bezier(.2,.8,.2,1)",
-        }}
-      >
-        <div className="mt-3.5 rounded-[3px] border border-line p-4">
-          <div className="min-h-[20px] text-[13px] leading-relaxed text-bone-dim">
-            {chatText}
+          <div className="border-t border-line pt-6">
+            <FinancePulse />
           </div>
-          <input
-            className="mt-3 w-full border-t border-line bg-transparent pt-3 text-[13px] text-bone outline-none placeholder:text-muted"
-            placeholder="Bugünü anlat, gerisini ben hallederim…"
-          />
         </div>
       </div>
     </motion.div>
