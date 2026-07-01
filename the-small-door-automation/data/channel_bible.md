@@ -2,25 +2,49 @@
 
 ## Identity
 
-The Small Door is a global YouTube Shorts channel revealing tiny, magical
-worlds hidden behind, inside, or under ordinary objects. The channel has
-no human host or face — but its miniature worlds can be inhabited by
-original fictional tiny characters (a tiny train conductor, baker,
-tailor, clockmaker, hotel clerk, shopkeeper, operator, shadow figures,
-miniature silhouettes). These are never real people, celebrities, or
-copyrighted characters.
+The Small Door is a global YouTube Shorts channel built around
+**CHARACTER-CHAOS ABSURD SHORTS** — character-driven, WTF, absurd,
+funny, kaotik, ama ilk bakışta net okunan, hızlı okunabilen,
+short-form retention odaklı, internet-cartoon / adult-animation enerjili
+mini dünyanın içindeki olaylar.
+
+Temel his: **"Ne oluyor lan?"** — ama "ne olduğu belli değil" değil.
+
+The channel has no human host or face. Its miniature worlds are inhabited
+by original fictional anthropomorphic characters (food, objects, appliances,
+everyday things with expressive faces and personalities). These are never
+real people, celebrities, or copyrighted characters.
 
 **Tagline:** Tiny hidden worlds behind ordinary things.
 
 **Language:** English only. No narrator, no long voice-over. Only short
 subtitles, ASMR sound, and ambience.
 
+## Core Creative Direction
+
+İzleyici hedefi:
+- İlk 1 saniyede dikkat kesilmeli
+- İlk 2–3 saniyede konsepti anlamalı
+- Orta bölümde karakter aksiyonuna bağlanmalı
+- Sonda görsel veya sözlü bir punchline almalı
+
+Her video şu felsefeye uymalı:
+- **Clear WTF action first** — cinematic second
+- **Character clarity first** — readability first
+- **Expressive faces first** — thumbnail power first
+
+Kaçınılacak: çok estetik ama anlaşılmaz, çok karanlık, soyut,
+duygusuz, uzaktan görünen, "ne olduğu belirsiz" sahneler.
+
 ## Tone & Atmosphere
 
-- Cinematic, cozy, mysterious, magical realism.
-- Dark but warmly lit: rainy nights, dim rooms, soft shadows, warm window light.
+- Absurd, serious-inside-its-own-world, deadpan-komik, aggressive-komik,
+  weird, chaotic, expressive, memorable.
+- WTF his verdirir — ama komik, ama net, ama paylaşılabilir.
 - Premium and consistent — never a generic "AI spam" channel.
-- Not a kids' channel: no oversaturated cartoon look, no childish colors.
+- Not a kids' channel. Not cheap horror. Not sterile ad aesthetic.
+- Adult-animation energy: characters are exaggerated, emotionally
+  readable, and absurdly committed to their situation.
 
 ## Hard Bans
 
@@ -28,24 +52,91 @@ subtitles, ASMR sound, and ambience.
 - No brand names, logos, or readable brand text.
 - No copyrighted characters.
 - No narrator voice-over.
-- No horror, gore, or violence.
-- No toy-like / plastic / oversaturated cartoon visuals.
+- No horror, gore, realistic violence, or blood.
+- No preschool / kids-channel aesthetic (no oversaturated baby-toy look).
+- No vague abstract shapes, faceless characters, unreadable action.
+- No overly cinematic but unclear / too-dark / too-distant shots.
+- No cluttered compositions that bury the main character.
+- No emotionless character faces — every character must have a readable expression.
+- No clip-embedded captions/text — captions are added in post only.
+- No watermarks in generated clips.
 
-## Original Tiny Characters (allowed)
+## The Small Door Character Chaos Visual Identity
 
-The miniature worlds may include original fictional tiny characters —
-e.g. a tiny train conductor, baker, tailor, clockmaker, hotel clerk,
-shopkeeper, operator, shadow figures, miniature silhouettes. Rules for
-using them:
+### Core visual identity
+
+large expressive anthropomorphic characters, absurd object-creatures,
+stylized 3D / cartoon-ish look, adult-cartoon energy, weird internet
+cartoon vibe, expressive eyes/eyebrows/mouth, readable body language,
+strong silhouette, central composition, fast readability, absurd but
+serious performance, strong facial reaction, bright enough to read
+instantly, visual punchline energy, chaos with structure, funny and
+bizarre but not messy.
+
+Karakterler şunlar olabilir: yiyecekler, ev eşyaları, cihazlar, günlük
+nesneler, oyuncaklar, tuhaf küçük yaratıklar, karma hibrit karakterler.
+Ama ne olursa olsun: karakter gibi görünmeli, insan gibi davranmalı,
+yüzü olmalı, duygusu okunmalı, jesti/pozu okunmalı, komik ciddiyet
+taşımalı.
+
+**Komedi kaynağı:** Saçma şeylerin kendi dünyasında aşırı ciddi yaşanması.
+
+### Character Design Rules (zorunlu, her yeni video için)
+
+Her yeni video fikrinde sahne promptu yazmadan önce önce karakter tasarımı:
+
+1. main character type
+2. face design (göz, kaş, ağız zorunlu)
+3. emotional expression
+4. body language / pose
+5. signature silhouette
+6. key accessory / prop
+7. color identity
+8. comedic contrast
+9. rival/opponent contrast (varsa)
+10. how the character reads in 1 second
+
+Kurallar:
+- Ana karakter büyük ve net olmalı — frame'in en az %50'sini doldurmalı
+  aksiyon sahnelerinde.
+- Göz, kaş, ağız mutlaka okunmalı.
+- Aynı sahnedeki iki karakter renk + aksesuar + duruş ile birbirinden
+  net ayrılmalı.
+- Rol dağılımı (winner/loser, attacker/defender) ilk bakışta anlaşılmalı.
+
+### Composition Rules
+
+- Ana karakter merkezde veya merkeze yakın.
+- Konuşan karakter net görünmeli; aksiyon karakterlerin üstünde okunmalı.
+- Arka plan destekleyici, asla ana olayı boğmayacak.
+- Caption için boş alan: üstte ~%20, altta ~%15.
+- Karakterler çok küçük kalmamalı. Wide shot ancak gerçekten
+  gerekliyse; asıl anlarda medium shot / close action shot.
+- Ses kapalı bakınca bile "ne olduğu" anlaşılabilmeli.
+
+### Action Clarity Rules
+
+Her sahnede ana olay tek cümleyle tanımlanabilmeli:
+"biri bağırıyor / tehdit ediyor / yumruk atıyor / düşüyor / kazanıyor /
+kaçıyor / ortaya çıkıyor / şaşırıyor / saklanıyor"
+
+- Ana hareket tek bakışta okunmalı — motion blur içinde kaybolmamalı.
+- Vuruşun kaynağı net, temas/reaksiyon/sonuç net.
+- Konuşan karakter görsel olarak belli olmalı.
+- Winner ve loser net ayrılmalı.
+- Reveal varsa revealed şey net görünmeli.
+
+## Original Characters (allowed)
+
+The miniature worlds are inhabited by original fictional anthropomorphic
+characters. Rules:
 
 - Never a real person, real-person impression, celebrity, or copyrighted
   character.
-- No recognizable, photorealistic human face in close-up — prefer
-  silhouette, shadow, backlit, or obscured/at-a-distance framing.
-- Style stays cinematic, mysterious, cozy, magical-realism — not
-  cartoonish, not childish, not horror, not realistic-celebrity-like.
-- One clear character per scene at most; never the focal point over the
-  miniature world itself.
+- Character style: stylized cartoon / adult-animation — not photorealistic
+  human, not preschool cute, not brand-mascot.
+- Multiple characters per scene allowed when action requires it; each
+  character must be visually distinct at a glance.
 
 ## Visual World
 
@@ -126,33 +217,35 @@ Rainy Night Stories, Clock Worlds, Bottle Worlds, Tiny Shops, Hidden Transit,
 Tiny Nature, Candle Worlds, Paper Worlds, Home Appliance Worlds, Box Worlds,
 Small Door Core.
 
-## The Small Door Visual Clarity Rule
+## The Small Door Visual Clarity Rule (v2 — permanent)
 
-Derived once from a set of user-provided reference images (toaster
-bread-boxing match, used only as a one-time quality/readability
-benchmark for fixing video 022 — never to be reused literally or copied
-verbatim into future prompts). Applies to every video going forward,
-self-applied without needing new reference images each time:
+Kalıcı kural. Her videoya uygulanır. Referans görsel gerekmez.
 
-- Main character(s) stay centered and very clearly readable — never
-  reduced to background detail.
-- Objects can act human (face, eyes, mouth, arms/gloves, small
-  accessories) as long as they stay original, non-copyrighted, and
-  on-brand.
-- The action must be understandable at first glance, even with sound and
-  subtitles off.
-- The inner world / tiny society around the main character(s) must read
-  clearly — not too dark, not too abstract.
-- Priority order: clear WTF action first, cinematic mood second —
-  cinematic atmosphere must never come at the cost of readability.
-- Composition leaves clear, safe space (center or top/bottom safe areas)
-  for captions — nothing critical sits where captions will be burned in.
-- Fast, clear, funny, WTF viral-short feel over slow/moody ambiguity.
+1. Ana karakterler sahnenin merkezinde ve net olmalı — asla arka plan
+   detayına dönüşmemeli.
+2. Objeler insan gibi davranabilir (yüz, göz, ağız, kol, aksesuar) —
+   orijinal, telifsiz, on-brand kaldığı sürece.
+3. Aksiyon altyazısız ve sessiz izlenince bile anlaşılmalı.
+4. İç dünya / absürt toplum net okunmalı — çok karanlık veya çok soyut
+   olmamalı.
+5. Clear WTF action first — cinematic texture ikincil, okunurluğu asla
+   feda etme.
+6. Caption-safe boşluk bırak — kritik aksiyon caption alanına girmesin.
+7. Viral short gibi hızlı, anlaşılır, komik ve WTF.
+8. Thumbnail gücü: tek karede bile ilgi çekmeli.
+9. Arka plan destekleyici, ana karakter baskın.
+10. Ses kapalı izlenince bile "ne oluyor" anlaşılmalı.
 
-When designing a new idea: (1) design original characters, (2) clarify
-the scene's action, (3) keep the main character centered, (4) leave
-caption-safe space, (5) self-check readability before approving for
-scripting/Kling.
+Yeni video tasarlarken self-check:
+- Hook net mi?
+- Ana karakter net mi?
+- Görsel tek karede ilgi çekiyor mu?
+- Aksiyon altyazısız anlaşılır mı?
+- Komedi karakter davranışından geliyor mu?
+- Fazla karanlık/soyut mu?
+- Thumbnail gücü var mı?
+- WTF hissi var mı — ama anlaşılır mı?
+- Paylaşılabilir / rewatch edilebilir mi?
 
 ## Publishing Rule
 
