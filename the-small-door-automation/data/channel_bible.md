@@ -61,6 +61,36 @@ duygusuz, uzaktan görünen, "ne olduğu belirsiz" sahneler.
 - No clip-embedded captions/text — captions are added in post only.
 - No watermarks in generated clips.
 
+## The Small Door Visual Design Identity Reference Set
+
+Bu bölüm, kanala yüklenen 5 referans görselinden çıkarılan kalıcı tasarım
+kimliğini tanımlar. Görseller birebir kopyalanmaz — sadece stil standardı
+olarak kullanılır. Her yeni video "same spirit, new original characters"
+mantığıyla üretilir.
+
+**Referans görsel seti (2026-07-01 tarihinde yüklendi):**
+1. Kahve makinesi içinde casino — coffee bean dealer vs sugar cube player
+2. Buzdolabı içinde mahkeme — yogurt cup judge vs strawberry defendant
+3. Çamaşır makinesi içinde korsan savaşı — sock pirate vs rubber duck pirate
+4. Çekmece içinde rock konseri — pencil rock star vs eraser drummer
+5. Kumbara içinde banka soygunu — gold coin burglar vs pig police officer
+
+**Bu referans setinden çıkarılan kalıcı tasarım ilkeleri:**
+
+- Ana karakterler her zaman büyük, merkezi ve net (frame'in 40–60'ı)
+- Her karakterin ROL KOSTÜMÜ var: tek aksesuar rolü anında tanıtır
+  (visor = dealer, wig+gavel = judge, eye patch+hook = pirate, mask+bag = burglar)
+- Renk kontrastı her zaman güçlü: açık vs koyu, sıcak vs soğuk
+- Yüzler: büyük yuvarlak gözler, kalın belirgin kaşlar, açık ağız
+  (agresif sırıtma veya şok açık ağız — asla nötr/duygusuz değil)
+- Cartoon beyaz eldivenler veya küçük kollar hareket ifadesini artırır
+- İki karakter dinamiği: aktif/agresif + reaktif/şaşkın
+- Container object (makine, buzdolabı, çekmece) ÇERÇEVE olarak kullanılır
+  — dünyayı çerçeveler ama içeriği boğmaz
+- Arka planda seyirci kalabalığı var ama küçük/uzakta — enerji katar,
+  ana aksiyonu boğmaz
+- İç mekan ışıklandırması: sıcak amber/altın ışık, karakterler tam aydınlık
+
 ## The Small Door Character Chaos Visual Identity
 
 ### Core visual identity

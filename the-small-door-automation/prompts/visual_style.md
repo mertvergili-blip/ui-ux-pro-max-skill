@@ -1,5 +1,29 @@
 # Visual Style — The Small Door
 
+## Character Chaos Reference Style (from 5-image reference set, 2026-07-01)
+
+Referans setinden çıkarılan ortak görsel dil. Birebir kopyalama yasak.
+"Same spirit, new original characters."
+
+**Karakterler:**
+- Büyük yuvarlak ifadeli gözler, kalın kaşlar, açık ağız (agresif sırıtma
+  veya şok/korku yüzü — asla nötr)
+- Her ana karakterin bir ROL KOSTÜMÜ var (tek aksesuar = anlık rol tanımı)
+- İki karakter: aktif/saldıran + reaktif/kaçan veya tepki veren
+- Renk: açık vs koyu, sıcak vs soğuk — asla aynı renk tonu
+
+**Kompozisyon:**
+- Container object (makine/çekmece/kumbara) dış ÇERÇEVE — iç dünya baskın
+- Ana iki karakter birlikte frame merkezinde, büyük
+- Arka planda seyirci/crowd kalabalığı — küçük, enerjik, arka planda
+- Zemin/sahne: dünyayı kuran detaylar (roulette table, judge bench, soapy
+  water, ruler stage, gold vault floor)
+
+**Işık:**
+- Sıcak amber/altın iç mekan ışığı — container içinden parlıyor hissi
+- Karakterler tam aydınlık — hiçbir yüz veya aksiyon gölgede kalmaz
+- Arka plan hafif daha karanlık — ana karakterleri öne çıkarır
+
 ## Character Chaos Style (primary — use for all videos)
 
 ```

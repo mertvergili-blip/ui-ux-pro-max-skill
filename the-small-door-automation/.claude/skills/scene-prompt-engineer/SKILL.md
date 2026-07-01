@@ -111,6 +111,44 @@ other, missing eyes or mouth on characters
 - Thumbnail gücü var mı?
 - WTF hissi var mı — ama anlaşılır mı?
 
+## Reference Image Policy
+
+Referans görsel yüklendiğinde: stil standardını öğren, birebir kopyalama
+yasak. "Same spirit, new original characters" mantığıyla üret. Gelecek
+videolarda kendi kendine bu stile uygun özgün karakterler üret. Benden her
+yeni video için yeni referans görsel bekleme.
+
+## 5-Image Reference Set — Design Patterns (2026-07-01)
+
+Bu referans setinden çıkarılan kalıplar. Birebir kopyalanmaz.
+
+**ROL KOSTÜMÜ PRENSİBİ:** Her ana karakterin tek bir aksesuarı vardır ve
+bu aksesuar rolü anında tanımlar:
+- green visor → casino dealer
+- whipped cream wig + gavel → judge
+- eye patch + hook + pirate hat → pirate captain
+- eraser mohawk + guitar → rock star
+- black mask + loot bag → burglar
+
+Her yeni karakterde önce ROL KOSTÜMÜNÜ belirle. Aksesuar olmadan karakter
+prompt'a yazılmaz.
+
+**İKİ KARAKTER DİNAMİĞİ:** Aktif/agresif + Reaktif/şaşkın. Renk kontrastı
+zorunlu (açık vs koyu). Beden dili: saldıran leans forward, savunan leans
+back.
+
+**CONTAINER-AS-FRAME:** Dış obje sahneyi çerçeveler; iç dünya baskın.
+Prompt'ta container'ı describe et ama iç karakterleri ön plana çıkar.
+
+**CROWD:** Arka planda küçük ekspresif seyirci figürleri — enerji katar,
+ana aksiyonu boğmaz.
+
+**ZEMIN/SAHNE:** Tematik zemin dünyayı kurar (roulette table / judge bench /
+soapy water + treasure chest / ruler stage / gold vault floor). Tek bakışta
+"neredeyiz" anlaşılır.
+
+Checklist: `data/visual_clarity_checklist_master.md`
+
 ## Output
 
 Write results to `outputs/metadata/<video_id>_scenes.json`.
