@@ -1,0 +1,35 @@
+{
+  "video_id": "042",
+  "results": [
+    {
+      "scene_number": 1,
+      "attempt": 1,
+      "status": "dry_run",
+      "output_file": null
+    },
+    {
+      "scene_number": 2,
+      "attempt": 1,
+      "status": "dry_run",
+      "output_file": null
+    },
+    {
+      "scene_number": 3,
+      "attempt": 1,
+      "status": "dry_run",
+      "output_file": null
+    },
+    {
+      "scene_number": 4,
+      "attempt": 1,
+      "status": "dry_run",
+      "output_file": null
+    },
+    {
+      "scene_number": 5,
+      "attempt": 1,
+      "status": "dry_run",
+      "output_file": null
+    }
+  ]
+}
