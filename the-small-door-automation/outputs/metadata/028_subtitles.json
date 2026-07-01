@@ -1,0 +1,56 @@
+{
+  "video_id": "028",
+  "subtitle_timings": [
+    {
+      "start": 0.2,
+      "end": 2.0,
+      "text": "My piggy bank's coin slot just breathed."
+    },
+    {
+      "start": 2.2,
+      "end": 3.6,
+      "text": "Like a mouth. In. Out."
+    },
+    {
+      "start": 3.9,
+      "end": 7.5,
+      "text": "Inside: a vault door, dented, alarm spinning."
+    },
+    {
+      "start": 7.8,
+      "end": 11.0,
+      "text": "Coin-sized guards sprinting down a corridor."
+    },
+    {
+      "start": 11.3,
+      "end": 14.8,
+      "text": "One guard froze and looked straight at the slot."
+    },
+    {
+      "start": 15.1,
+      "end": 16.2,
+      "text": "At me."
+    },
+    {
+      "start": 19.2,
+      "end": 22.5,
+      "text": "Then the lights inside went red."
+    },
+    {
+      "start": 22.8,
+      "end": 26.5,
+      "text": "Whatever they're protecting is already gone."
+    },
+    {
+      "start": 27.0,
+      "end": 29.8,
+      "text": "What do you think they were guarding?"
+    }
+  ],
+  "ffmpeg_subtitle_filter": "subtitles=/home/user/ui-ux-pro-max-skill/the-small-door-automation/assets/subtitles/028.srt:force_style='FontName=Arial,FontSize=14,PrimaryColour=&HFFFFFF&,Alignment=2,MarginV=120'",
+  "render_settings": {
+    "resolution": "1080x1920",
+    "aspect_ratio": "9:16",
+    "target_duration_s": "25-35"
+  }
+}

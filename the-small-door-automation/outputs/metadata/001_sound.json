@@ -1,0 +1,35 @@
+{
+  "video_id": "001",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "ambience": "quiet dark kitchen room tone",
+      "sfx": ["soft door creak", "fridge hum (low, distant)", "cold air whoosh"],
+      "transition_sound": "soft low whoosh into scene 2"
+    },
+    {
+      "scene_number": 2,
+      "ambience": "fridge hum (closer, warmer undertone)",
+      "sfx": ["ceramic clink (bottle shifting slightly)", "tiny bell (faint, far away)"],
+      "transition_sound": "rising tiny bell chime into scene 3"
+    },
+    {
+      "scene_number": 3,
+      "ambience": "warm tiny room tone, distant train ambience",
+      "sfx": ["distant train", "soft steam", "tiny footsteps-like mechanical clicks", "cold air"],
+      "transition_sound": "train brakes hiss softly into scene 4"
+    },
+    {
+      "scene_number": 4,
+      "ambience": "warm tiny room tone (quieter)",
+      "sfx": ["paper rustle", "soft magical chime"],
+      "transition_sound": "single soft chime into scene 5"
+    },
+    {
+      "scene_number": 5,
+      "ambience": "fridge hum fading out, cold air return",
+      "sfx": ["clock ticking (single distant tick)", "fridge hum (returning, signaling normalcy)"],
+      "transition_sound": "fade to silence / fridge door swallow sound for the loop"
+    }
+  ]
+}

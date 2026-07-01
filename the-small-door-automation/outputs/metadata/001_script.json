@@ -1,0 +1,58 @@
+{
+  "title": "I found a tiny train station inside my fridge",
+  "script_lines": [
+    "I opened the fridge at 3AM.",
+    "Behind the milk, something was glowing.",
+    "It was a train station.",
+    "A very small one.",
+    "Then a train arrived.",
+    "No driver. No passengers.",
+    "The ticket had my name on it.",
+    "Last stop: Tomorrow.",
+    "Should I get on?"
+  ],
+  "subtitle_timings": [
+    {"start": 0.0, "end": 2.0, "text": "I opened the fridge at 3AM."},
+    {"start": 2.0, "end": 5.5, "text": "Behind the milk, something was glowing."},
+    {"start": 5.5, "end": 9.0, "text": "It was a train station."},
+    {"start": 9.0, "end": 11.0, "text": "A very small one."},
+    {"start": 11.0, "end": 16.0, "text": "Then a train arrived."},
+    {"start": 16.0, "end": 19.5, "text": "No driver. No passengers."},
+    {"start": 19.5, "end": 24.5, "text": "The ticket had my name on it."},
+    {"start": 24.5, "end": 28.0, "text": "Last stop: Tomorrow."},
+    {"start": 28.0, "end": 31.0, "text": "Should I get on?"}
+  ],
+  "scene_breakdown": [
+    {
+      "scene": 1,
+      "label": "Hook",
+      "duration": 2,
+      "summary": "a dark kitchen at 3AM, a hand-less fridge door swings open, cold light spills out"
+    },
+    {
+      "scene": 2,
+      "label": "Discovery",
+      "duration": 6,
+      "summary": "inside the fridge, behind a glass milk bottle, a warm tiny glow flickers between the shelves"
+    },
+    {
+      "scene": 3,
+      "label": "Reveal",
+      "duration": 14,
+      "summary": "a miniature train station built into the fridge shelf, tiny brass lanterns, a small steam train pulling into the platform with no driver and no passengers"
+    },
+    {
+      "scene": 4,
+      "label": "Twist",
+      "duration": 5,
+      "summary": "a tiny paper ticket slides out from the train window onto the shelf, engraved destination reads Tomorrow"
+    },
+    {
+      "scene": 5,
+      "label": "Question",
+      "duration": 3,
+      "summary": "close-up on the glowing ticket and the waiting train, door light dimming around the edges"
+    }
+  ],
+  "final_question": "Should I get on?"
+}

@@ -1,0 +1,41 @@
+{
+  "video_id": "029",
+  "stage": "pre_production_plan",
+  "note": "No footage exists yet (no Kling generation run). This is a planning-stage retention pass on the script/scene breakdown, to be re-run by viral-retention-editor against real footage after QC passes.",
+  "weak_points": [
+    "Lava lamp motion is naturally slow/ambient — risk that 'movement against gravity' doesn't read as deliberate/wrong unless the sideways glide is sharp and clearly directional in frame 1.",
+    "Scene 4's dormant shape must stay ambiguous (silhouette only) — risk of Kling rendering something that reads as a recognizable creature; needs a tight negative prompt pass before generation."
+  ],
+  "stronger_hook": "Frame 1 should already show the wax blob breaking from the normal vertical rise/fall pattern — a clean lateral glide reads as 'wrong' far faster than a blob that's merely oddly shaped.",
+  "pacing_plan": [
+    "Scene 1 (2s): no trim, hook stays tight.",
+    "Scene 2 (9s): trim to ~6-7s in final cut if the submarine reveal happens early and the rest is just drifting; reserve seconds for scene 3's ocean wide shot.",
+    "Scene 3 (8s): keep full duration for the bioluminescent ocean payoff.",
+    "Scene 4 (8s): keep full duration; the light sweep across the dormant shape should happen once, cleanly, around the 3-4s mark of this scene — avoid lingering on it too long (mystery > clarity here).",
+    "Scene 5 (3s): no trim, light dims to black."
+  ],
+  "subtitle_rewrite": [
+    "Something in my lava lamp moved against gravity.",
+    "Lava doesn't do that.",
+    "It glided sideways through the wax.",
+    "A window. A light.",
+    "A tiny submarine in a glowing ocean.",
+    "Something is sleeping on the floor down there.",
+    "The light passed right over it.",
+    "It didn't wake up. Yet.",
+    "What did they find down there?"
+  ],
+  "audio_emphasis_plan": [
+    "A low, wrong-feeling resonant tone the instant the blob glides sideways in scene 1 (signals 'not normal physics').",
+    "Soft underwater/sonar ping texture building through scenes 2-3.",
+    "Sonar ping going silent (held breath) the moment the light sweeps over the dormant shape in scene 4.",
+    "Single low pulse/heartbeat-adjacent thud as the light dims to black in scene 5 — restrained, not jumpscare-loud."
+  ],
+  "retention_edit_instructions": [
+    "Once footage exists: ffmpeg trim scene 2 if the submarine reveal is front-loaded with idle drifting after.",
+    "Never let scene 4 linger past ~4s on the dormant shape once it's been shown once — cut away before the viewer can fully resolve what it is.",
+    "Burn subtitles per timing above; the 8s gap in current subtitle timing (18.5s-21.0s) should stay a clean silent beat, not filled with text."
+  ],
+  "scene_retry_recommendation": "none (no footage generated yet)",
+  "final_approval_recommendation": "ready_for_live_generation_pending_human_approval — re-verify scene 4 negative prompt strictness (no recognizable creature/animal silhouette) before any live Kling run"
+}

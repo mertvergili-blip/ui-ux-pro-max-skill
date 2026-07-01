@@ -1,0 +1,60 @@
+{
+  "video_id": "028",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "duration": 2,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no logos, no text, no brand packaging, no cartoon style, Extreme macro on a piggy bank coin slot, the slot itself flexing like it just inhaled, a single flash of light escaping it.",
+      "camera_motion": "slow push-in, slight parallax",
+      "lighting": "warm practical light against dark ambient room",
+      "mood": "cozy, mysterious",
+      "details": "",
+      "negative_prompt": "real person, celebrity, recognizable face, famous character, copyrighted character, brand logo, readable brand text, horror, gore, violence, scary monster, cartoonish, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs",
+      "continuity_notes": ""
+    },
+    {
+      "scene_number": 2,
+      "duration": 9,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no logos, no text, no brand packaging, no cartoon style, Push through the coin slot into darkness; a dented miniature vault door comes into view, a red alarm light spinning slowly across scratched metal walls.",
+      "camera_motion": "slow push-in, slight parallax",
+      "lighting": "warm practical light against dark ambient room",
+      "mood": "cozy, mysterious",
+      "details": "",
+      "negative_prompt": "real person, celebrity, recognizable face, famous character, copyrighted character, brand logo, readable brand text, horror, gore, violence, scary monster, cartoonish, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs",
+      "continuity_notes": ""
+    },
+    {
+      "scene_number": 3,
+      "duration": 8,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no logos, no text, no brand packaging, no cartoon style, Inside the vault chamber: tiny coin-sized figures in silhouette sprinting down a narrow corridor between stacked coin towers, alarm light sweeping over them.",
+      "camera_motion": "slow push-in, slight parallax",
+      "lighting": "warm practical light against dark ambient room",
+      "mood": "cozy, mysterious",
+      "details": "",
+      "negative_prompt": "real person, celebrity, recognizable face, famous character, copyrighted character, brand logo, readable brand text, horror, gore, violence, scary monster, cartoonish, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs",
+      "continuity_notes": ""
+    },
+    {
+      "scene_number": 4,
+      "duration": 8,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no logos, no text, no brand packaging, no cartoon style, an original tiny guard character, seen as a small cinematic silhouette, no recognizable face, no celebrity, no real person, no brand, no copyrighted character, freezes mid-run and slowly turns toward the camera/slot, warm red alarm light, mysterious but cozy magical realism, raises a hand as if to say stop",
+      "camera_motion": "slow push-in, slight parallax",
+      "lighting": "warm practical light against dark ambient room",
+      "mood": "cozy, mysterious",
+      "details": "",
+      "negative_prompt": "real person, celebrity, recognizable face, famous character, copyrighted character, brand logo, readable brand text, horror, gore, violence, scary monster, cartoonish, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs",
+      "continuity_notes": ""
+    },
+    {
+      "scene_number": 5,
+      "duration": 3,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no logos, no text, no brand packaging, no cartoon style, The vault interior lights flicker from red to black; an empty pedestal where something used to sit is the last thing visible before darkness.",
+      "camera_motion": "slow push-in, slight parallax",
+      "lighting": "warm practical light against dark ambient room",
+      "mood": "cozy, mysterious",
+      "details": "",
+      "negative_prompt": "real person, celebrity, recognizable face, famous character, copyrighted character, brand logo, readable brand text, horror, gore, violence, scary monster, cartoonish, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs",
+      "continuity_notes": ""
+    }
+  ]
+}

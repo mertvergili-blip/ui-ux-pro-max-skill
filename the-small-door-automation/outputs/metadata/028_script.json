@@ -1,0 +1,94 @@
+{
+  "title": "Someone is robbing the tiny vault inside my piggy bank",
+  "script_lines": [
+    "My piggy bank's coin slot just breathed.",
+    "Like a mouth. In. Out.",
+    "Inside: a vault door, dented, alarm spinning.",
+    "Coin-sized guards sprinting down a corridor.",
+    "One guard froze and looked straight at the slot.",
+    "At me.",
+    "Then the lights inside went red.",
+    "Whatever they're protecting is already gone.",
+    "What do you think they were guarding?"
+  ],
+  "subtitle_timings": [
+    {
+      "start": 0.2,
+      "end": 2.0,
+      "text": "My piggy bank's coin slot just breathed."
+    },
+    {
+      "start": 2.2,
+      "end": 3.6,
+      "text": "Like a mouth. In. Out."
+    },
+    {
+      "start": 3.9,
+      "end": 7.5,
+      "text": "Inside: a vault door, dented, alarm spinning."
+    },
+    {
+      "start": 7.8,
+      "end": 11.0,
+      "text": "Coin-sized guards sprinting down a corridor."
+    },
+    {
+      "start": 11.3,
+      "end": 14.8,
+      "text": "One guard froze and looked straight at the slot."
+    },
+    {
+      "start": 15.1,
+      "end": 16.2,
+      "text": "At me."
+    },
+    {
+      "start": 19.2,
+      "end": 22.5,
+      "text": "Then the lights inside went red."
+    },
+    {
+      "start": 22.8,
+      "end": 26.5,
+      "text": "Whatever they're protecting is already gone."
+    },
+    {
+      "start": 27.0,
+      "end": 29.8,
+      "text": "What do you think they were guarding?"
+    }
+  ],
+  "scene_breakdown": [
+    {
+      "scene": 1,
+      "label": "Hook",
+      "duration": 2,
+      "summary": "Extreme macro on a piggy bank coin slot, the slot itself flexing like it just inhaled, a single flash of light escaping it."
+    },
+    {
+      "scene": 2,
+      "label": "Wrongness",
+      "duration": 9,
+      "summary": "Push through the coin slot into darkness; a dented miniature vault door comes into view, a red alarm light spinning slowly across scratched metal walls."
+    },
+    {
+      "scene": 3,
+      "label": "Reveal",
+      "duration": 8,
+      "summary": "Inside the vault chamber: tiny coin-sized figures in silhouette sprinting down a narrow corridor between stacked coin towers, alarm light sweeping over them."
+    },
+    {
+      "scene": 4,
+      "label": "Twist",
+      "duration": 8,
+      "summary": "an original tiny guard character, seen as a small cinematic silhouette, no recognizable face, no celebrity, no real person, no brand, no copyrighted character, freezes mid-run and slowly turns toward the camera/slot, warm red alarm light, mysterious but cozy magical realism, raises a hand as if to say stop"
+    },
+    {
+      "scene": 5,
+      "label": "Cliffhanger",
+      "duration": 3,
+      "summary": "The vault interior lights flicker from red to black; an empty pedestal where something used to sit is the last thing visible before darkness."
+    }
+  ],
+  "final_question": "What do you think they were guarding?"
+}
