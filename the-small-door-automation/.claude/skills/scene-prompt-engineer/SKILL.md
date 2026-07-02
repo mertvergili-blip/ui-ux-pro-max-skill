@@ -26,6 +26,32 @@ Before writing any scene prompt, define the characters:
 These character definitions must carry through ALL scenes unchanged
 (continuity_notes field).
 
+## Mandatory: Character Reference Sheet Before Any Scene Prompt (2026-07-01)
+
+Research into why 042 had broken character continuity (Charger vanishing,
+a human-like figure appearing mid-scene) found the root cause: prompts
+written from a long text description alone, fed to pure text2video, let
+the model reinterpret the character from scratch on every single scene —
+see `data/ai_video_quality_research_2026.md`. Two changes are now mandatory:
+
+1. **Generate a reference sheet image first.** For every named recurring
+   character, run `scripts/generate_character_reference.py` (Kling's own
+   text2image endpoint, no new API key needed) BEFORE writing any scene
+   video prompt. The reference prompt itself must already respect the
+   2-3 descriptor cap below.
+2. **Cap character descriptors at 2-3 per prompt: one silhouette element +
+   one identifying color/texture.** Research across 1,800 character-driven
+   Kling generations found 2-3 descriptors produce consistent results 78%
+   of the time, while 8+ descriptors reliably produce "muddled"/drifting
+   output — which is what our old multi-sentence character_design fields
+   were doing. Do not re-describe the full character paragraph in every
+   scene prompt; the bound reference image carries that, not the text.
+3. **Trait-lock exact wording.** Whatever words describe the character in
+   the reference-sheet prompt (e.g. "pale faded yellow-white", "bright
+   vivid orange") must be repeated verbatim in every scene prompt for that
+   character — never swap in a synonym ("orange" -> "amber") between
+   scenes; that alone is enough to reintroduce drift.
+
 ## Mandatory: Role Costume Before Any Prompt (Reference Set 02)
 
 Bir karakter prompt'a yazılmadan önce ROL KOSTÜMÜ zorunludur. Her karakterin
@@ -70,6 +96,10 @@ kural negative prompt ile de zorlanır (aşağıya bakınız).
 - `continuity_notes` — character color, accessory, expression must match prior scenes
 - `caption_cue` — short censored caption text for this scene
 - `audio_cue` — SFX / voice cue description
+- `reference_image` — path/URL to the character's reference sheet from
+  `generate_character_reference.py`, set on every scene that character
+  appears in (omit only for character-free establishing/object-only shots;
+  `kling-video-producer` falls back to text2video when this is absent)
 
 ## Base Visual Style (always include at start of visual_prompt)
 

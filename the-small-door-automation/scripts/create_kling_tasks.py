@@ -59,14 +59,34 @@ def call_kling_api(client, video_id: str, scene: dict, attempt: int, live: bool)
         "5" if planned_duration <= 7 else "10"
     )
 
+    # Prefer image-to-video with a bound character reference sheet whenever
+    # the scene names one (see generate_character_reference.py). Research
+    # into why earlier videos drifted character design between scenes found
+    # pure text2video is the documented cause; text2video is now the
+    # fallback only for character-free establishing shots.
+    reference_image = scene.get("reference_image")
+
     try:
-        task_id = client.create_text2video_task(
-            prompt=scene["visual_prompt"],
-            negative_prompt=scene.get("negative_prompt", ""),
-            duration=kling_duration,
-        )
-        logger.info("Scene %s attempt %s: Kling task_id=%s submitted", scene_num, attempt, task_id)
-        task_data = client.wait_for_task(task_id, task_type="text2video")
+        if reference_image:
+            task_id = client.create_image2video_task(
+                image_url=reference_image,
+                prompt=scene["visual_prompt"],
+                negative_prompt=scene.get("negative_prompt", ""),
+                duration=kling_duration,
+            )
+            logger.info(
+                "Scene %s attempt %s: Kling image2video task_id=%s submitted (reference=%s)",
+                scene_num, attempt, task_id, reference_image,
+            )
+        else:
+            task_id = client.create_text2video_task(
+                prompt=scene["visual_prompt"],
+                negative_prompt=scene.get("negative_prompt", ""),
+                duration=kling_duration,
+            )
+            logger.info("Scene %s attempt %s: Kling text2video task_id=%s submitted", scene_num, attempt, task_id)
+        task_type = "image2video" if reference_image else "text2video"
+        task_data = client.wait_for_task(task_id, task_type=task_type)
         video_url = client.extract_video_url(task_data)
         client.download_video(video_url, out_path)
         logger.info("Scene %s attempt %s: downloaded to %s", scene_num, attempt, out_path)
@@ -76,6 +96,7 @@ def call_kling_api(client, video_id: str, scene: dict, attempt: int, live: bool)
             "task_id": task_id,
             "planned_duration": planned_duration,
             "generated_duration": kling_duration,
+            "mode": "image2video" if reference_image else "text2video",
         }
     except KlingAPIError as exc:
         logger.warning("Scene %s attempt %s failed: %s", scene_num, attempt, exc)

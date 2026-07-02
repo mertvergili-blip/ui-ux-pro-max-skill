@@ -10,6 +10,23 @@ Converts scene prompts into Kling production tasks and tracks retries.
 ## Rules
 
 - Kling is the only provider. Do not add Runway or any other fallback.
+- **Character reference sheet is mandatory before any scene with a named
+  recurring character.** Research into 042's visual failures (character
+  drift, a human-like figure appearing mid-video) found pure text2video
+  with no reference image is the documented cause — see
+  `data/ai_video_quality_research_2026.md`. Workflow:
+  1. Run `scripts/generate_character_reference.py --video-id <id> --character <name>`
+     for every named character in `character_continuity_lock` (dry-run
+     first). This calls Kling's own text2image endpoint — no separate
+     image-model API key needed.
+  2. Once approved, add the resulting image URL/path to each scene's
+     `reference_image` field in `<video_id>_scenes.json` for every scene
+     that character appears in.
+  3. `create_kling_tasks.py` automatically uses `create_image2video_task`
+     (bound to `reference_image`) whenever that field is present, and only
+     falls back to plain `create_text2video_task` for character-free
+     establishing/object-only shots (e.g. a scene showing just the
+     container object before any character appears).
 - Maximum 3 attempts per scene:
   1. First attempt: prompt as written by `scene-prompt-engineer`.
   2. If it fails: simplify the prompt (remove secondary details, keep

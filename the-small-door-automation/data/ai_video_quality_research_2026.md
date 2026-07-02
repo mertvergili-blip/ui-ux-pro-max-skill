@@ -131,26 +131,31 @@ beyond captions. Every one of these is fixable *before* spending more
 credits, not by regenerating with the same method and hoping for a better
 roll.
 
-## Proposed next steps (NOT executed — awaiting approval)
+## Next steps — status (updated 2026-07-01, same session)
 
-1. Update `scene-prompt-engineer` SKILL.md to mandate: (a) a character
-   reference-sheet step (image generation, not video) before any scene
-   prompt is written, (b) a hard cap of 2-3 character descriptors per
-   prompt, (c) explicit camera-language requirements (already partially
-   present).
-2. Update `kling-video-producer` to support image-to-video with a bound
-   reference element as the default mode for any video with named
-   recurring characters, with text2video as fallback only for
-   establishing/object-only shots (like our Scene 1, which worked fine
-   with zero characters in frame).
-3. Plan for 1.5-2x redundant scene generation on future videos with a
-   deliberate "pick the best take" step, instead of accepting attempt 1
-   automatically.
-4. Add a lightweight post-processing pass (color match, punch-in on cuts)
-   to `assemble_short.py` before final QC.
-5. None of this should be applied to 042 by generating anything new right
-   now — this file is research only, per the explicit "video yapma, önce
-   öğren" instruction.
+1. **DONE.** `scene-prompt-engineer` SKILL.md now mandates a character
+   reference-sheet step before any scene prompt, a hard cap of 2-3
+   character descriptors per prompt, and verbatim trait-locking of
+   color/texture words across scenes.
+2. **DONE.** `kling_client.py` gained `create_text2image_task` /
+   `extract_image_urls` (Kling's own `/v1/images/generations` endpoint —
+   same credentials, no new API key). New
+   `scripts/generate_character_reference.py` (dry-run by default) builds a
+   capped, trait-locked reference-sheet prompt per character.
+   `create_kling_tasks.py` now reads an optional `reference_image` field
+   per scene and calls `create_image2video_task` (bound reference) instead
+   of `create_text2video_task` whenever it's present; text2video remains
+   the fallback for character-free establishing shots only.
+   `kling-video-producer` SKILL.md documents the new required workflow.
+3. **Not started.** 1.5-2x redundant scene generation + "pick the best
+   take" step — still just a plan, no code changes yet.
+4. **Not started.** Post-processing pass (color match, punch-in on cuts)
+   in `assemble_short.py` — still just a plan.
+5. **Still true for 042 specifically.** None of the above has been used to
+   generate anything for 042 or any other video. This pass only updated
+   scripts and skill docs (code + prompts), per "isterim ama hala araştır
+   öğrenmeyi bırakma" — apply the fixes, keep researching, but no new
+   generation was requested or performed.
 
 ## Sources
 

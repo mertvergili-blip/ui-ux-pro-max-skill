@@ -15,6 +15,11 @@ Endpoints (per https://app.klingai.com/global/dev/document-api):
     POST {base}/v1/videos/image2video        create an image-to-video task
     GET  {base}/v1/videos/text2video/{id}     poll a text2video task
     GET  {base}/v1/videos/image2video/{id}    poll an image2video task
+    POST {base}/v1/images/generations         create a text-to-image task
+                                               (character reference sheets —
+                                               same credentials, no separate
+                                               image-model API key needed)
+    GET  {base}/v1/images/generations/{id}    poll a text2image task
 
 Response shape (create + poll):
     {
@@ -188,8 +193,36 @@ class KlingClient:
         payload = self._request("POST", "/v1/videos/image2video", body)
         return payload["data"]["task_id"]
 
+    def create_text2image_task(
+        self,
+        prompt: str,
+        negative_prompt: str = "",
+        n: int = 1,
+        aspect_ratio: str | None = None,
+        model: str | None = None,
+    ) -> str:
+        """Create a character reference-sheet image (or any still image).
+
+        Uses the same KLING_API_KEY / access+secret credentials already
+        configured for video — no separate image-model API key needed.
+        Intended use in this project: generate a single reference sheet
+        (front view + 45deg + side profile of one character) BEFORE any
+        scene video prompt is written, then bind that image via
+        create_image2video_task(image_url=...) instead of pure text2video.
+        """
+        body = {
+            "model_name": model or self.model,
+            "prompt": prompt[:2500],
+            "negative_prompt": negative_prompt[:2500] if negative_prompt else "",
+            "n": n,
+            "aspect_ratio": aspect_ratio or self.aspect_ratio,
+        }
+        payload = self._request("POST", "/v1/images/generations", body)
+        return payload["data"]["task_id"]
+
     def get_task(self, task_id: str, task_type: str = "text2video") -> dict:
-        payload = self._request("GET", f"/v1/videos/{task_type}/{task_id}")
+        path = "/v1/images/generations" if task_type == "text2image" else f"/v1/videos/{task_type}"
+        payload = self._request("GET", f"{path}/{task_id}")
         return payload["data"]
 
     def wait_for_task(
@@ -209,6 +242,13 @@ class KlingClient:
                 raise KlingAPIError(f"Kling task {task_id} failed: {data.get('task_status_msg', 'no message')}")
             time.sleep(poll_interval)
         raise KlingAPIError(f"Kling task {task_id} timed out after {timeout}s")
+
+    @staticmethod
+    def extract_image_urls(task_data: dict) -> list[str]:
+        images = (task_data.get("task_result") or {}).get("images") or []
+        if not images:
+            raise KlingAPIError("Kling text2image task succeeded but returned no image URL")
+        return [img["url"] for img in images]
 
     def check_auth(self) -> dict:
         """Lightweight, non-billable credential check.

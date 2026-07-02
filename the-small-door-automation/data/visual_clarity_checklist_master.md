@@ -4,6 +4,23 @@ Bu checklist her yeni video için, Kling generation ÖNCESINDE ve SONRASINDA
 uygulanır. Video 022 deneyimi ve 5-görsel referans setinden türetilmiştir.
 Kalıcı proje standardıdır.
 
+## PRE-GENERATION: Character Reference Sheet (zorunlu, 2026-07-01)
+
+042'nin karakter tutarlılığı sorunlarının kök nedeni araştırıldı (bkz.
+`data/ai_video_quality_research_2026.md`): salt text2video, referans
+görsel olmadan, her sahnede karakteri sıfırdan "hayal ediyor" — bu yüzden
+Charger kayboldu, Scene 4-5'te insan-benzeri figürler çıktı. Artık zorunlu:
+
+- [ ] Her tekrarlayan karakter için `generate_character_reference.py` ile
+      bir referans sheet (ön/45°/yan profil) üretildi mi? (Kling'in kendi
+      text2image endpoint'i, yeni API key gerekmez)
+- [ ] Bu referans görsel her sahnede `reference_image` alanına eklendi mi?
+      (image2video ile bind edilecek, salt text2video değil)
+- [ ] Karakter prompt'u 2-3 detaya sıkıştırıldı mı? (silüet + 1 renk/doku —
+      8+ detay "muddled"/tutarsız çıktıya sebep oluyor, araştırmayla kanıtlı)
+- [ ] Trait-lock: referans sheet'teki renk/doku kelimeleri (örn. "pale
+      faded yellow-white") her sahnede birebir aynı mı tekrarlanıyor?
+
 ## PRE-GENERATION: Karakter Tasarımı Kontrolü
 
 Sahne promptu yazmadan önce şu soruları cevapla:
