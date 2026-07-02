@@ -56,9 +56,6 @@ export function FinancePulse() {
 
   return (
     <div>
-      <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
-        Finance Pulse
-      </p>
       <div className="flex flex-col gap-1.5">
         {COINS.map(({ id, sym }) => {
           const d = prices[id as keyof PriceMap];

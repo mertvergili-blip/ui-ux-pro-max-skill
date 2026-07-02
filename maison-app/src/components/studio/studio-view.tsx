@@ -112,84 +112,93 @@ export function StudioView() {
 
       <HeadlineReveal />
 
-      <div className="flex flex-col gap-10 lg:flex-row lg:gap-[50px]">
-        <div className="flex-[1.3]">
-          <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
+      <div className="mb-9 grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="bento-tile bento-gold p-6 sm:col-span-2 lg:col-span-4">
+          <div className="bento-orb" style={{ width: 150, height: 150, top: -50, right: -40 }} />
+          <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
             Studio Focus
           </p>
-          <p className="mb-2.5 font-heading text-[22px]">
+          <p className="mb-2.5 max-w-[340px] font-serif text-[22px] italic text-[#e4c98f]">
             Koleksiyon III — Moodboard Revizyonu
           </p>
-          <p className="mb-6 max-w-[380px] text-[13.5px] leading-relaxed text-bone-dim">
+          <p className="max-w-[320px] text-[13px] leading-relaxed text-bone-dim">
             Kumaş referanslarını gözden geçir, palet notlarını netleştir.
           </p>
-          <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
-            Today
-          </p>
-          <div className="flex flex-col gap-3.5">
-            {tasks.map((t) => (
-              <TaskItem key={t.id} {...t} />
-            ))}
-          </div>
-
-          {latestNote && (
-            <div
-              className="mt-9 max-w-[420px] cursor-pointer border-t border-line pt-5"
-              onClick={toggleAiPanel}
-            >
-              <p className="mb-2 text-[9.5px] uppercase tracking-[3px] text-muted">
-                Studio Assistant Note
-              </p>
-              <p className="text-[13px] leading-relaxed text-bone-dim">
-                {latestNote.content}
-              </p>
-            </div>
-          )}
-
-          <CapsuleDayCard />
         </div>
 
-        <div className="grid grid-cols-2 gap-x-6 gap-y-7 border-t border-line pt-7 lg:flex lg:flex-col lg:gap-6 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-0">
-          <div>
-            <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
-              Streak
-            </p>
-            <p className="flex items-baseline font-heading text-[28px]">
-              <AnimateDigits value={String(streak)} enterY={20} />
-              <small className="ml-1.5 font-sans text-xs text-muted">gün</small>
-            </p>
-          </div>
-          <div>
-            <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
-              Creative Energy
-            </p>
-            <p className="font-serif text-lg italic text-bone">{creativeEnergy}</p>
-          </div>
-          <div>
-            <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
-              Next Deadline
-            </p>
-            <p className="font-heading text-[15px]">{deadlineLabel}</p>
-            <p className="mt-0.5 flex items-baseline text-[11.5px] text-muted">
-              {daysRemaining === 0 ? (
-                "Bugün teslim"
-              ) : (
-                <>
-                  <AnimateDigits
-                    value={String(daysRemaining)}
-                    enterY={14}
-                    className="text-[11.5px]"
-                  />
-                  <span className="ml-1">gün kaldı</span>
-                </>
-              )}
-            </p>
-          </div>
-          <div className="col-span-2 border-t border-line pt-6">
-            <FinancePulse />
-          </div>
+        <div className="bento-tile bento-violet p-5 lg:col-span-2">
+          <div className="bento-orb" style={{ width: 110, height: 110, bottom: -40, left: -30 }} />
+          <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
+            Streak
+          </p>
+          <p className="flex items-baseline font-heading text-[28px] text-[#f1ecff]">
+            <AnimateDigits value={String(streak)} enterY={20} />
+            <small className="ml-1.5 font-sans text-xs text-white/60">gün</small>
+          </p>
+        </div>
+
+        <div className="bento-tile bento-teal p-5 lg:col-span-2">
+          <div className="bento-orb" style={{ width: 120, height: 120, top: -40, right: -35 }} />
+          <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
+            Creative Energy
+          </p>
+          <p className="font-serif text-lg italic text-[#d3fff2]">{creativeEnergy}</p>
+        </div>
+
+        <div className="bento-tile bento-graphite p-5 lg:col-span-2">
+          <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
+            Finance Pulse
+          </p>
+          <FinancePulse />
+        </div>
+
+        <div className="bento-tile bento-blue p-5 lg:col-span-2">
+          <div className="bento-orb" style={{ width: 100, height: 100, bottom: -35, right: -30 }} />
+          <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
+            Next Deadline
+          </p>
+          <p className="font-heading text-[15px] text-[#e2f0ff]">{deadlineLabel}</p>
+          <p className="mt-0.5 flex items-baseline text-[11.5px] text-white/60">
+            {daysRemaining === 0 ? (
+              "Bugün teslim"
+            ) : (
+              <>
+                <AnimateDigits
+                  value={String(daysRemaining)}
+                  enterY={14}
+                  className="text-[11.5px]"
+                />
+                <span className="ml-1">gün kaldı</span>
+              </>
+            )}
+          </p>
         </div>
       </div>
+
+      <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
+        Today
+      </p>
+      <div className="flex flex-col gap-3.5">
+        {tasks.map((t) => (
+          <TaskItem key={t.id} {...t} />
+        ))}
+      </div>
+
+      {latestNote && (
+        <div
+          className="mt-9 max-w-[420px] cursor-pointer border-t border-line pt-5"
+          onClick={toggleAiPanel}
+        >
+          <p className="mb-2 text-[9.5px] uppercase tracking-[3px] text-muted">
+            Studio Assistant Note
+          </p>
+          <p className="text-[13px] leading-relaxed text-bone-dim">
+            {latestNote.content}
+          </p>
+        </div>
+      )}
+
+      <CapsuleDayCard />
     </motion.div>
   );
 }

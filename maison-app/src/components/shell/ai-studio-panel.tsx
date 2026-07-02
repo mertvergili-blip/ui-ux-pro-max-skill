@@ -148,9 +148,19 @@ export function AiStudioPanel() {
                     animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
                     transition={{ duration: 0.4, ease: EASE }}
-                    className="mt-8 w-full rounded-[1.5rem] bg-white/[0.02] p-1.5 ring-1 ring-white/[0.06]"
+                    className="relative mt-8 w-full overflow-hidden rounded-[1.5rem] border border-white/[0.07] px-5 py-6"
+                    style={{
+                      background: `radial-gradient(90% 90% at 100% 0%, color-mix(in srgb, ${TYPE_COLORS[pendingSuggestion.type]} 35%, transparent), transparent 60%), linear-gradient(155deg, #17181a 0%, #0c0d0e 75%)`,
+                    }}
                   >
-                    <div className="rounded-[1.15rem] bg-black/20 px-5 py-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
+                    <div
+                      className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full opacity-70"
+                      style={{
+                        background: `radial-gradient(circle, color-mix(in srgb, ${TYPE_COLORS[pendingSuggestion.type]} 85%, white), ${TYPE_COLORS[pendingSuggestion.type]} 55%, transparent 75%)`,
+                        filter: "blur(24px)",
+                      }}
+                    />
+                    <div className="relative">
                       <p
                         className="mb-2.5 text-center text-[9.5px] uppercase tracking-[2.5px]"
                         style={{ color: TYPE_COLORS[pendingSuggestion.type] }}

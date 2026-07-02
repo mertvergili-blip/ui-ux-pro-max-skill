@@ -305,18 +305,17 @@ export function RunwayView() {
       </p>
 
       {radar.length > 0 && (
-        <div className="mb-7 rounded-[1.25rem] bg-white/[0.02] p-1.5 ring-1 ring-gold/15 lg:mr-5">
-          <div className="rounded-[1rem] bg-black/20 px-5 py-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
-            <p className="mb-1.5 text-[9.5px] uppercase tracking-[2.5px] text-gold">
-              Trend Radar · Sana Özel
-            </p>
-            <p className="text-[13px] leading-relaxed text-bone-dim">
-              <span className="text-bone">{radar[0].item.title}</span> — DNA
-              haritandaki{" "}
-              <span className="text-gold">{radar[0].matchedLabels.join(", ")}</span>{" "}
-              referanslarınla örtüşüyor.
-            </p>
-          </div>
+        <div className="bento-tile bento-coral mb-7 px-5 py-4 lg:mr-5">
+          <div className="bento-orb" style={{ width: 130, height: 130, top: -40, right: -30 }} />
+          <p className="relative mb-1.5 text-[9.5px] uppercase tracking-[2.5px] text-[#ffcdb8]">
+            Trend Radar · Sana Özel
+          </p>
+          <p className="relative text-[13px] leading-relaxed text-bone-dim">
+            <span className="text-bone">{radar[0].item.title}</span> — DNA
+            haritandaki{" "}
+            <span className="text-[#ffcdb8]">{radar[0].matchedLabels.join(", ")}</span>{" "}
+            referanslarınla örtüşüyor.
+          </p>
         </div>
       )}
 

@@ -223,8 +223,9 @@ export function DnaMapView() {
       </div>
 
       <div className="flex flex-col gap-8 lg:flex-row">
-        <div className="rounded-[1.5rem] bg-white/[0.02] p-1.5 ring-1 ring-white/[0.06]">
-          <div className="rounded-[1.15rem] bg-black/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
+        <div className="bento-tile bento-blue relative">
+          <div className="bento-orb" style={{ width: 200, height: 200, bottom: -60, right: -60 }} />
+          <div className="relative">
             <svg
               ref={svgRef}
               viewBox={`0 0 ${WIDTH} ${HEIGHT}`}

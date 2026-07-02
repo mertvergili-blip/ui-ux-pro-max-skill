@@ -38,12 +38,12 @@ function MaterialCard({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-      className="group relative rounded-[1.25rem] bg-white/[0.02] p-1.5 ring-1 ring-white/[0.06]"
+      className="group bento-tile bento-graphite relative"
     >
       <Tilt
         rotationFactor={5}
         springOptions={{ stiffness: 200, damping: 22 }}
-        className="rounded-[1rem] bg-black/20 p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]"
+        className="p-5"
       >
         <div className="mb-4 flex items-center justify-between">
           <div
@@ -122,9 +122,9 @@ function AddMaterialCard() {
     <motion.div
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="rounded-[1.25rem] bg-white/[0.02] p-1.5 ring-1 ring-gold/20"
+      className="bento-tile bento-gold"
     >
-      <div className="flex flex-col gap-2.5 rounded-[1rem] bg-black/20 p-5">
+      <div className="relative flex flex-col gap-2.5 p-5">
         <div className="mb-1 flex gap-1.5">
           {SWATCH_PRESETS.map((c) => (
             <button

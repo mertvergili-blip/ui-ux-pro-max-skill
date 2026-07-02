@@ -241,7 +241,7 @@ function AddFolderCard({
     <motion.div
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col gap-2.5 rounded-[4px_8px_8px_4px] border border-gold/20 bg-white/[0.02] p-4"
+      className="bento-tile bento-gold flex flex-col gap-2.5 !rounded-[4px_8px_8px_4px] p-4"
     >
       <div className="mb-0.5 flex gap-1.5">
         {ACCENT_PRESETS.map((c) => (
@@ -357,9 +357,9 @@ function ProjectDetail({
       <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
         Notlarım
       </p>
-      <div className="mb-5 rounded-[1.25rem] bg-white/[0.02] p-1.5 ring-1 ring-white/[0.06]">
+      <div className="bento-tile bento-graphite mb-5">
         <textarea
-          className="min-h-[136px] w-full resize-none rounded-[1rem] border-none bg-black/20 p-[18px] text-sm leading-relaxed text-bone-dim shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] outline-none placeholder:text-muted"
+          className="min-h-[136px] w-full resize-none border-none bg-transparent p-[18px] text-sm leading-relaxed text-bone-dim outline-none placeholder:text-muted"
           placeholder="Bu proje için fikrini yaz — AI kategorize etsin…"
           value={notes}
           onChange={(e) => handleNoteInput(e.target.value)}

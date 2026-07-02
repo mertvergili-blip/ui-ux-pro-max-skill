@@ -16,18 +16,23 @@ function HighlightTile({
   accent: string;
 }) {
   return (
-    <div className="rounded-[1rem] bg-white/[0.02] p-1 ring-1 ring-white/[0.06]">
+    <div
+      className="relative overflow-hidden rounded-[1rem] border border-white/[0.07] px-4 py-5"
+      style={{
+        background: `radial-gradient(90% 100% at 100% 0%, color-mix(in srgb, ${accent} 55%, transparent), transparent 60%), linear-gradient(150deg, color-mix(in srgb, ${accent} 22%, var(--color-ink)), var(--color-ink))`,
+      }}
+    >
       <div
-        className="rounded-[0.75rem] px-4 py-5"
+        className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-70"
         style={{
-          background: `linear-gradient(150deg, color-mix(in srgb, ${accent} 30%, var(--color-ink)), var(--color-ink))`,
+          background: `radial-gradient(circle, color-mix(in srgb, ${accent} 85%, white), ${accent} 55%, transparent 75%)`,
+          filter: "blur(22px)",
         }}
-      >
-        <p className="mb-1 text-[9px] uppercase tracking-[2px]" style={{ color: accent }}>
-          {sub}
-        </p>
-        <p className="font-heading text-[15px] text-bone">{label}</p>
-      </div>
+      />
+      <p className="relative mb-1 text-[9px] uppercase tracking-[2px]" style={{ color: accent }}>
+        {sub}
+      </p>
+      <p className="relative font-heading text-[15px] text-bone">{label}</p>
     </div>
   );
 }

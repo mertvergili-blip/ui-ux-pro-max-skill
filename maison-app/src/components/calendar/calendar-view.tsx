@@ -34,17 +34,18 @@ function MobileDayPanel({ day }: { day: number }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="mt-6 rounded-[1.25rem] bg-white/[0.02] p-1.5 ring-1 ring-white/[0.06] lg:hidden"
+      className="bento-tile bento-gold relative mt-6 px-5 py-5 lg:hidden"
     >
-      <div className="rounded-[1rem] bg-black/20 px-5 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
-        <div className="mb-3.5 flex items-center justify-between">
-          <p className="text-[9.5px] uppercase tracking-[2.5px] text-gold">
+      <div className="bento-orb" style={{ width: 110, height: 110, top: -35, right: -30 }} />
+      <div>
+        <div className="relative mb-3.5 flex items-center justify-between">
+          <p className="text-[9.5px] uppercase tracking-[2.5px] text-[#e4c98f]">
             Temmuz {day}
           </p>
           {!adding && (
             <button
               onClick={() => setAdding(true)}
-              className="text-[10px] uppercase tracking-[1.5px] text-muted transition-colors hover:text-gold"
+              className="text-[10px] uppercase tracking-[1.5px] text-white/60 transition-colors hover:text-[#e4c98f]"
             >
               + Ekle
             </button>

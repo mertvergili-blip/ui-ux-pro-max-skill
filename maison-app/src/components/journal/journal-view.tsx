@@ -206,24 +206,26 @@ export function JournalView() {
         </div>
       </div>
 
-      <div className="mt-10 max-w-[520px] border-t border-line pt-6">
-        <p className="mb-2.5 flex items-center gap-2.5 text-[9.5px] uppercase tracking-[3px] text-muted">
+      <div className="bento-tile bento-violet relative mt-10 max-w-[520px] px-6 py-6">
+        <div className="bento-orb" style={{ width: 120, height: 120, top: -35, right: -30 }} />
+        <p className="relative mb-2.5 flex items-center gap-2.5 text-[9.5px] uppercase tracking-[3px] text-white/55">
           Weekly Editor Letter
         </p>
-        <p className="font-serif text-[17px] italic leading-relaxed text-bone-dim">
+        <p className="relative font-serif text-[17px] italic leading-relaxed text-[#e7e1fb]">
           {editorLetterDisplay}
         </p>
       </div>
 
-      <div className="mt-10 max-w-[520px] border-t border-line pt-6">
-        <div className="mb-2.5 flex items-center justify-between">
-          <p className="flex items-center gap-2.5 text-[9.5px] uppercase tracking-[3px] text-muted">
+      <div className="bento-tile bento-teal relative mt-6 max-w-[520px] px-6 py-6">
+        <div className="bento-orb" style={{ width: 120, height: 120, bottom: -35, left: -30 }} />
+        <div className="relative mb-2.5 flex items-center justify-between">
+          <p className="flex items-center gap-2.5 text-[9.5px] uppercase tracking-[3px] text-white/55">
             Üç Aylık Öz-Değerlendirme
           </p>
           <button
             onClick={generateQuarterlyReview}
             disabled={reviewLoading}
-            className="text-[10px] uppercase tracking-[1.5px] text-muted transition-colors hover:text-gold disabled:opacity-40"
+            className="text-[10px] uppercase tracking-[1.5px] text-white/60 transition-colors hover:text-[#d3fff2] disabled:opacity-40"
           >
             {reviewLoading
               ? "Hazırlanıyor…"
@@ -234,11 +236,11 @@ export function JournalView() {
         </div>
         {quarterlyReviewText ? (
           <>
-            <p className="font-serif text-[17px] italic leading-relaxed text-bone-dim">
+            <p className="relative font-serif text-[17px] italic leading-relaxed text-[#d3fff2]">
               {quarterlyReviewDisplay}
             </p>
             {quarterlyReviewGeneratedAt && (
-              <p className="mt-2.5 text-[10.5px] text-muted">
+              <p className="relative mt-2.5 text-[10.5px] text-white/50">
                 {new Date(quarterlyReviewGeneratedAt).toLocaleDateString("tr-TR", {
                   day: "numeric",
                   month: "long",
@@ -249,7 +251,7 @@ export function JournalView() {
             )}
           </>
         ) : (
-          <p className="text-[12.5px] leading-relaxed text-muted">
+          <p className="relative text-[12.5px] leading-relaxed text-white/60">
             Günlük ritmini, ruh hali dağılımını ve koleksiyon ilerlemeni
             özetleyen, üç ayda bir güncellediğin daha geniş bir yansıma.
           </p>
