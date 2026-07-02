@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { localNoteInsight } from "@/lib/note-insight";
+import { localPortfolioPitch } from "@/lib/portfolio-pitch";
 import { useStore, type CollectionFolder as FolderData } from "@/lib/store";
 import {
   STUDIO_TEAM,
@@ -100,10 +101,14 @@ function Folder({
   data,
   onOpenProject,
   onRemove,
+  pitch,
+  pitchLoading,
 }: {
   data: FolderData;
   onOpenProject: (folder: FolderData) => void;
   onRemove: () => void;
+  pitch?: string;
+  pitchLoading?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -168,6 +173,11 @@ function Folder({
         </div>
         <p className="font-heading text-[17px]">{data.name}</p>
         <p className="mt-0.5 text-xs text-muted">{data.sub}</p>
+        {(pitch || pitchLoading) && (
+          <p className="mt-2 font-serif text-[12.5px] italic leading-relaxed text-bone-dim">
+            {pitchLoading ? "Pitch hazırlanıyor…" : pitch}
+          </p>
+        )}
         <span
           className="mt-2.5 inline-block translate-x-[-4px] text-[10.5px] uppercase tracking-[1.5px] opacity-0 transition-all duration-250 group-hover:translate-x-0 group-hover:opacity-100"
           style={{ color: data.accent }}
@@ -558,6 +568,46 @@ export function CollectionsView() {
   const addCollection = useStore((s) => s.addCollection);
   const removeCollection = useStore((s) => s.removeCollection);
 
+  // Portfolio Autopilot — generates a one-line pitch per collection on
+  // demand, always reading live from the collections list, so a project
+  // added/removed here is reflected without any separate portfolio doc.
+  const [portfolioMode, setPortfolioMode] = useState(false);
+  const [pitches, setPitches] = useState<Record<string, string>>({});
+  const [pitchLoadingIds, setPitchLoadingIds] = useState<Set<string>>(new Set());
+
+  const togglePortfolioMode = () => {
+    const next = !portfolioMode;
+    setPortfolioMode(next);
+    if (!next) return;
+
+    const missing = collections.filter((c) => !pitches[c.id]);
+    if (missing.length === 0) return;
+
+    setPitchLoadingIds(new Set(missing.map((c) => c.id)));
+    missing.forEach(async (c) => {
+      let pitch = localPortfolioPitch(c.name, c.status);
+      try {
+        const res = await fetch("/api/portfolio-pitch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: c.name, status: c.status, sub: c.sub }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.pitch) pitch = data.pitch;
+        }
+      } catch {
+        // local pitch already set above
+      }
+      setPitches((prev) => ({ ...prev, [c.id]: pitch }));
+      setPitchLoadingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(c.id);
+        return next;
+      });
+    });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -580,10 +630,20 @@ export function CollectionsView() {
             exit={{ opacity: 0, scale: 0.97 }}
             transition={{ duration: 0.4 }}
           >
-            <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
-              <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
-              Collections
-            </p>
+            <div className="mb-[18px] flex items-center justify-between">
+              <p className="flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
+                <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
+                Collections
+              </p>
+              <button
+                onClick={togglePortfolioMode}
+                className={`text-[10px] uppercase tracking-[1.5px] transition-colors ${
+                  portfolioMode ? "text-gold" : "text-muted hover:text-bone-dim"
+                }`}
+              >
+                {portfolioMode ? "Portfolyo Modu · Açık" : "Portfolyo Modu"}
+              </button>
+            </div>
             <h1 className="mb-7 font-heading text-[34px] font-normal leading-[1.12] text-[#f7f2e6]">
               Klasörü aç, içindeki parçaları gör.
             </h1>
@@ -594,6 +654,8 @@ export function CollectionsView() {
                   data={f}
                   onOpenProject={setOpenProject}
                   onRemove={() => removeCollection(f.id)}
+                  pitch={portfolioMode ? pitches[f.id] : undefined}
+                  pitchLoading={portfolioMode && pitchLoadingIds.has(f.id)}
                 />
               ))}
               <AddFolderCard onAdd={addCollection} />

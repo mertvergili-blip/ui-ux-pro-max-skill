@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LOCAL_RUNWAY_NEWS, RUNWAY_TAG_COLOR, type RunwayNewsItem } from "@/lib/runway-news";
 import { useStore } from "@/lib/store";
 import { resizeImageFile } from "@/lib/image-resize";
+import { rankTrendRadar } from "@/lib/trend-radar";
 
-function NewsCard({ tag, title, sub, link, large }: RunwayNewsItem) {
+function NewsCard({
+  tag,
+  title,
+  sub,
+  link,
+  large,
+  matchedLabels,
+}: RunwayNewsItem & { matchedLabels?: string[] }) {
   const color = RUNWAY_TAG_COLOR[tag];
   const Wrapper = link ? "a" : "div";
   return (
@@ -38,6 +46,11 @@ function NewsCard({ tag, title, sub, link, large }: RunwayNewsItem) {
             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
           }}
         />
+        {matchedLabels && matchedLabels.length > 0 && (
+          <span className="absolute right-2.5 top-2.5 rounded-full border border-gold/30 bg-ink/60 px-2 py-1 text-[8.5px] uppercase tracking-[1px] text-gold backdrop-blur-sm">
+            DNA&apos;na uygun
+          </span>
+        )}
       </div>
       <p
         className="mx-4 mt-3.5 mb-1.5 text-[9.5px] uppercase tracking-[2px]"
@@ -228,6 +241,12 @@ export function RunwayView() {
     };
   }, []);
 
+  const radar = useMemo(() => rankTrendRadar(news), [news]);
+  const matchedByTitle = useMemo(
+    () => new Map(radar.map((r) => [r.item.title, r.matchedLabels])),
+    [radar]
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -248,9 +267,25 @@ export function RunwayView() {
           : "Bağlantı kurulamadı — örnek içerik gösteriliyor."}
       </p>
 
+      {radar.length > 0 && (
+        <div className="mr-5 mb-7 rounded-[1.25rem] bg-white/[0.02] p-1.5 ring-1 ring-gold/15">
+          <div className="rounded-[1rem] bg-black/20 px-5 py-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
+            <p className="mb-1.5 text-[9.5px] uppercase tracking-[2.5px] text-gold">
+              Trend Radar · Sana Özel
+            </p>
+            <p className="text-[13px] leading-relaxed text-bone-dim">
+              <span className="text-bone">{radar[0].item.title}</span> — DNA
+              haritandaki{" "}
+              <span className="text-gold">{radar[0].matchedLabels.join(", ")}</span>{" "}
+              referanslarınla örtüşüyor.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="mr-5 grid grid-cols-2 gap-[18px]">
         {news.map((n, i) => (
-          <NewsCard key={i} {...n} />
+          <NewsCard key={i} {...n} matchedLabels={matchedByTitle.get(n.title)} />
         ))}
       </div>
 

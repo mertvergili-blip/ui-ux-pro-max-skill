@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Timeline, type TimelineEntry } from "@/components/vendor/timeline";
+import { useStore } from "@/lib/store";
+import { compileYearArchive, downloadTextFile } from "@/lib/year-archive";
 
 function HighlightTile({
   label,
@@ -86,6 +89,21 @@ const YEARS: TimelineEntry[] = [
 ];
 
 export function PathView() {
+  const collections = useStore((s) => s.collections);
+  const journalEntries = useStore((s) => s.journalEntries);
+  const streak = useStore((s) => s.streak);
+  const [archiveText, setArchiveText] = useState<string | null>(null);
+
+  const handleGenerateArchive = () => {
+    const text = compileYearArchive({
+      collections,
+      journalEntries,
+      streak,
+      year: new Date().getFullYear(),
+    });
+    setArchiveText(text);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -102,6 +120,42 @@ export function PathView() {
       </h1>
 
       <Timeline data={YEARS} />
+
+      <div className="mt-12 max-w-[520px] border-t border-line pt-7">
+        <div className="mb-2.5 flex items-center justify-between">
+          <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
+            Yıl Sonu Arşivi
+          </p>
+          <div className="flex gap-3 text-[10px] uppercase tracking-[1.5px]">
+            <button
+              onClick={handleGenerateArchive}
+              className="text-muted transition-colors hover:text-gold"
+            >
+              Oluştur
+            </button>
+            {archiveText && (
+              <button
+                onClick={() =>
+                  downloadTextFile(`maison-${new Date().getFullYear()}-arsiv.txt`, archiveText)
+                }
+                className="text-gold hover:text-bone"
+              >
+                İndir (.txt)
+              </button>
+            )}
+          </div>
+        </div>
+        {archiveText ? (
+          <pre className="whitespace-pre-wrap rounded-[1rem] border border-dashed border-line p-5 font-sans text-[12px] leading-relaxed text-bone-dim">
+            {archiveText}
+          </pre>
+        ) : (
+          <p className="text-[12.5px] leading-relaxed text-muted">
+            Tüm koleksiyonlarını, günlük ritmini ve seri bilgini tek bir
+            arşiv dosyasında derle — indirip saklayabilirsin.
+          </p>
+        )}
+      </div>
     </motion.div>
   );
 }

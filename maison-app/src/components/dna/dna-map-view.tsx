@@ -10,6 +10,7 @@ import {
   type DnaCategory,
 } from "@/lib/dna-data";
 import { layoutDnaGraph, type LaidOutNode } from "@/lib/dna-layout";
+import { localWhatWouldTheyDo } from "@/lib/what-would-they-do";
 
 const WIDTH = 900;
 const HEIGHT = 560;
@@ -124,6 +125,30 @@ export function DnaMapView() {
   }, [selectedId]);
 
   const selectedNode = selectedId ? byId.get(selectedId) : null;
+
+  const [wwtd, setWwtd] = useState<{ id: string; text: string } | null>(null);
+  const [wwtdLoading, setWwtdLoading] = useState(false);
+
+  const askWhatWouldTheyDo = async (nodeId: string, designerName: string) => {
+    setWwtdLoading(true);
+    setWwtd(null);
+    let text = localWhatWouldTheyDo(designerName);
+    try {
+      const res = await fetch("/api/what-would-they-do", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ designerName }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.perspective) text = data.perspective;
+      }
+    } catch {
+      // local perspective already set above
+    }
+    setWwtd({ id: nodeId, text });
+    setWwtdLoading(false);
+  };
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -324,6 +349,30 @@ export function DnaMapView() {
                   );
                 })}
               </div>
+
+              {selectedNode.category === "designer" && (
+                <div className="mt-6 border-t border-dashed border-line pt-5">
+                  {wwtd && wwtd.id === selectedNode.id ? (
+                    <motion.p
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="font-serif text-[13.5px] italic leading-relaxed text-bone-dim"
+                    >
+                      {wwtd.text}
+                    </motion.p>
+                  ) : (
+                    <button
+                      onClick={() => askWhatWouldTheyDo(selectedNode.id, selectedNode.label)}
+                      disabled={wwtdLoading}
+                      className="text-left text-[11px] uppercase tracking-[1.5px] text-muted transition-colors hover:text-gold disabled:opacity-40"
+                    >
+                      {wwtdLoading
+                        ? "Düşünüyor…"
+                        : `${selectedNode.label} olsa ne yapardı?`}
+                    </button>
+                  )}
+                </div>
+              )}
             </motion.div>
           ) : (
             <p className="text-[12.5px] leading-relaxed text-muted">

@@ -182,6 +182,12 @@ interface MaisonStore {
   journalEntries: JournalDay[];
   setTodayMood: (mood: MoodKey) => void;
   setTodayReflection: (text: string) => void;
+
+  // Quarterly self-review — a deliberate, manually-triggered longer-horizon
+  // reflection (vs. the always-on Weekly Editor Letter)
+  quarterlyReviewText: string | null;
+  quarterlyReviewGeneratedAt: number | null;
+  setQuarterlyReview: (text: string) => void;
 }
 
 export function selectTodayEntry(journalEntries: JournalDay[]): JournalDay {
@@ -439,6 +445,11 @@ export const useStore = create<MaisonStore>()(
             ],
           };
         }),
+
+      quarterlyReviewText: null,
+      quarterlyReviewGeneratedAt: null,
+      setQuarterlyReview: (text) =>
+        set({ quarterlyReviewText: text, quarterlyReviewGeneratedAt: Date.now() }),
     }),
     {
       name: "maison-storage",
@@ -451,6 +462,8 @@ export const useStore = create<MaisonStore>()(
         materials: s.materials,
         iterationLogs: s.iterationLogs,
         completedCapsuleIds: s.completedCapsuleIds,
+        quarterlyReviewText: s.quarterlyReviewText,
+        quarterlyReviewGeneratedAt: s.quarterlyReviewGeneratedAt,
         collections: s.collections,
         calendarEvents: s.calendarEvents,
         runwayPhotos: s.runwayPhotos,

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useStore, selectTodayEntry, type MoodKey, type JournalDay } from "@/lib/store";
 import { localEditorLetter } from "@/lib/journal-letter";
+import { computeQuarterlyStats, localQuarterlyReview } from "@/lib/quarterly-review";
 
 const MOODS: { key: MoodKey; label: string; gradient: string; color: string }[] = [
   { key: "flowing", label: "Flowing", gradient: "radial-gradient(circle at 35% 30%, #e7c98f, #7a5a24)", color: "#c4a469" },
@@ -26,6 +27,33 @@ export function JournalView() {
   const todayEntry = useMemo(() => selectTodayEntry(journalEntries), [journalEntries]);
   const setTodayMood = useStore((s) => s.setTodayMood);
   const setTodayReflection = useStore((s) => s.setTodayReflection);
+  const streak = useStore((s) => s.streak);
+  const collectionsCount = useStore((s) => s.collections.length);
+  const quarterlyReviewText = useStore((s) => s.quarterlyReviewText);
+  const quarterlyReviewGeneratedAt = useStore((s) => s.quarterlyReviewGeneratedAt);
+  const setQuarterlyReview = useStore((s) => s.setQuarterlyReview);
+  const [reviewLoading, setReviewLoading] = useState(false);
+
+  const generateQuarterlyReview = async () => {
+    setReviewLoading(true);
+    const stats = computeQuarterlyStats(journalEntries, streak, collectionsCount);
+    let review = localQuarterlyReview(stats);
+    try {
+      const res = await fetch("/api/quarterly-review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(stats),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.review) review = data.review;
+      }
+    } catch {
+      // local review already set above
+    }
+    setQuarterlyReview(review);
+    setReviewLoading(false);
+  };
 
   const heatData = useMemo(
     () =>
@@ -176,6 +204,47 @@ export function JournalView() {
         <p className="font-serif text-[17px] italic leading-relaxed text-bone-dim">
           {editorLetter}
         </p>
+      </div>
+
+      <div className="mt-10 max-w-[520px] border-t border-line pt-6">
+        <div className="mb-2.5 flex items-center justify-between">
+          <p className="flex items-center gap-2.5 text-[9.5px] uppercase tracking-[3px] text-muted">
+            Üç Aylık Öz-Değerlendirme
+          </p>
+          <button
+            onClick={generateQuarterlyReview}
+            disabled={reviewLoading}
+            className="text-[10px] uppercase tracking-[1.5px] text-muted transition-colors hover:text-gold disabled:opacity-40"
+          >
+            {reviewLoading
+              ? "Hazırlanıyor…"
+              : quarterlyReviewText
+              ? "Yenile"
+              : "Oluştur"}
+          </button>
+        </div>
+        {quarterlyReviewText ? (
+          <>
+            <p className="font-serif text-[17px] italic leading-relaxed text-bone-dim">
+              {quarterlyReviewText}
+            </p>
+            {quarterlyReviewGeneratedAt && (
+              <p className="mt-2.5 text-[10.5px] text-muted">
+                {new Date(quarterlyReviewGeneratedAt).toLocaleDateString("tr-TR", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}{" "}
+                tarihinde oluşturuldu
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="text-[12.5px] leading-relaxed text-muted">
+            Günlük ritmini, ruh hali dağılımını ve koleksiyon ilerlemeni
+            özetleyen, üç ayda bir güncellediğin daha geniş bir yansıma.
+          </p>
+        )}
       </div>
     </motion.div>
   );
