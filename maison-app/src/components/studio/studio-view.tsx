@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { useStore, selectCreativeEnergy, selectDaysRemaining } from "@/lib/store";
 import { FinancePulse } from "@/components/shared/finance-pulse";
+import { CapsuleDayCard } from "@/components/studio/capsule-day-card";
 
 function HeadlineReveal() {
   const words = "Bugün sakin bir gün. Bir teslim tarihi *yaklaşıyor.*".split(" ");
@@ -143,6 +144,8 @@ export function StudioView() {
               </p>
             </div>
           )}
+
+          <CapsuleDayCard />
         </div>
 
         <div className="flex flex-col gap-6 border-l border-line pl-7">

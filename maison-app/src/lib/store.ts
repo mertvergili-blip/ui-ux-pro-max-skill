@@ -54,6 +54,14 @@ export interface Material {
   createdAt: number;
 }
 
+export interface IterationEntry {
+  id: string;
+  collectionId: string;
+  whatDidntWork: string;
+  why: string;
+  createdAt: number;
+}
+
 const MOOD_ENERGY: Record<MoodKey, string> = {
   flowing: "Flowing",
   calm: "Calm",
@@ -107,6 +115,15 @@ interface MaisonStore {
   materials: Material[];
   addMaterial: (m: Omit<Material, "id" | "createdAt">) => void;
   removeMaterial: (id: string) => void;
+
+  // Mistake/iteration log — per collection
+  iterationLogs: IterationEntry[];
+  addIterationEntry: (e: Omit<IterationEntry, "id" | "createdAt">) => void;
+  removeIterationEntry: (id: string) => void;
+
+  // Capsule Day Challenge — tracks which day-challenges were marked done
+  completedCapsuleIds: string[];
+  toggleCapsuleComplete: (id: string) => void;
 
   // AI Studio panel
   aiPanelOpen: boolean;
@@ -195,6 +212,27 @@ export const useStore = create<MaisonStore>()(
         })),
       removeMaterial: (id) =>
         set((s) => ({ materials: s.materials.filter((m) => m.id !== id) })),
+
+      iterationLogs: [],
+      addIterationEntry: (e) =>
+        set((s) => ({
+          iterationLogs: [
+            { ...e, id: `iter${Date.now()}`, createdAt: Date.now() },
+            ...s.iterationLogs,
+          ],
+        })),
+      removeIterationEntry: (id) =>
+        set((s) => ({
+          iterationLogs: s.iterationLogs.filter((e) => e.id !== id),
+        })),
+
+      completedCapsuleIds: [],
+      toggleCapsuleComplete: (id) =>
+        set((s) => ({
+          completedCapsuleIds: s.completedCapsuleIds.includes(id)
+            ? s.completedCapsuleIds.filter((c) => c !== id)
+            : [...s.completedCapsuleIds, id],
+        })),
 
       aiPanelOpen: false,
       toggleAiPanel: () => set((s) => ({ aiPanelOpen: !s.aiPanelOpen })),
@@ -301,6 +339,8 @@ export const useStore = create<MaisonStore>()(
         journalEntries: s.journalEntries,
         streak: s.streak,
         materials: s.materials,
+        iterationLogs: s.iterationLogs,
+        completedCapsuleIds: s.completedCapsuleIds,
       }),
     }
   )

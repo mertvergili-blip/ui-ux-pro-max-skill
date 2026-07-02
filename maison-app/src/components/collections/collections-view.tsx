@@ -3,8 +3,15 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { localNoteInsight } from "@/lib/note-insight";
+import { useStore } from "@/lib/store";
+import {
+  STUDIO_TEAM,
+  localStudioTeamFeedback,
+  type PersonaFeedback,
+} from "@/lib/studio-team";
 
 interface FolderData {
+  id: string;
   name: string;
   status: string;
   accent: string;
@@ -14,6 +21,7 @@ interface FolderData {
 
 const FOLDERS: FolderData[] = [
   {
+    id: "terre-or",
     name: "Koleksiyon III — Terre & Or",
     status: "In Progress",
     accent: "var(--color-gold)",
@@ -21,6 +29,7 @@ const FOLDERS: FolderData[] = [
     sub: "6 gün kaldı",
   },
   {
+    id: "verre-bleu",
     name: "Koleksiyon II — Verre Bleu",
     status: "Archived",
     accent: "var(--color-blue)",
@@ -28,6 +37,7 @@ const FOLDERS: FolderData[] = [
     sub: "Mart 2026",
   },
   {
+    id: "rose-poudre",
     name: "Koleksiyon I — Rosé Poudré",
     status: "Archived",
     accent: "var(--color-rose)",
@@ -272,7 +282,7 @@ function ProjectDetail({
         />
       </div>
       {aiText && (
-        <div className="flex items-start gap-3 border-t border-line pt-4 text-[13px] leading-relaxed text-bone-dim">
+        <div className="mb-8 flex items-start gap-3 border-t border-line pt-4 text-[13px] leading-relaxed text-bone-dim">
           <span
             className="mt-1 h-1.5 w-1.5 flex-shrink-0 animate-[pulse-glow_2.4s_infinite] rounded-full"
             style={{ background: folder.accent }}
@@ -280,7 +290,193 @@ function ProjectDetail({
           <span>{aiText}</span>
         </div>
       )}
+
+      <StudioTeam notes={notes} accent={folder.accent} />
+
+      <IterationLog collectionId={folder.id} />
     </motion.div>
+  );
+}
+
+function StudioTeam({ notes, accent }: { notes: string; accent: string }) {
+  const [feedback, setFeedback] = useState<PersonaFeedback[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleAsk = async () => {
+    if (!notes.trim() || loading) return;
+    setLoading(true);
+    setFeedback(null);
+    let result = localStudioTeamFeedback(notes);
+    try {
+      const res = await fetch("/api/studio-team", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: notes }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.feedback)) result = data.feedback;
+      }
+    } catch {
+      // local result already set above
+    }
+    setFeedback(result);
+    setLoading(false);
+  };
+
+  return (
+    <div className="mb-8 border-t border-line pt-6">
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
+          Stüdyo Ekibi
+        </p>
+        <button
+          onClick={handleAsk}
+          disabled={!notes.trim() || loading}
+          className="text-[10px] uppercase tracking-[1.5px] text-muted transition-colors hover:text-bone-dim disabled:opacity-30"
+          style={feedback || loading ? { color: accent } : undefined}
+        >
+          {loading ? "Soruluyor…" : "Ekibe Sor"}
+        </button>
+      </div>
+      {!feedback && !loading && (
+        <p className="text-[12px] leading-relaxed text-muted">
+          Yukarıdaki nota dört farklı bakış açısından anlık geri bildirim al.
+        </p>
+      )}
+      <AnimatePresence>
+        {feedback && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col gap-3.5"
+          >
+            {STUDIO_TEAM.map((p, i) => {
+              const f = feedback.find((x) => x.personaId === p.id);
+              if (!f) return null;
+              return (
+                <motion.div
+                  key={p.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: i * 0.06 }}
+                  className="flex items-start gap-3"
+                >
+                  <span
+                    className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                    style={{ background: p.accent }}
+                  />
+                  <p className="text-[13px] leading-relaxed text-bone-dim">
+                    <span className="text-bone">{p.name}</span>
+                    <span className="text-muted"> · {p.role} — </span>
+                    {f.message}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function IterationLog({ collectionId }: { collectionId: string }) {
+  const allEntries = useStore((s) => s.iterationLogs);
+  const addIterationEntry = useStore((s) => s.addIterationEntry);
+  const removeIterationEntry = useStore((s) => s.removeIterationEntry);
+  const entries = allEntries.filter((e) => e.collectionId === collectionId);
+
+  const [open, setOpen] = useState(false);
+  const [whatDidntWork, setWhatDidntWork] = useState("");
+  const [why, setWhy] = useState("");
+
+  const handleSave = () => {
+    if (!whatDidntWork.trim()) return;
+    addIterationEntry({ collectionId, whatDidntWork: whatDidntWork.trim(), why: why.trim() });
+    setWhatDidntWork("");
+    setWhy("");
+    setOpen(false);
+  };
+
+  return (
+    <div className="mt-2 border-t border-dashed border-line pt-6">
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
+          İterasyon Günlüğü
+        </p>
+        {!open && (
+          <button
+            onClick={() => setOpen(true)}
+            className="text-[10px] uppercase tracking-[1.5px] text-muted hover:text-bone-dim"
+          >
+            + Ekle
+          </button>
+        )}
+      </div>
+      <p className="mb-4 text-[12px] leading-relaxed text-muted">
+        İşe yaramayan kararlar ve nedenleri — portfolyoya girmeyen, sadece
+        senin gelişimin için.
+      </p>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-4 overflow-hidden"
+          >
+            <div className="flex flex-col gap-2.5 rounded-[1rem] border border-dashed border-line p-4">
+              <input
+                value={whatDidntWork}
+                onChange={(e) => setWhatDidntWork(e.target.value)}
+                placeholder="Ne işe yaramadı?"
+                autoFocus
+                className="border-b border-line bg-transparent pb-1.5 text-[13px] text-bone outline-none placeholder:text-muted focus:border-bone-dim/50"
+              />
+              <input
+                value={why}
+                onChange={(e) => setWhy(e.target.value)}
+                placeholder="Neden? (opsiyonel)"
+                className="border-b border-line bg-transparent pb-1.5 text-[12.5px] text-bone-dim outline-none placeholder:text-muted focus:border-bone-dim/50"
+              />
+              <div className="mt-1 flex gap-2 text-[10px] uppercase tracking-[1.5px]">
+                <button
+                  onClick={handleSave}
+                  className="rounded-full border border-bone-dim/40 px-3.5 py-1.5 text-bone-dim hover:border-bone-dim"
+                >
+                  Kaydet
+                </button>
+                <button
+                  onClick={() => setOpen(false)}
+                  className="rounded-full border border-white/10 px-3.5 py-1.5 text-muted hover:border-white/25"
+                >
+                  Vazgeç
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-col gap-3">
+        {entries.map((e) => (
+          <div key={e.id} className="group flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[13px] leading-relaxed text-bone-dim">{e.whatDidntWork}</p>
+              {e.why && <p className="mt-0.5 text-[12px] text-muted">{e.why}</p>}
+            </div>
+            <button
+              onClick={() => removeIterationEntry(e.id)}
+              className="flex-shrink-0 text-[10px] uppercase tracking-[1.5px] text-muted opacity-0 transition-opacity hover:text-rose group-hover:opacity-100"
+            >
+              Kaldır
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
