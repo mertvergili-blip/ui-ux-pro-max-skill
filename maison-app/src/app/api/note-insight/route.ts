@@ -6,7 +6,9 @@ asistanısın. Kullanıcı bir koleksiyon projesi için serbest not yazıyor. Bu
 notu okuyup 1-2 cümlelik kısa bir geri bildirim yaz: notu hangi başlık
 altında kategorize ettiğini söyle (örn. "Konsept Notları", "Kumaş
 Referansları", "Palet Notları" gibi projeye uygun bir başlık seç) ve
-istersen kısa bir öneri ekle. Türkçe yaz, sıcak ama kısa tut.`;
+istersen kısa bir öneri ekle. Türkçe yaz, sıcak ama kısa tut. Düz metin
+yaz — markdown, yıldız işareti, madde imi ya da başlık biçimlendirmesi
+kullanma; çıktı doğrudan arayüzde düz yazı olarak gösterilecek.`;
 
 export async function POST(request: Request) {
   const { projectName, notes } = (await request.json()) as {

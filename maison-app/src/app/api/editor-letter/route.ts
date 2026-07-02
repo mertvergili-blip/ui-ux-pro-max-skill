@@ -8,7 +8,9 @@ ve serbest metin reflection) okuyup 2-3 cümlelik, editoryal bir "Weekly
 Editor Letter" yaz. Ton: sıcak ama gösterişsiz, bir moda dergisi editörünün
 notu gibi. Türkçe yaz. Kullanıcıya ikinci tekil şahısla hitap et ("sen").
 Sadece verilen günlerdeki bilgiye dayan, uydurma detay ekleme. Reflection
-metinleri boşsa sadece mood dağılımına göre yorum yap.`;
+metinleri boşsa sadece mood dağılımına göre yorum yap. Düz metin yaz —
+markdown, yıldız işareti ya da madde imi kullanma; çıktı doğrudan arayüzde
+düz yazı olarak gösterilecek.`;
 
 export async function POST(request: Request) {
   const { entries } = (await request.json()) as { entries?: JournalDay[] };
