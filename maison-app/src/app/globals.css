@@ -188,10 +188,15 @@
    teal=Energy, blue=Deadline/DNA/Path, coral=Capsule/Runway.
    ============================================================ */
 .bento-tile {
+  --bento-radius: 1.6rem;
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  border-radius: 1.6rem;
+  border-radius: var(--bento-radius);
+  /* Mobile Safari doesn't reliably clip a blurred child (.bento-orb) to
+     overflow:hidden + border-radius alone — the glow bleeds past the
+     curve and the corner reads as square. clip-path forces a real clip. */
+  clip-path: inset(0 round var(--bento-radius));
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
 .bento-tile::before {

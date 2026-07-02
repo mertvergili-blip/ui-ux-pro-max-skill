@@ -5,7 +5,10 @@ import { decodeHtmlEntities } from "@/lib/html-entities";
 import { fetchOgImage } from "@/lib/og-image";
 import { LOCAL_RUNWAY_NEWS, type RunwayNewsItem, type RunwayTag } from "@/lib/runway-news";
 
-const FEED_URL = "https://wwd.com/feed/";
+// The "Fashion" category feed, not WWD's general firehose — the general
+// feed mixes in celebrity, sports-crossover, and business stories that
+// don't read as high fashion for a "Runway Intel" panel.
+const FEED_URL = "https://wwd.com/fashion-news/feed/";
 const CACHE_TTL_MS = 45 * 60 * 1000; // 45 minutes — fashion news doesn't need to be second-fresh
 const ITEM_COUNT = 4;
 const TAGS: RunwayTag[] = ["Marka Haberi", "Tasarımcı", "Materyal & Zanaat", "Trend"];
@@ -80,9 +83,13 @@ async function summarizeWithGemini(items: RawFeedItem[]): Promise<RunwayNewsItem
     contents: digest,
     config: {
       systemInstruction: `Sen Maison adlı bir moda tasarım stüdyosu uygulamasının
-"Runway Intel" bölümünü hazırlıyorsun. Sana numaralı İngilizce moda haberi
-başlıkları verilecek. Bunlardan en ilginç ${ITEM_COUNT} tanesini seç ve her
-biri için:
+"Runway Intel" bölümünü hazırlıyorsun. Kullanıcı bir moda tasarım öğrencisi ve
+Creative Director olmaya çalışıyor — bu yüzden yüksek moda (haute couture,
+defile/runway, tasarımcı koleksiyonları, kumaş & zanaat, fashion week) odaklı
+haberleri önceliklendir; ünlü/kırmızı halı, spor markası iş haberleri veya
+lifestyle haberlerini sadece başka seçenek kalmazsa kullan. Sana numaralı
+İngilizce moda haberi başlıkları verilecek. Bunlardan en ilginç ve en çok
+yüksek modaya dair olan ${ITEM_COUNT} tanesini seç ve her biri için:
 - sourceIndex: seçtiğin haberin listedeki numarası (1'den başlar)
 - title: Türkçe'ye çevrilmiş, kısa ve çarpıcı bir başlık (60 karakteri geçme)
 - sub: 1 cümlelik Türkçe özet (sadece en önemli haber için doldur, diğerlerinde boş bırakabilirsin)

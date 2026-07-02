@@ -241,7 +241,8 @@ function AddFolderCard({
     <motion.div
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bento-tile bento-gold flex flex-col gap-2.5 !rounded-[4px_8px_8px_4px] p-4"
+      className="bento-tile bento-gold flex flex-col gap-2.5 p-4"
+      style={{ ["--bento-radius" as string]: "4px 8px 8px 4px" }}
     >
       <div className="mb-0.5 flex gap-1.5">
         {ACCENT_PRESETS.map((c) => (
