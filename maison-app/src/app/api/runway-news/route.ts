@@ -1,6 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
 import { Type } from "@google/genai";
-import { getGeminiClient, GEMINI_MODEL } from "@/lib/gemini";
+import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { LOCAL_RUNWAY_NEWS, type RunwayNewsItem, type RunwayTag } from "@/lib/runway-news";
 
 const FEED_URL = "https://wwd.com/feed/";
@@ -51,8 +51,7 @@ async function summarizeWithGemini(items: RawFeedItem[]): Promise<RunwayNewsItem
     .map((it, i) => `${i + 1}. ${it.title}${it.description ? ` — ${it.description}` : ""}`)
     .join("\n");
 
-  const response = await client.models.generateContent({
-    model: GEMINI_MODEL,
+  const response = await generateWithFallback(client, {
     contents: digest,
     config: {
       systemInstruction: `Sen Maison adlı bir moda tasarım stüdyosu uygulamasının

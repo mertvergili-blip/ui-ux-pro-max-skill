@@ -1,4 +1,4 @@
-import { getGeminiClient, GEMINI_MODEL } from "@/lib/gemini";
+import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { localWhatWouldTheyDo } from "@/lib/what-would-they-do";
 
 const SYSTEM_PROMPT = `Sen Maison adlı bir moda tasarım stüdyosu uygulamasının
@@ -23,8 +23,7 @@ export async function POST(request: Request) {
   if (!client) return fallback();
 
   try {
-    const response = await client.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateWithFallback(client, {
       contents: `Tasarımcı: ${designerName}`,
       config: { systemInstruction: SYSTEM_PROMPT },
     });

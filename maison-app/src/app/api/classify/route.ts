@@ -1,5 +1,5 @@
 import { Type } from "@google/genai";
-import { getGeminiClient, GEMINI_MODEL } from "@/lib/gemini";
+import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { localClassify, SUGGESTION_TYPES, type SuggestionType } from "@/lib/classify";
 
 const SYSTEM_PROMPT = `Sen Maison adlı bir moda tasarım stüdyosu uygulamasının asistanısın.
@@ -37,8 +37,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const response = await client.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateWithFallback(client, {
       contents: text,
       config: {
         systemInstruction: SYSTEM_PROMPT,

@@ -1,4 +1,4 @@
-import { getGeminiClient, GEMINI_MODEL } from "@/lib/gemini";
+import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { localPortfolioPitch } from "@/lib/portfolio-pitch";
 
 const SYSTEM_PROMPT = `Sen Maison adlı bir moda tasarım stüdyosu uygulamasının
@@ -26,8 +26,7 @@ export async function POST(request: Request) {
   if (!client) return fallback();
 
   try {
-    const response = await client.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateWithFallback(client, {
       contents: `Koleksiyon: ${name}\nDurum: ${status}\nNot: ${sub ?? ""}`,
       config: { systemInstruction: SYSTEM_PROMPT },
     });

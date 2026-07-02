@@ -1,5 +1,5 @@
 import { Type } from "@google/genai";
-import { getGeminiClient, GEMINI_MODEL } from "@/lib/gemini";
+import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { STUDIO_TEAM, localStudioTeamFeedback, type PersonaFeedback } from "@/lib/studio-team";
 
 const PERSONA_IDS = STUDIO_TEAM.map((p) => p.id);
@@ -43,8 +43,7 @@ export async function POST(request: Request) {
   if (!client) return fallback();
 
   try {
-    const response = await client.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateWithFallback(client, {
       contents: text,
       config: {
         systemInstruction: SYSTEM_PROMPT,

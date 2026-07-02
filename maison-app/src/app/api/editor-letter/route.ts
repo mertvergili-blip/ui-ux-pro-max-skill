@@ -1,4 +1,4 @@
-import { getGeminiClient, GEMINI_MODEL } from "@/lib/gemini";
+import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { localEditorLetter } from "@/lib/journal-letter";
 import type { JournalDay } from "@/lib/store";
 
@@ -33,8 +33,7 @@ export async function POST(request: Request) {
       .map((e) => `${e.date}: mood=${e.mood ?? "yok"}, not="${e.reflection || "yok"}"`)
       .join("\n");
 
-    const response = await client.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateWithFallback(client, {
       contents: summary,
       config: { systemInstruction: SYSTEM_PROMPT },
     });
