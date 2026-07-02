@@ -1,0 +1,39 @@
+1
+00:00:00,200 --> 00:00:02,800
+I heard cheering from the toaster.
+
+2
+00:00:03,200 --> 00:00:04,600
+It wasn't making toast.
+
+3
+00:00:04,900 --> 00:00:06,900
+It was a boxing match.
+
+4
+00:00:08,200 --> 00:00:10,500
+Wheat bread was winning.
+
+5
+00:00:11,800 --> 00:00:14,500
+Then dark rye switched hands.
+
+6
+00:00:15,300 --> 00:00:16,400
+One punch.
+
+7
+00:00:16,700 --> 00:00:18,800
+White bread went down.
+
+8
+00:00:22,300 --> 00:00:24,000
+The toaster dinged.
+
+9
+00:00:24,300 --> 00:00:26,500
+The winner came out.
+
+10
+00:00:26,800 --> 00:00:29,600
+Should I eat the winner?

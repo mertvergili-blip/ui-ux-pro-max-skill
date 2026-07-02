@@ -1,0 +1,41 @@
+{
+  "video_id": "028",
+  "stage": "pre_production_plan",
+  "note": "No footage exists yet (no Kling generation run). This is a planning-stage retention pass on the script/scene breakdown, to be re-run by viral-retention-editor against real footage after QC passes.",
+  "weak_points": [
+    "The 'breathing slot' hook is subtle — risk of reading as just camera shake rather than an intentional inhale/exhale motion. Needs a clear contraction/expansion beat in frame 1.",
+    "Scene 2 (9s) wrongness beat could drag if the vault door reveal happens too late in the clip; want it visible by ~3s in."
+  ],
+  "stronger_hook": "Open on the slot mid-contraction (already moving), not before it starts — viewer should catch it already happening, which reads as 'I'm seeing something I shouldn't' rather than 'something is about to happen.'",
+  "pacing_plan": [
+    "Scene 1 (2s): no trim, hook stays tight.",
+    "Scene 2 (9s): trim to ~6-7s in final cut if the vault door is static after reveal; push remaining time into scene 3's corridor chase.",
+    "Scene 3 (8s): keep full duration, this carries the chase energy.",
+    "Scene 4 (8s): keep full duration; the guard's turn-and-freeze beat should land by the 2-3s mark of this scene, not at the very end.",
+    "Scene 5 (3s): no trim, abrupt cut to black on the empty pedestal."
+  ],
+  "subtitle_rewrite": [
+    "My piggy bank's coin slot just breathed.",
+    "In. Out.",
+    "A vault door. Dented. Alarm spinning.",
+    "Guards sprinting down a corridor.",
+    "One froze. Looked straight at the slot.",
+    "At me.",
+    "Lights went red.",
+    "Whatever they guarded is already gone.",
+    "What were they guarding?"
+  ],
+  "audio_emphasis_plan": [
+    "A soft inhale/exhale whoosh synced exactly to the slot's breathing motion in scene 1.",
+    "Alarm klaxon (low, distant, non-jarring) starting under scene 2's vault reveal.",
+    "Footsteps/scrambling texture under scene 3's corridor chase, cutting to dead silence the instant the guard freezes in scene 4.",
+    "A single heavy mechanical thud as lights cut to red at the start of scene 5."
+  ],
+  "retention_edit_instructions": [
+    "Once footage exists: ffmpeg trim scene 2 if vault door reveal arrives late, never re-cut scene 1.",
+    "Hold scene 4 on the guard's freeze frame as long as possible without exceeding 8s — this is the most shareable single frame.",
+    "Burn subtitles per timing above; keep 'At me.' isolated as its own short beat for maximum unease."
+  ],
+  "scene_retry_recommendation": "none (no footage generated yet)",
+  "final_approval_recommendation": "ready_for_live_generation_pending_human_approval"
+}

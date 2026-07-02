@@ -1,0 +1,17 @@
+.env
+*.key
+*.json
+# Pipeline metadata bundles are tracked deliverables (see CLAUDE.md key files).
+# Keep credentials protected via .env / *.key / credentials/ above.
+!outputs/metadata/*.json
+credentials/
+__pycache__/
+.venv/
+assets/raw_clips/
+assets/temp/
+assets/voice/
+outputs/final_videos/
+outputs/audio/
+outputs/previews/
+logs/
+.DS_Store

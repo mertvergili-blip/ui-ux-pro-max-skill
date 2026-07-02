@@ -1,0 +1,56 @@
+{
+  "video_id": "029",
+  "subtitle_timings": [
+    {
+      "start": 0.2,
+      "end": 2.6,
+      "text": "Something inside my lava lamp moved against gravity."
+    },
+    {
+      "start": 2.9,
+      "end": 4.1,
+      "text": "Lava doesn't do that."
+    },
+    {
+      "start": 4.4,
+      "end": 7.6,
+      "text": "A shape glided sideways through the wax."
+    },
+    {
+      "start": 7.9,
+      "end": 10.2,
+      "text": "It had a window. And a light."
+    },
+    {
+      "start": 10.5,
+      "end": 14.0,
+      "text": "A tiny submarine, drifting through a glowing ocean."
+    },
+    {
+      "start": 14.3,
+      "end": 18.5,
+      "text": "Something is sleeping on the ocean floor down there."
+    },
+    {
+      "start": 21.0,
+      "end": 24.5,
+      "text": "The submarine's light passed right over it."
+    },
+    {
+      "start": 24.8,
+      "end": 26.6,
+      "text": "It didn't wake up. Yet."
+    },
+    {
+      "start": 27.0,
+      "end": 29.8,
+      "text": "What do you think they found down there?"
+    }
+  ],
+  "ffmpeg_subtitle_filter": "subtitles=/home/user/ui-ux-pro-max-skill/the-small-door-automation/assets/subtitles/029.srt:force_style='FontName=Arial,FontSize=14,PrimaryColour=&HFFFFFF&,Alignment=2,MarginV=120'",
+  "render_settings": {
+    "resolution": "1080x1920",
+    "aspect_ratio": "9:16",
+    "target_duration_s": "25-35"
+  }
+}

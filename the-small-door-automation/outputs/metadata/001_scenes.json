@@ -1,0 +1,60 @@
+{
+  "video_id": "001",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "duration": 2,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no humans, no logos, no text, no brand packaging, no cartoon style, dark kitchen at 3AM, a refrigerator door swinging open, cold blue-white light spilling into the dark room",
+      "camera_motion": "slow push-in toward the opening fridge door",
+      "lighting": "cold blue-white fridge light against a near-black kitchen",
+      "mood": "quiet, curious, slightly eerie",
+      "details": "condensation on shelves, soft hum implied visually by light flicker",
+      "negative_prompt": "human face, real person, celebrity, brand logo, readable brand text, copyrighted character, cartoon, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs, scary horror, gore, violence",
+      "continuity_notes": "fridge interior layout must match scene 2; same cold light color temperature"
+    },
+    {
+      "scene_number": 2,
+      "duration": 6,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no humans, no logos, no text, no brand packaging, no cartoon style, close macro shot behind a plain glass milk bottle on a fridge shelf, a warm golden glow flickering between the shelf gaps",
+      "camera_motion": "slow rack focus from the milk bottle to the glow behind it",
+      "lighting": "transition from cold fridge light to a warm golden glow source",
+      "mood": "curious, anticipatory",
+      "details": "glass bottle condensation, shelf wire grid, glow growing slightly brighter",
+      "negative_prompt": "human face, real person, celebrity, brand logo, readable brand text, copyrighted character, cartoon, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs, scary horror, gore, violence",
+      "continuity_notes": "same fridge shelf and milk bottle from scene 1; glow color must match scene 3's station lanterns"
+    },
+    {
+      "scene_number": 3,
+      "duration": 14,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no humans, no logos, no text, no brand packaging, no cartoon style, a miniature train station built into a fridge shelf, tiny brass lanterns lining a small platform, a small steam train arriving with no driver and no passengers, soft steam rising",
+      "camera_motion": "slow lateral dolly along the platform, settling on the arriving train",
+      "lighting": "warm brass lantern glow, soft steam catching the light",
+      "mood": "wondrous, magical, hushed",
+      "details": "tiny cobblestone platform, miniature signage left blank (no readable text), brass fittings, soft steam wisps",
+      "negative_prompt": "human face, real person, celebrity, brand logo, readable brand text, copyrighted character, cartoon, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs, scary horror, gore, violence",
+      "continuity_notes": "same warm glow color as scene 2; station scale stays consistent with fridge shelf scale; train design carries into scene 4"
+    },
+    {
+      "scene_number": 4,
+      "duration": 5,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no humans, no logos, no text, no brand packaging, no cartoon style, a small paper ticket sliding out from the train's window onto the platform, soft engraved destination mark glowing faintly",
+      "camera_motion": "macro close-up, slow push-in on the sliding ticket",
+      "lighting": "warm lantern glow reflecting off the paper ticket",
+      "mood": "intimate, slightly uncanny",
+      "details": "paper texture, soft glowing ink, ticket edge curling slightly",
+      "negative_prompt": "human face, real person, celebrity, brand logo, readable brand text, copyrighted character, cartoon, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs, scary horror, gore, violence",
+      "continuity_notes": "same train and platform from scene 3; ticket glow color matches station lanterns"
+    },
+    {
+      "scene_number": 5,
+      "duration": 3,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no humans, no logos, no text, no brand packaging, no cartoon style, final close-up on the glowing ticket beside the waiting train, light at the edges of frame slowly dimming",
+      "camera_motion": "very slow pull-back, light vignette closing in",
+      "lighting": "warm glow dimming toward the dark fridge interior",
+      "mood": "suspenseful, inviting",
+      "details": "soft fade of background details, ticket remains the brightest point",
+      "negative_prompt": "human face, real person, celebrity, brand logo, readable brand text, copyrighted character, cartoon, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs, scary horror, gore, violence",
+      "continuity_notes": "final frame should feel like a held breath before the loop/end card; matches scene 4 lighting"
+    }
+  ]
+}

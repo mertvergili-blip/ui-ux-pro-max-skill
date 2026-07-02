@@ -1,0 +1,82 @@
+{
+  "title": "My toaster has a tiny bread boxing match inside",
+  "reference_note": "Rescripted from a user-provided reference comic (8-panel anthropomorphic bread boxing match). Updated again to finalize a 7-line censored trash-talk/punch voice flow (content/timing/censor-only update, no lines copied verbatim from any reference) on top of the existing visual-clarity-first scene direction. Priority remains WTF readability: viewer must understand 'bread slices are boxing inside a toaster' on sight, even with sound off.",
+  "voice_note": "Channel hard rule is no long voice-over / no narrator — these are short in-character barks (1-4 words to a short sentence), not narration, so they stay within that rule. No real human voice, no celebrity voice, no copyrighted/impersonated voice. Final replik flow below is finalized in content/timing/censor terms; the audio itself has NOT been generated yet (still pending an explicit --live ElevenLabs pass), and final mix will use the B-Cartoon post-process chain (see postprocess_voice_022.py FINAL_VARIANT).",
+  "script_lines": [
+    "I heard yelling from my toaster.",
+    "It wasn't making toast.",
+    "It was a fight.",
+    "Wheat bread was talking trash.",
+    "Then rye switched hands.",
+    "One punch.",
+    "White bread went down.",
+    "The toaster dinged.",
+    "Should I eat the winner?"
+  ],
+  "voice_lines": [
+    {"scene": 1, "speaker": "referee_crumb", "line": "Round one!", "tone": "small, sharp, energetic announcer bark"},
+    {"scene": 3, "speaker": "wheat_bread", "line": "You're burnt, rye.", "tone": "cocky, aggressive, short"},
+    {"scene": 3, "speaker": "dark_rye", "line": "Say that again.", "tone": "low, cold, deadpan, short"},
+    {"scene": 3, "speaker": "wheat_bread", "line": "I'll fuck you up, mate.", "tone": "shrill escalation, British bar-fight 'mate' energy; spoken uncensored in audio, caption rendered censored as \"I'll f*** you up, mate.\"", "censor_required": true},
+    {"scene": 4, "speaker": "dark_rye", "line": "Wrong toaster.", "tone": "calm, cold, near-whisper, pre-punch"},
+    {"scene": 4, "speaker": "crowd_crumbs", "line": "OHHH!", "tone": "crowd gasp/reaction, group ad-lib"},
+    {"scene": 5, "speaker": "dark_rye", "line": "Breakfast is over, bitch.", "tone": "calm, dry, triumphant; spoken uncensored in audio, caption rendered censored as \"Breakfast is over, b****.\"", "censor_required": true}
+  ],
+  "subtitle_timings": [
+    {"start": 0.2, "end": 2.8, "text": "I heard yelling\nfrom my toaster."},
+    {"start": 3.2, "end": 5.8, "text": "It wasn't making toast."},
+    {"start": 6.1, "end": 7.8, "text": "It was a fight."},
+    {"start": 8.2, "end": 10.0, "text": "“You're burnt, rye.”"},
+    {"start": 10.3, "end": 11.6, "text": "“Say that again.”"},
+    {"start": 11.8, "end": 14.5, "text": "“I'll f*** you up, mate.”"},
+    {"start": 15.0, "end": 17.5, "text": "“Wrong toaster.”"},
+    {"start": 18.0, "end": 20.0, "text": "ONE PUNCH."},
+    {"start": 20.3, "end": 22.5, "text": "White bread\nwent down."},
+    {"start": 22.8, "end": 25.5, "text": "The toaster dinged."},
+    {"start": 26.0, "end": 28.0, "text": "“Breakfast is over, b****.”"},
+    {"start": 28.2, "end": 29.8, "text": "Should I eat\nthe winner?"}
+  ],
+  "scene_breakdown": [
+    {
+      "scene": 1,
+      "label": "Hook",
+      "duration": 3,
+      "summary": "A toaster sits on a kitchen counter at night. It shakes slightly. Tiny yelling comes from inside. The lever trembles. Warm orange light leaks from the slots.",
+      "caption": "I heard yelling\nfrom my toaster.",
+      "audio": "crowd murmur + toaster hum + tiny voice line: referee_crumb \"Round one!\""
+    },
+    {
+      "scene": 2,
+      "label": "Reveal",
+      "duration": 5,
+      "summary": "Camera moves into the toaster slot. Inside, a clear tiny boxing ring is visible, made of toast crumbs and tiny ropes, with ring corners and posts clearly readable. A crumb crowd cheers around it.",
+      "caption": "It wasn't making toast. / It was a fight.",
+      "audio": "boxing bell + crowd volume rises"
+    },
+    {
+      "scene": 3,
+      "label": "Fighters",
+      "duration": 7,
+      "summary": "Two anthropomorphic bread-slice boxers stand inside the ring, clearly readable, circling each other: one light wheat/white bread with red gloves, one dark rye bread with blue gloves, both with expressive faces (eyes, eyebrows, mouth), small arms and legs, an original tiny referee character between them.",
+      "caption": "“You're burnt, rye.” / “Say that again.” / “I'll f*** you up, mate.”",
+      "audio": "wheat_bread: \"You're burnt, rye.\" / dark_rye: \"Say that again.\" / wheat_bread: \"I'll fuck you up, mate.\" (spoken uncensored in audio, shrill/aggressive; caption only is censored — no beep on this line) + crowd murmur under dialogue"
+    },
+    {
+      "scene": 4,
+      "label": "Turnaround punch",
+      "duration": 7,
+      "summary": "Dark rye bread suddenly switches stance and throws one clear, soft, readable punch. Wheat/white bread reacts dramatically and falls backward onto soft crumbs. No blood, no gore, playful surreal boxing beat.",
+      "caption": "“Wrong toaster.” / ONE PUNCH. / White bread went down.",
+      "audio": "dark_rye: \"Wrong toaster.\" (calm, cold, near-whisper) + boxing bell + soft punch thump + crowd_crumbs: \"OHHH!\" gasp"
+    },
+    {
+      "scene": 5,
+      "label": "Final",
+      "duration": 8,
+      "summary": "The toaster dings normally. The dark rye bread character pops out of the toaster wearing a tiny championship belt and boxing gloves, crumbs cheering from inside. The kitchen looks normal again.",
+      "caption": "The toaster dinged. / “Breakfast is over, b****.” / Should I eat the winner?",
+      "audio": "toaster ding + crowd cheer + dark_rye: \"Breakfast is over, bitch.\" (spoken uncensored in audio, calm/dry delivery; caption only is censored, no beep) + final magical hit/sparkle"
+    }
+  ],
+  "final_question": "Should I eat the winner?"
+}

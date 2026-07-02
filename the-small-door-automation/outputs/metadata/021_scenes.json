@@ -1,0 +1,60 @@
+{
+  "video_id": "021",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "duration": 2,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no logos, no text, no brand packaging, no cartoon style, Smoke detector chirps once at 3AM, single red LED.",
+      "camera_motion": "slow push-in, slight parallax",
+      "lighting": "warm practical light against dark ambient room",
+      "mood": "cozy, mysterious",
+      "details": "",
+      "negative_prompt": "real person, celebrity, recognizable face, famous character, copyrighted character, brand logo, readable brand text, horror, gore, violence, scary monster, cartoonish, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs",
+      "continuity_notes": ""
+    },
+    {
+      "scene_number": 2,
+      "duration": 9,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no logos, no text, no brand packaging, no cartoon style, Macro push into the detector vents; a faint countdown glow flickers behind the grille instead of a normal alarm beep.",
+      "camera_motion": "slow push-in, slight parallax",
+      "lighting": "warm practical light against dark ambient room",
+      "mood": "cozy, mysterious",
+      "details": "",
+      "negative_prompt": "real person, celebrity, recognizable face, famous character, copyrighted character, brand logo, readable brand text, horror, gore, violence, scary monster, cartoonish, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs",
+      "continuity_notes": ""
+    },
+    {
+      "scene_number": 3,
+      "duration": 8,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no logos, no text, no brand packaging, no cartoon style, Inside: a tiny windowed control room with a glowing number display ticking down, cables, a single chair facing the viewer.",
+      "camera_motion": "slow push-in, slight parallax",
+      "lighting": "warm practical light against dark ambient room",
+      "mood": "cozy, mysterious",
+      "details": "",
+      "negative_prompt": "real person, celebrity, recognizable face, famous character, copyrighted character, brand logo, readable brand text, horror, gore, violence, scary monster, cartoonish, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs",
+      "continuity_notes": ""
+    },
+    {
+      "scene_number": 4,
+      "duration": 8,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no logos, no text, no brand packaging, no cartoon style, an original tiny operator character inside the miniature control room, seen as a small cinematic silhouette, no recognizable face, no celebrity, no real person, no brand, no copyrighted character, warm dim control lights, mysterious but cozy magical realism, raises a hand, mouths a warning without sound",
+      "camera_motion": "slow push-in, slight parallax",
+      "lighting": "warm practical light against dark ambient room",
+      "mood": "cozy, mysterious",
+      "details": "",
+      "negative_prompt": "real person, celebrity, recognizable face, famous character, copyrighted character, brand logo, readable brand text, horror, gore, violence, scary monster, cartoonish, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs",
+      "continuity_notes": ""
+    },
+    {
+      "scene_number": 5,
+      "duration": 3,
+      "visual_prompt": "cinematic macro shot, miniature hidden world, cozy magical realism, dark room, warm tiny lights, soft shadows, shallow depth of field, realistic textures, no logos, no text, no brand packaging, no cartoon style, The countdown hits 1, every light inside cuts to black.",
+      "camera_motion": "slow push-in, slight parallax",
+      "lighting": "warm practical light against dark ambient room",
+      "mood": "cozy, mysterious",
+      "details": "",
+      "negative_prompt": "real person, celebrity, recognizable face, famous character, copyrighted character, brand logo, readable brand text, horror, gore, violence, scary monster, cartoonish, toy-like, childish colors, oversaturated, plastic look, distorted objects, unreadable subtitles, extra limbs",
+      "continuity_notes": ""
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "video_id": "001",
+  "subtitle_timings": [
+    {
+      "start": 0.0,
+      "end": 2.0,
+      "text": "I opened the fridge at 3AM."
+    },
+    {
+      "start": 2.0,
+      "end": 5.5,
+      "text": "Behind the milk, something was glowing."
+    },
+    {
+      "start": 5.5,
+      "end": 9.0,
+      "text": "It was a train station."
+    },
+    {
+      "start": 9.0,
+      "end": 11.0,
+      "text": "A very small one."
+    },
+    {
+      "start": 11.0,
+      "end": 16.0,
+      "text": "Then a train arrived."
+    },
+    {
+      "start": 16.0,
+      "end": 19.5,
+      "text": "No driver. No passengers."
+    },
+    {
+      "start": 19.5,
+      "end": 24.5,
+      "text": "The ticket had my name on it."
+    },
+    {
+      "start": 24.5,
+      "end": 28.0,
+      "text": "Last stop: Tomorrow."
+    },
+    {
+      "start": 28.0,
+      "end": 31.0,
+      "text": "Should I get on?"
+    }
+  ],
+  "ffmpeg_subtitle_filter": "subtitles=/home/user/ui-ux-pro-max-skill/the-small-door-automation/assets/subtitles/001.srt:force_style='FontName=Arial,FontSize=14,PrimaryColour=&HFFFFFF&,Alignment=2,MarginV=120'",
+  "render_settings": {
+    "resolution": "1080x1920",
+    "aspect_ratio": "9:16",
+    "target_duration_s": "25-35"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "video_id": "022",
+  "subtitle_timings": [
+    {
+      "start": 0.2,
+      "end": 2.8,
+      "text": "I heard cheering from the toaster."
+    },
+    {
+      "start": 3.2,
+      "end": 4.6,
+      "text": "It wasn't making toast."
+    },
+    {
+      "start": 4.9,
+      "end": 6.9,
+      "text": "It was a boxing match."
+    },
+    {
+      "start": 8.2,
+      "end": 10.5,
+      "text": "Wheat bread was winning."
+    },
+    {
+      "start": 11.8,
+      "end": 14.5,
+      "text": "Then dark rye switched hands."
+    },
+    {
+      "start": 15.3,
+      "end": 16.4,
+      "text": "One punch."
+    },
+    {
+      "start": 16.7,
+      "end": 18.8,
+      "text": "White bread went down."
+    },
+    {
+      "start": 22.3,
+      "end": 24.0,
+      "text": "The toaster dinged."
+    },
+    {
+      "start": 24.3,
+      "end": 26.5,
+      "text": "The winner came out."
+    },
+    {
+      "start": 26.8,
+      "end": 29.6,
+      "text": "Should I eat the winner?"
+    }
+  ],
+  "ffmpeg_subtitle_filter": "subtitles=/home/user/ui-ux-pro-max-skill/the-small-door-automation/assets/subtitles/022.srt:force_style='FontName=Arial,FontSize=14,PrimaryColour=&HFFFFFF&,Alignment=2,MarginV=120'",
+  "render_settings": {
+    "resolution": "1080x1920",
+    "aspect_ratio": "9:16",
+    "target_duration_s": "25-35"
+  }
+}

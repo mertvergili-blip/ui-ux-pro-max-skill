@@ -1,0 +1,491 @@
+{
+  "video_id": "042",
+  "title": "My phone battery doesn't die. It performs.",
+  "hook": "My phone hit 1%.",
+  "object": "smartphone",
+  "hidden_world": "1% battery opera theater inside the phone",
+  "style": "Character Chaos — adult-animation, self-aware, Version B",
+  "tone": "absurd-deadpan, short punchy lines, adult-animation energy, no childish filler",
+  "total_duration_seconds": 27,
+  "lip_sync_policy": {
+    "pipeline_supports_audio_driven_lipsync": false,
+    "current_approach": "prompt-based mouth movement — Kling does not support audio-driven lip-sync natively",
+    "requirement": "Every scene with dialogue must explicitly request visible mouth movement in the visual prompt",
+    "talking_rules": [
+      "talking character must face camera or 3/4 toward camera",
+      "mouth open/close animation during voice line — explicitly stated in prompt",
+      "no hidden mouth, no back-facing character during dialogue",
+      "no tiny distant talking character — medium or close-up required for dialogue scenes",
+      "visible mouth movement required on every dialogue beat"
+    ],
+    "future_plan": "If prompt-based mouth movement is insufficient after QC, add a lip-sync tool pass (e.g. LatentSync or SadTalker-style) between Kling output and voice mix — do not attempt live until this plan is approved"
+  },
+  "brand_safety": {
+    "audio_line": "Tell Spotify I loved her.",
+    "caption_line": "Tell Spotily I loved her.",
+    "visual_rule": "No real Spotify logo, no real app icons, no real phone UI (iOS/Android), no readable brand text anywhere in generated clips",
+    "app_icon_audience": "Generic colored square/circle characters with simple expressive faces — no real app resemblance",
+    "battery_icon": "Generic battery bar shape — do not render real iOS or Android 1% UI"
+  },
+  "characters": {
+    "battery": {
+      "name": "Battery",
+      "type": "1% battery icon — anthropomorphic",
+      "color": "pale faded yellow/white — solid opaque, NOT transparent, NOT glowing orb",
+      "face": "large expressive eyes, deep V-shaped suffering eyebrows, wide open mouth in theatrical aria pose",
+      "costume": "large flowing red opera cape, clearly visible and billowing",
+      "pose": "one hand pressed to forehead (anguish), other arm extended toward spotlight above",
+      "energy": "absolute commitment to the drama — no irony in delivery — tiny Pavarotti who hasn't eaten",
+      "voice": "tiny operatic cartoonish tenor, deliberate, each word a performance, slight reverb (theater hall effect), slight rasp on held notes",
+      "size_in_frame": "dominant — fills at least 50% of frame height in solo shots, 40% in two-shots"
+    },
+    "charger": {
+      "name": "Charger",
+      "type": "USB/lightning cable — anthropomorphic",
+      "color": "bright orange/yellow — strong contrast against pale battery",
+      "face": "large panicking eyes (whites showing), mouth open mid-shout, eyebrows raised in disbelief",
+      "costume": "cable body IS the costume — plug end = head/face, cable body = body",
+      "pose": "running in from stage right, arms (cable ends) outstretched toward battery",
+      "energy": "exhausted stage manager who has watched this happen 47 times, patience completely gone",
+      "voice": "fast, strained, going higher as panic increases, dry with no reverb — immediate and present",
+      "size_in_frame": "secondary — enters from edge, reaches medium prominence in confrontation scenes"
+    },
+    "audience": {
+      "name": "App Icon Audience",
+      "type": "generic colored square/circle characters with simple dot eyes and small mouths",
+      "color": "varied muted colors — no real app brand colors",
+      "rule": "NO real app logos, NO recognizable icons, NO text, NO brand resemblance",
+      "size_in_frame": "small, background only, fills depth of stage — expressive reactions but never dominant"
+    }
+  },
+  "script_lines": [
+    {
+      "id": 1,
+      "character": "none",
+      "line": "My phone hit 1%.",
+      "caption": "My phone hit 1%.",
+      "type": "hook"
+    },
+    {
+      "id": 2,
+      "character": "none",
+      "line": "It didn't ask to be charged.",
+      "caption": "It didn't ask\nto be charged.",
+      "type": "hook"
+    },
+    {
+      "id": 3,
+      "character": "none",
+      "line": "It asked for an audience.",
+      "caption": "It asked for\nan audience.",
+      "type": "reveal_setup"
+    },
+    {
+      "id": 4,
+      "character": "battery",
+      "line": "I gave everything.",
+      "caption": "I gave everything.",
+      "type": "monologue"
+    },
+    {
+      "id": 5,
+      "character": "battery",
+      "line": "Every percent. Every bar.",
+      "caption": "Every percent.\nEvery bar.",
+      "type": "monologue"
+    },
+    {
+      "id": 6,
+      "character": "battery",
+      "line": "Tell the WiFi... I tried.",
+      "caption": "Tell the WiFi...\nI tried.",
+      "type": "monologue"
+    },
+    {
+      "id": 7,
+      "character": "charger",
+      "line": "You're literally next to the outlet.",
+      "caption": "You're literally\nnext to the outlet.",
+      "type": "confrontation"
+    },
+    {
+      "id": 8,
+      "character": "battery",
+      "line": "I'm in the middle of something.",
+      "caption": "I'm in the middle\nof something.",
+      "type": "confrontation"
+    },
+    {
+      "id": 9,
+      "character": "charger",
+      "line": "You're at one percent.",
+      "caption": "You're at\nONE PERCENT.",
+      "type": "confrontation"
+    },
+    {
+      "id": 10,
+      "character": "battery",
+      "line": "Those are the same thing.",
+      "caption": "Those are\nthe same thing.",
+      "type": "punchline",
+      "caption_size": "large"
+    },
+    {
+      "id": 11,
+      "character": "battery",
+      "line": "Tell Spotify I loved her.",
+      "caption": "Tell Spotily\nI loved her.",
+      "type": "final_monologue",
+      "audio_note": "say 'Spotify' in audio",
+      "caption_note": "render as 'Spotily' in caption — no real brand in text"
+    },
+    {
+      "id": 12,
+      "character": "charger",
+      "line": "You were at one percent for six hours.",
+      "caption": "You've been at 1%\nfor six hours.",
+      "type": "final_confrontation"
+    },
+    {
+      "id": 13,
+      "character": "battery",
+      "line": "Then let me die dramatically.",
+      "caption": "Then let me die\ndramatically.",
+      "type": "final_line"
+    },
+    {
+      "id": 14,
+      "character": "none",
+      "line": "[phone dies — low battery chime]",
+      "caption": "",
+      "type": "button",
+      "sfx": "single original low-battery chime, NOT Apple/Samsung exact sound"
+    },
+    {
+      "id": 15,
+      "character": "none",
+      "line": "Should I charge it or let it have this?",
+      "caption": "Should I charge it\nor let it have this?",
+      "type": "final_question"
+    }
+  ],
+  "subtitle_timings": [
+    {
+      "time": "0:00-0:02",
+      "caption": "My phone hit 1%."
+    },
+    {
+      "time": "0:02-0:04",
+      "caption": "It didn't ask\nto be charged."
+    },
+    {
+      "time": "0:04-0:06",
+      "caption": "It asked for\nan audience."
+    },
+    {
+      "time": "0:06-0:08",
+      "caption": "I gave everything."
+    },
+    {
+      "time": "0:08-0:10",
+      "caption": "Every percent.\nEvery bar."
+    },
+    {
+      "time": "0:10-0:13",
+      "caption": "Tell the WiFi...\nI tried."
+    },
+    {
+      "time": "0:13-0:15",
+      "caption": "You're literally\nnext to the outlet."
+    },
+    {
+      "time": "0:15-0:17",
+      "caption": "I'm in the middle\nof something."
+    },
+    {
+      "time": "0:17-0:18",
+      "caption": "You're at\nONE PERCENT."
+    },
+    {
+      "time": "0:18-0:20",
+      "caption": "Those are\nthe same thing."
+    },
+    {
+      "time": "0:20-0:22",
+      "caption": "Tell Spotily\nI loved her."
+    },
+    {
+      "time": "0:22-0:24",
+      "caption": "You've been at 1%\nfor six hours."
+    },
+    {
+      "time": "0:24-0:25",
+      "caption": "Then let me die\ndramatically."
+    },
+    {
+      "time": "0:25-0:27",
+      "caption": "Should I charge it\nor let it have this?"
+    }
+  ],
+  "scene_breakdown": [
+    {
+      "scene_number": 1,
+      "name": "HOOK",
+      "duration": 3,
+      "timestamp": "0:00-0:03",
+      "visual_action": "Unbranded generic black smartphone sits on a surface. No real logos. Battery corner shows low/empty bar (no text, no real UI). Camera slowly pushes toward screen. Transition: screen becomes a stage curtain parting.",
+      "characters_visible": [
+        "none — exterior shot only"
+      ],
+      "voice_lines": [],
+      "captions": [
+        "My phone hit 1%.",
+        "It didn't ask\nto be charged."
+      ],
+      "sfx": "soft phone ambient hum + single low piano note",
+      "visual_clarity_note": "Phone must read as generic — no Apple/Samsung/brand markings. Battery indicator is visual only (depleted bar), not text-rendered by Kling. Camera push creates anticipation.",
+      "mouth_movement_required": false
+    },
+    {
+      "scene_number": 2,
+      "name": "REVEAL",
+      "duration": 5,
+      "timestamp": "0:03-0:08",
+      "visual_action": "Red velvet curtain parts revealing a small opera stage inside the phone. CENTER STAGE in spotlight: Battery character — pale white/faded yellow, large flowing RED opera cape, one hand pressed to forehead in anguish, other arm extended toward spotlight, large expressive suffering eyes, deep V eyebrows, mouth wide open in aria. Generic colored square/circle app icon audience visible in background — small, expressive reactions, no real logos. Wooden stage planks floor.",
+      "characters_visible": [
+        "battery (center, large, spotlight)",
+        "app_icon_audience (background, small)"
+      ],
+      "voice_lines": [
+        {
+          "character": "battery",
+          "line": "I gave everything.",
+          "mouth_note": "mouth wide open on 'everything', visible from medium shot"
+        },
+        {
+          "character": "battery",
+          "line": "Every percent. Every bar.",
+          "mouth_note": "staccato delivery, mouth opens and closes on each word"
+        }
+      ],
+      "captions": [
+        "It asked for\nan audience.",
+        "I gave everything.",
+        "Every percent.\nEvery bar."
+      ],
+      "sfx": "mini cartoonish orchestral swell (not real opera — cartoonish version) + tiny audience murmur",
+      "visual_clarity_note": "Battery must fill at least 50% of frame height. Opera cape RED and large — billowing. Face fully readable. App icon audience stays in background, darker, smaller. Spotlight must be visible as a cone of light. Stage wooden floor establishes world in one glance.",
+      "mouth_movement_required": true,
+      "mouth_movement_note": "Battery facing camera or 3/4 camera. Mouth open/close clearly visible during 'I gave everything' and 'Every percent. Every bar.' Must be readable at medium shot."
+    },
+    {
+      "scene_number": 3,
+      "name": "BUILD / CHARGER ENTERS",
+      "duration": 6,
+      "timestamp": "0:08-0:14",
+      "visual_action": "Battery continues monologue center stage — hand still to forehead, other arm reaching up to spotlight. STAGE RIGHT: Charger cable character RUNS IN — bright orange, plug end is face (large panicking eyes, mouth open mid-shout), cable body moving like legs, arms (cable ends) outstretched toward Battery. Battery does NOT look at Charger. Charger gets closer but Battery stays in performance mode.",
+      "characters_visible": [
+        "battery (center, dominant)",
+        "charger (entering from right, secondary)"
+      ],
+      "voice_lines": [
+        {
+          "character": "battery",
+          "line": "Tell the WiFi... I tried.",
+          "mouth_note": "slow dramatic delivery, mouth barely open on 'WiFi', full open on 'tried' — facing camera"
+        },
+        {
+          "character": "charger",
+          "line": "You're literally next to the outlet.",
+          "mouth_note": "fast panicked delivery, mouth wide open, plug face toward camera or 3/4"
+        }
+      ],
+      "captions": [
+        "Tell the WiFi...\nI tried.",
+        "You're literally\nnext to the outlet."
+      ],
+      "sfx": "charger running footsteps on stage floor + tiny audience gasp",
+      "visual_clarity_note": "Two characters must be clearly different: pale white battery vs bright orange charger. Battery large and central, charger smaller and approaching from side. Both face camera enough for mouth to be visible. Action: battery performing, charger panicking — two clear emotional states readable at once.",
+      "mouth_movement_required": true,
+      "mouth_movement_note": "BOTH characters must show visible mouth movement during their lines. Battery: slow, theatrical. Charger: fast, panicked. Neither character may have mouth clamped shut during their voice line."
+    },
+    {
+      "scene_number": 4,
+      "name": "CONFRONTATION / THE PUNCHLINE",
+      "duration": 7,
+      "timestamp": "0:14-0:21",
+      "visual_action": "Charger reaches Battery and grabs its arm. Battery pulls away slowly without breaking performance. MEDIUM TWO-SHOT. Charger POINTS off-stage left (toward 'the outlet') — exaggerated pointing gesture, face contorted with frustration, veins showing on cable. Battery, without opening eyes: 'I'm in the middle of something.' Charger: 'You're at ONE PERCENT.' Battery (still performing, eyes closed): 'Those are the same thing.' Charger holds own head with both cable-hands in total disbelief. App icon audience visible in background — leaning forward, shocked.",
+      "characters_visible": [
+        "battery (center, medium shot)",
+        "charger (medium shot, confrontation frame)"
+      ],
+      "voice_lines": [
+        {
+          "character": "battery",
+          "line": "I'm in the middle of something.",
+          "mouth_note": "deadpan, eyes still closed or barely open — but mouth visible and moving"
+        },
+        {
+          "character": "charger",
+          "line": "You're at one percent.",
+          "mouth_note": "cracking voice, mouth wide, plug face toward camera"
+        },
+        {
+          "character": "battery",
+          "line": "Those are the same thing.",
+          "mouth_note": "THE LINE — calm, eyes still closed, mouth barely moving — understated delivery is the joke. Mouth movement minimal but visible."
+        }
+      ],
+      "captions": [
+        "I'm in the middle\nof something.",
+        "You're at\nONE PERCENT.",
+        "Those are\nthe same thing."
+      ],
+      "caption_note": "'Those are the same thing.' rendered at larger font size — this is the key punchline",
+      "sfx": "tiny audience GASP on 'those are the same thing' + brief silence after the line",
+      "visual_clarity_note": "THIS IS THE KEY SCENE. The confrontation must be readable: charger points (gesture clear), battery ignores (body language clear). Both faces visible. 'Those are the same thing' must land in silence — brief SFX pause after the line. Charger's head-hold reaction must read as total defeat.",
+      "mouth_movement_required": true,
+      "mouth_movement_note": "All three lines require visible mouth movement on speaking character. Charger: face camera or 3/4. Battery: can be slightly profile but mouth movement still readable. NO line can be delivered with mouth fully closed."
+    },
+    {
+      "scene_number": 5,
+      "name": "COLLAPSE + BUTTON",
+      "duration": 6,
+      "timestamp": "0:21-0:27",
+      "visual_action": "Battery begins theatrical collapse — slow fall backwards, one arm still outstretched toward spotlight, red cape BILLOWING, spotlight tightens on falling battery. Battery whispers: 'Tell Spotify I loved her.' [audio says 'Spotify', caption shows 'Spotily']. Charger lunges to catch Battery — arms outstretched, horrified expression — but Battery falls anyway with full theatrical commitment. STAGE GOES DARK. Single clean low-battery chime sound. ONE BEAT OF SILENCE. Caption appears on black: 'Should I charge it or let it have this?'",
+      "characters_visible": [
+        "battery (falling, center, large)",
+        "charger (lunging, reactive)"
+      ],
+      "voice_lines": [
+        {
+          "character": "charger",
+          "line": "You've been at one percent for six hours.",
+          "mouth_note": "exhausted, defeated — quieter than before, plug face visible"
+        },
+        {
+          "character": "battery",
+          "line": "Then let me die dramatically.",
+          "mouth_note": "eyes closed, whisper delivery, mouth barely moving — but visible"
+        },
+        {
+          "character": "battery",
+          "line": "Tell Spotify I loved her.",
+          "mouth_note": "final whisper, slow, mouth gently opens and closes on each word",
+          "caption_override": "Tell Spotily\nI loved her.",
+          "audio_note": "say 'Spotify' in audio — caption shows 'Spotily'"
+        }
+      ],
+      "captions": [
+        "Tell Spotily\nI loved her.",
+        "Then let me die\ndramatically.",
+        "Should I charge it\nor let it have this?"
+      ],
+      "sfx": "cape billowing swoosh + soft stage thud as battery collapses + SINGLE ORIGINAL low-battery chime (NOT Apple/Samsung exact sound) + 0.5s complete silence + caption appears",
+      "visual_clarity_note": "Collapse must read as theatrical/funny — not sad or violent. Cape billowing = visual comedy. Charger's lunging arms = frustrated helplessness. Dark transition must happen AFTER collapse is fully visible — not during. Final caption on black for 2 seconds minimum.",
+      "mouth_movement_required": true,
+      "mouth_movement_note": "Battery's final lines are whispered — mouth movement subtle but visible on close shot. Charger's line delivered at medium shot facing camera."
+    }
+  ],
+  "sfx_plan": [
+    {
+      "scene": 1,
+      "sfx": "soft phone ambient hum + single low piano note",
+      "timing": "0:00"
+    },
+    {
+      "scene": 2,
+      "sfx": "mini cartoonish orchestral swell (original, not real opera recording)",
+      "timing": "0:03"
+    },
+    {
+      "scene": 2,
+      "sfx": "tiny audience murmur",
+      "timing": "0:04"
+    },
+    {
+      "scene": 3,
+      "sfx": "charger footsteps on stage floor",
+      "timing": "0:09"
+    },
+    {
+      "scene": 3,
+      "sfx": "tiny audience gasp",
+      "timing": "0:11"
+    },
+    {
+      "scene": 4,
+      "sfx": "audience gasp on punchline",
+      "timing": "0:19"
+    },
+    {
+      "scene": 4,
+      "sfx": "brief silence (0.4s) after 'those are the same thing'",
+      "timing": "0:20"
+    },
+    {
+      "scene": 5,
+      "sfx": "cape billowing swoosh",
+      "timing": "0:22"
+    },
+    {
+      "scene": 5,
+      "sfx": "soft stage thud",
+      "timing": "0:23"
+    },
+    {
+      "scene": 5,
+      "sfx": "single original low-battery chime — NOT Apple/Samsung",
+      "timing": "0:24"
+    },
+    {
+      "scene": 5,
+      "sfx": "0.5s complete silence",
+      "timing": "0:24.5"
+    }
+  ],
+  "production_risks": [
+    {
+      "risk": "Battery rendered transparent or as a glowing orb",
+      "severity": "high",
+      "fix": "Prompt must say: solid opaque pale faded yellow/white body, NOT transparent, NOT a glowing orb, NOT ethereal — solid character with visible mass"
+    },
+    {
+      "risk": "Opera cape too small to read",
+      "severity": "high",
+      "fix": "Prompt: large flowing red opera cape, occupies significant portion of character, clearly visible and billowing, cape larger than character torso"
+    },
+    {
+      "risk": "Charger rendered as just a cable with no face",
+      "severity": "high",
+      "fix": "Prompt: orange USB/lightning cable character, round face on the plug end, large round panicking eyes on plug face, mouth open on plug face, cable body acts as the body with arm extensions"
+    },
+    {
+      "risk": "App icon audience shows real logos (Spotify green, Netflix red, etc.)",
+      "severity": "high",
+      "fix": "Prompt: generic abstract colored square and circle characters, NO real app logos, NO brand colors, NO recognizable icons, NO text on any audience member, simple expressive dot eyes"
+    },
+    {
+      "risk": "Mouth movement invisible or mouth closed during dialogue",
+      "severity": "high",
+      "fix": "Every dialogue scene prompt must include: 'visible mouth open and closing during speech, character faces camera or 3/4 angle, mouth animation clearly readable from medium shot'"
+    },
+    {
+      "risk": "Real battery UI text rendered by Kling in scene 1",
+      "severity": "medium",
+      "fix": "Do NOT ask Kling to render '1%' text. Battery level communicated by near-empty bar shape only. Text added in post/caption if needed."
+    },
+    {
+      "risk": "Scene 5 dark transition obscures collapse action",
+      "severity": "medium",
+      "fix": "Prompt: lights fade to black ONLY after battery is visibly collapsed on stage floor — do not fade during the collapse action, cut to black cleanly after"
+    },
+    {
+      "risk": "Two characters too similar in color if Kling drifts",
+      "severity": "medium",
+      "fix": "Explicitly state: 'Battery = pale faded white/yellow. Charger = bright vivid orange. These two colors must never overlap or be confused. Strong chromatic contrast required.'"
+    }
+  ],
+  "output_file": "outputs/metadata/042_script.json",
+  "next_step": "scene-prompt-engineer — do not proceed without human approval of this script"
+}

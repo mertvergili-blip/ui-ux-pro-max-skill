@@ -1,0 +1,94 @@
+{
+  "title": "There is a tiny submarine exploring the ocean in my lava lamp",
+  "script_lines": [
+    "Something inside my lava lamp moved against gravity.",
+    "Lava doesn't do that.",
+    "A shape glided sideways through the wax.",
+    "It had a window. And a light.",
+    "A tiny submarine, drifting through a glowing ocean.",
+    "Something is sleeping on the ocean floor down there.",
+    "The submarine's light passed right over it.",
+    "It didn't wake up. Yet.",
+    "What do you think they found down there?"
+  ],
+  "subtitle_timings": [
+    {
+      "start": 0.2,
+      "end": 2.6,
+      "text": "Something inside my lava lamp moved against gravity."
+    },
+    {
+      "start": 2.9,
+      "end": 4.1,
+      "text": "Lava doesn't do that."
+    },
+    {
+      "start": 4.4,
+      "end": 7.6,
+      "text": "A shape glided sideways through the wax."
+    },
+    {
+      "start": 7.9,
+      "end": 10.2,
+      "text": "It had a window. And a light."
+    },
+    {
+      "start": 10.5,
+      "end": 14.0,
+      "text": "A tiny submarine, drifting through a glowing ocean."
+    },
+    {
+      "start": 14.3,
+      "end": 18.5,
+      "text": "Something is sleeping on the ocean floor down there."
+    },
+    {
+      "start": 21.0,
+      "end": 24.5,
+      "text": "The submarine's light passed right over it."
+    },
+    {
+      "start": 24.8,
+      "end": 26.6,
+      "text": "It didn't wake up. Yet."
+    },
+    {
+      "start": 27.0,
+      "end": 29.8,
+      "text": "What do you think they found down there?"
+    }
+  ],
+  "scene_breakdown": [
+    {
+      "scene": 1,
+      "label": "Hook",
+      "duration": 2,
+      "summary": "Macro shot of a lava lamp, a single wax blob breaks formation and drifts sideways against the rising current, unnaturally deliberate."
+    },
+    {
+      "scene": 2,
+      "label": "Wrongness",
+      "duration": 9,
+      "summary": "Push closer into the glowing wax; a small metallic shape with a lit porthole window becomes visible, moving steadily through the liquid like it's navigating."
+    },
+    {
+      "scene": 3,
+      "label": "Reveal",
+      "duration": 8,
+      "summary": "A tiny submarine drifts through a glowing bioluminescent ocean inside the lamp, its headlight beam cutting through suspended glowing particles, miniature coral-like wax formations passing by."
+    },
+    {
+      "scene": 4,
+      "label": "Twist",
+      "duration": 8,
+      "summary": "the submarine's headlight beam sweeps across a large dormant shape resting on the glass floor of the lamp, seen only as a vast cinematic silhouette, no recognizable creature design, no real animal, no copyrighted character, warm glowing light, mysterious but cozy magical realism, the shape does not move"
+    },
+    {
+      "scene": 5,
+      "label": "Cliffhanger",
+      "duration": 3,
+      "summary": "The submarine's light flickers once over the dormant shape, then the lamp's glow dims to a single point of light before fading to black."
+    }
+  ],
+  "final_question": "What do you think they found down there?"
+}

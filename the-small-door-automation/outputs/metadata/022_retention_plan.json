@@ -1,0 +1,41 @@
+{
+  "video_id": "022",
+  "stage": "pre_production_plan",
+  "note": "No footage exists yet (no Kling generation run). This is a planning-stage retention pass on the script/scene breakdown, to be re-run by viral-retention-editor against real footage after QC passes.",
+  "weak_points": [
+    "Scene 3 (8s) risks lingering on the ring wide-shot without a new visual beat if Kling doesn't vary the camera; plan a mid-scene push-in at ~4s to keep it alive.",
+    "The knockout (scene 4) needs to read clearly in silhouette in one beat, not buried in the middle of an 8s clip."
+  ],
+  "stronger_hook": "Keep the belt-pop as frame 1, but make sure the belt is already glinting/catching light in the very first frame (no slow fade-in) so the 'wait, what is that' lands inside 1 second.",
+  "pacing_plan": [
+    "Scene 1 (2s): no trim, this is the hook — must stay sharp and short.",
+    "Scene 2 (9s): if Kling delivers a static hold after the initial push-in, trim to ~6-7s in final cut once footage exists; reserve the extra seconds for scene 3.",
+    "Scene 3 (8s): keep full duration; this is the main reveal and crowd/ring payoff.",
+    "Scene 4 (8s): keep full duration for the knockout silhouette beat, ensure referee gesture reads within the first 2s of the scene.",
+    "Scene 5 (3s): no trim, fast cliffhanger pull-out."
+  ],
+  "subtitle_rewrite": [
+    "My toaster popped out a championship belt.",
+    "Not toast. A belt.",
+    "A boxing ring. Coin-sized.",
+    "Two slices, gloved up.",
+    "Crumbs in the stands, cheering.",
+    "Round two.",
+    "One goes down.",
+    "The toaster dings like nothing happened.",
+    "White or wheat — who wins?"
+  ],
+  "audio_emphasis_plan": [
+    "Bell ding sound timed exactly to the belt appearing in scene 1.",
+    "Crowd-crumb murmur swelling under scene 3.",
+    "Sharp bell + tiny crowd roar at the knockout moment in scene 4.",
+    "Hard cut to normal toaster 'ding' sound at the very start of scene 5 — the everyday sound should feel jarring after the tiny chaos."
+  ],
+  "retention_edit_instructions": [
+    "Once footage exists: ffmpeg trim scene 2 to first usable 6-7s if it goes static, never re-cut scene 1 or scene 4.",
+    "Burn subtitles per timing above, each line under ~1.5s read time.",
+    "No reordering needed — hook/discovery/reveal/twist/question order is already optimal."
+  ],
+  "scene_retry_recommendation": "none (no footage generated yet)",
+  "final_approval_recommendation": "ready_for_live_generation_pending_human_approval"
+}

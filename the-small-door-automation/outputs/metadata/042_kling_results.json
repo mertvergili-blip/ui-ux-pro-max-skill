@@ -1,0 +1,50 @@
+{
+  "video_id": "042",
+  "results": [
+    {
+      "scene_number": 1,
+      "attempt": 1,
+      "status": "success",
+      "output_file": "assets/raw_clips/042/scene_01.mp4",
+      "task_id": "901313759049416707",
+      "planned_duration": 3,
+      "generated_duration": "5"
+    },
+    {
+      "scene_number": 2,
+      "attempt": 1,
+      "status": "success",
+      "output_file": "assets/raw_clips/042/scene_02.mp4",
+      "task_id": "901315158067912759",
+      "planned_duration": 5,
+      "generated_duration": "5"
+    },
+    {
+      "scene_number": 3,
+      "attempt": 1,
+      "status": "success",
+      "output_file": "assets/raw_clips/042/scene_03.mp4",
+      "task_id": "901316622651760726",
+      "planned_duration": 6,
+      "generated_duration": "10"
+    },
+    {
+      "scene_number": 4,
+      "attempt": 1,
+      "status": "success",
+      "output_file": "assets/raw_clips/042/scene_04.mp4",
+      "task_id": "901317251792502792",
+      "planned_duration": 7,
+      "generated_duration": "10"
+    },
+    {
+      "scene_number": 5,
+      "attempt": 1,
+      "status": "success",
+      "output_file": "assets/raw_clips/042/scene_05.mp4",
+      "task_id": "901318741958074372",
+      "planned_duration": 6,
+      "generated_duration": "10"
+    }
+  ]
+}
