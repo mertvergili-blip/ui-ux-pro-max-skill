@@ -4,7 +4,6 @@ import { useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useStore } from "@/lib/store";
-import { HeroSceneGate } from "./hero-scene-gate";
 import { EntranceMonogram } from "./entrance-monogram";
 
 const LiquidEther = dynamic(() => import("@/components/vendor/LiquidEther"), {
@@ -70,8 +69,6 @@ export function IntroScreen() {
                 "radial-gradient(ellipse 900px 700px at 72% 50%, rgba(196,164,105,0.05), transparent 60%)",
             }}
           />
-
-          <HeroSceneGate />
 
           <div
             className="pointer-events-none absolute inset-0"
