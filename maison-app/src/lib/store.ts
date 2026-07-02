@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { localClassify, type SuggestionType } from "./classify";
+import { dbStorage } from "./db-storage";
 
 export type { SuggestionType };
 
@@ -453,7 +454,7 @@ export const useStore = create<MaisonStore>()(
     }),
     {
       name: "maison-storage",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => dbStorage),
       partialize: (s) => ({
         tasks: s.tasks,
         notes: s.notes,
