@@ -6,11 +6,20 @@ let schemaEnsured: Promise<void> | null = null;
 
 // Lazy singleton, mirrors the getGeminiClient() pattern — avoids opening a
 // connection at module load for routes that never touch the DB.
+//
+// Uses the direct (non-pooled) connection rather than Supabase's PgBouncer
+// pooler: this app does one query per request from a single user, so
+// pooling buys nothing, while PgBouncer's transaction-mode pooling
+// actively breaks postgres.js's prepared statements — every query can land
+// on a different backend connection, which intermittently corrupted writes
+// (a JSON object would get double-encoded as a string) until this was
+// switched. `prepare: false` is kept as a second line of defense in case
+// this ever falls back to the pooled URL.
 function getClient() {
   if (!client) {
-    const url = process.env.POSTGRES_URL;
-    if (!url) throw new Error("POSTGRES_URL is not set");
-    client = postgres(url, { max: 1 });
+    const url = process.env.POSTGRES_URL_NON_POOLING ?? process.env.POSTGRES_URL;
+    if (!url) throw new Error("POSTGRES_URL_NON_POOLING is not set");
+    client = postgres(url, { max: 1, prepare: false });
   }
   return client;
 }
@@ -42,7 +51,18 @@ export async function loadAppState(): Promise<unknown | null> {
   await ready();
   const sql = getClient();
   const rows = await sql`SELECT data FROM app_state WHERE id = 'default'`;
-  return rows[0]?.data ?? null;
+  const data = rows[0]?.data ?? null;
+  // Self-heal rows written while the pooler bug above was still live —
+  // those got double-encoded (a JSON object stored as its own string
+  // representation instead of as an object).
+  if (typeof data === "string") {
+    try {
+      return JSON.parse(data);
+    } catch {
+      return null;
+    }
+  }
+  return data;
 }
 
 export async function saveAppState(data: unknown): Promise<void> {
