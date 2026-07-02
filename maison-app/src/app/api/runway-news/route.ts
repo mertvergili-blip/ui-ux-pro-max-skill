@@ -31,6 +31,18 @@ interface RawFeedItem {
   description?: string;
 }
 
+// fast-xml-parser leaves CDATA fields as { __cdata: string } rather than
+// auto-unwrapping them to a plain string (inconsistently — title usually
+// comes through as a string, description usually doesn't), so every field
+// needs to handle both shapes.
+function textOf(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object" && "__cdata" in value) {
+    return String((value as { __cdata: unknown }).__cdata);
+  }
+  return "";
+}
+
 async function fetchWwdItems(): Promise<RawFeedItem[]> {
   const res = await fetch(FEED_URL, {
     headers: { "User-Agent": "Mozilla/5.0 (compatible; MaisonApp/1.0)" },
@@ -43,11 +55,14 @@ async function fetchWwdItems(): Promise<RawFeedItem[]> {
   const rawItems = parsed?.rss?.channel?.item;
   const list = Array.isArray(rawItems) ? rawItems : rawItems ? [rawItems] : [];
 
-  return list.slice(0, 8).map((item) => ({
-    title: String(item.title ?? "").trim(),
-    link: String(item.link ?? "").trim(),
-    description: item.description ? String(item.description).replace(/<[^>]+>/g, "").trim() : undefined,
-  }));
+  return list.slice(0, 8).map((item) => {
+    const description = textOf(item.description).replace(/<[^>]+>/g, "").trim();
+    return {
+      title: textOf(item.title).trim(),
+      link: textOf(item.link).trim(),
+      description: description || undefined,
+    };
+  });
 }
 
 async function summarizeWithGemini(items: RawFeedItem[]): Promise<RunwayNewsItem[]> {
