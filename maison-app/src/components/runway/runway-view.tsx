@@ -1,48 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { LOCAL_RUNWAY_NEWS, RUNWAY_TAG_COLOR, type RunwayNewsItem } from "@/lib/runway-news";
 
-const NEWS = [
-  {
-    tag: "Runway · Bugün",
-    title: "Maison Margiela, SS26 koleksiyonunu sundu",
-    sub: "Deconstructed tailoring ve ham kenar detayları öne çıktı.",
-    color: "var(--color-gold)",
-    large: true,
-  },
-  {
-    tag: "Trend Renk",
-    title: "Sezonun rengi: Terracotta Rosé",
-    color: "var(--color-rose)",
-  },
-  {
-    tag: "Beklenti",
-    title: "2027 için sivri omuz siluetleri geri dönüyor",
-    color: "var(--color-blue)",
-  },
-  {
-    tag: "Materyal",
-    title: "Geri dönüştürülmüş deri kullanımı %30 arttı",
-    color: "var(--color-sage)",
-  },
-];
-
-function NewsCard({
-  tag,
-  title,
-  sub,
-  color,
-  large,
-}: {
-  tag: string;
-  title: string;
-  sub?: string;
-  color: string;
-  large?: boolean;
-}) {
+function NewsCard({ tag, title, sub, link, large }: RunwayNewsItem) {
+  const color = RUNWAY_TAG_COLOR[tag];
+  const Wrapper = link ? "a" : "div";
   return (
-    <div
-      className={`group cursor-pointer overflow-hidden rounded border border-line transition-all duration-300 hover:-translate-y-0.5 ${
+    <Wrapper
+      {...(link ? { href: link, target: "_blank", rel: "noopener noreferrer" } : {})}
+      className={`group block cursor-pointer overflow-hidden rounded border border-line transition-all duration-300 hover:-translate-y-0.5 ${
         large ? "col-span-2" : ""
       }`}
       style={
@@ -84,11 +52,37 @@ function NewsCard({
       </p>
       {sub && <p className="mx-4 mb-4 text-xs text-muted">{sub}</p>}
       {!sub && <div className="mb-4" />}
-    </div>
+    </Wrapper>
   );
 }
 
 export function RunwayView() {
+  const [news, setNews] = useState<RunwayNewsItem[]>(LOCAL_RUNWAY_NEWS);
+  const [live, setLive] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchNews = async () => {
+      try {
+        const res = await fetch("/api/runway-news");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && Array.isArray(data.items) && data.items.length > 0) {
+          setNews(data.items);
+          setLive(data.source === "gemini");
+        }
+      } catch {
+        // local fallback already showing
+      }
+    };
+
+    fetchNews();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -104,12 +98,13 @@ export function RunwayView() {
         Bugünün moda özeti.
       </h1>
       <p className="mb-7 max-w-[380px] text-[13.5px] leading-relaxed text-bone-dim">
-        Örnek/temsili içerik — gerçek üründe gerçek zamanlı haber kaynaklarından
-        beslenip AI tarafından özetlenecek.
+        {live
+          ? "WWD'den gerçek zamanlı haberler, AI tarafından Türkçe'ye çevrilip özetlendi."
+          : "Bağlantı kurulamadı — örnek içerik gösteriliyor."}
       </p>
 
       <div className="mr-5 grid grid-cols-2 gap-[18px]">
-        {NEWS.map((n, i) => (
+        {news.map((n, i) => (
           <NewsCard key={i} {...n} />
         ))}
       </div>
