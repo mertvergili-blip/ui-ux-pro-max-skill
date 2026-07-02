@@ -10,6 +10,7 @@ const VIEW_CAPTIONS: Record<ViewName, [string, string]> = {
   path: ["Journey", "Creative Director yolu"],
   journal: ["Reflection", "Bugünkü ruh hali"],
   runway: ["Runway Intel", "Bugünün moda özeti"],
+  dna: ["Identity", "Yaratıcı DNA haritası"],
 };
 
 export function ImagePanel() {

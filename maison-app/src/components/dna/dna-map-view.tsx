@@ -1,0 +1,246 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { animate, stagger } from "animejs";
+import {
+  DNA_CATEGORY_META,
+  DNA_EDGES,
+  DNA_NODES,
+  type DnaCategory,
+} from "@/lib/dna-data";
+import { layoutDnaGraph, type LaidOutNode } from "@/lib/dna-layout";
+
+const WIDTH = 900;
+const HEIGHT = 560;
+
+function degreeOf(nodeId: string): number {
+  return DNA_EDGES.filter((e) => e.from === nodeId || e.to === nodeId).length;
+}
+
+export function DnaMapView() {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [activeCategory, setActiveCategory] = useState<DnaCategory | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const laidOut = useMemo<LaidOutNode[]>(
+    () => layoutDnaGraph(DNA_NODES, DNA_EDGES, WIDTH, HEIGHT),
+    []
+  );
+  const byId = useMemo(() => new Map(laidOut.map((n) => [n.id, n])), [laidOut]);
+
+  const connectedIds = useMemo(() => {
+    if (!selectedId) return null;
+    const ids = new Set<string>([selectedId]);
+    for (const e of DNA_EDGES) {
+      if (e.from === selectedId) ids.add(e.to);
+      if (e.to === selectedId) ids.add(e.from);
+    }
+    return ids;
+  }, [selectedId]);
+
+  const selectedNode = selectedId ? byId.get(selectedId) : null;
+
+  useEffect(() => {
+    if (!svgRef.current) return;
+    const nodeEls = svgRef.current.querySelectorAll("[data-node]");
+    const edgeEls = svgRef.current.querySelectorAll("[data-edge]");
+
+    animate(edgeEls, {
+      strokeDashoffset: [1, 0],
+      opacity: [0, 1],
+      duration: 900,
+      delay: stagger(12),
+      ease: "outSine",
+    });
+
+    animate(nodeEls, {
+      scale: [0, 1],
+      opacity: [0, 1],
+      duration: 600,
+      delay: stagger(18, { start: 300 }),
+      ease: "outElastic(1, .6)",
+    });
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
+      className="pr-14"
+    >
+      <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
+        <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
+        Reference DNA Map
+      </p>
+      <h1 className="mb-2 font-heading text-[34px] font-normal leading-[1.12] text-[#f7f2e6]">
+        Yaratıcı kimliğini zaman içinde gör.
+      </h1>
+      <p className="mb-7 max-w-[460px] text-[13.5px] leading-relaxed text-bone-dim">
+        Moodboard değil — koleksiyonlarını besleyen tasarımcı, renk, form,
+        doku, dönem ve zanaat referanslarının birbirine nasıl bağlandığını
+        gösteren bir harita.
+      </p>
+
+      <div className="mb-6 flex flex-wrap gap-1.5">
+        {(Object.keys(DNA_CATEGORY_META) as DnaCategory[]).map((cat) => {
+          const meta = DNA_CATEGORY_META[cat];
+          const active = activeCategory === cat;
+          return (
+            <button
+              key={cat}
+              onClick={() => {
+                setActiveCategory(active ? null : cat);
+                setSelectedId(null);
+              }}
+              className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[9.5px] uppercase tracking-[1.5px] transition-colors duration-250"
+              style={{
+                borderColor: active ? meta.color : "rgba(255,255,255,0.08)",
+                color: active ? meta.color : "var(--color-muted)",
+                background: active ? "rgba(255,255,255,0.03)" : "transparent",
+              }}
+            >
+              <span
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ background: meta.color }}
+              />
+              {meta.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="flex gap-8">
+        <div className="rounded-[1.5rem] bg-white/[0.02] p-1.5 ring-1 ring-white/[0.06]">
+          <div className="rounded-[1.15rem] bg-black/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
+            <svg
+              ref={svgRef}
+              viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+              className="h-[460px] w-[620px]"
+            >
+              {DNA_EDGES.map((e, i) => {
+                const a = byId.get(e.from);
+                const b = byId.get(e.to);
+                if (!a || !b) return null;
+                const dim =
+                  (activeCategory &&
+                    a.category !== activeCategory &&
+                    b.category !== activeCategory) ||
+                  (connectedIds && !(connectedIds.has(e.from) && connectedIds.has(e.to)));
+                return (
+                  <line
+                    key={i}
+                    data-edge
+                    x1={a.x}
+                    y1={a.y}
+                    x2={b.x}
+                    y2={b.y}
+                    stroke="var(--color-bone-dim)"
+                    strokeWidth={1}
+                    strokeOpacity={dim ? 0.06 : 0.22}
+                    pathLength={1}
+                    strokeDasharray={1}
+                    style={{ transition: "stroke-opacity 0.4s ease" }}
+                  />
+                );
+              })}
+
+              {laidOut.map((n) => {
+                const meta = DNA_CATEGORY_META[n.category];
+                const dim =
+                  (activeCategory && n.category !== activeCategory) ||
+                  (connectedIds && !connectedIds.has(n.id));
+                const r = n.category === "collection" ? 9 : 5 + degreeOf(n.id) * 0.6;
+                return (
+                  <g
+                    key={n.id}
+                    data-node
+                    className="cursor-pointer"
+                    onClick={() =>
+                      setSelectedId((cur) => (cur === n.id ? null : n.id))
+                    }
+                    style={{ transformOrigin: `${n.x}px ${n.y}px` }}
+                  >
+                    <circle
+                      cx={n.x}
+                      cy={n.y}
+                      r={r}
+                      fill={meta.color}
+                      opacity={dim ? 0.18 : selectedId === n.id ? 1 : 0.75}
+                      style={{ transition: "opacity 0.3s ease" }}
+                    />
+                    <text
+                      x={n.x}
+                      y={n.y - r - 7}
+                      textAnchor="middle"
+                      fontSize={n.category === "collection" ? 10.5 : 9}
+                      fill={dim ? "transparent" : "var(--color-bone-dim)"}
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        transition: "fill 0.3s ease",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      {n.label}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+        </div>
+
+        <div className="w-[220px] flex-shrink-0 pt-2">
+          {selectedNode ? (
+            <motion.div
+              key={selectedNode.id}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <p
+                className="mb-2 text-[9.5px] uppercase tracking-[2.5px]"
+                style={{ color: DNA_CATEGORY_META[selectedNode.category].color }}
+              >
+                {DNA_CATEGORY_META[selectedNode.category].label}
+              </p>
+              <p className="mb-1 font-heading text-lg text-bone">
+                {selectedNode.label}
+              </p>
+              {selectedNode.note && (
+                <p className="mb-4 text-xs text-muted">{selectedNode.note}</p>
+              )}
+              <p className="mb-2 text-[9.5px] uppercase tracking-[2.5px] text-muted">
+                Bağlantılar
+              </p>
+              <div className="flex flex-col gap-1.5">
+                {DNA_EDGES.filter(
+                  (e) => e.from === selectedNode.id || e.to === selectedNode.id
+                ).map((e, i) => {
+                  const otherId = e.from === selectedNode.id ? e.to : e.from;
+                  const other = byId.get(otherId);
+                  if (!other) return null;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedId(other.id)}
+                      className="text-left text-[12.5px] text-bone-dim transition-colors hover:text-bone"
+                    >
+                      {other.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          ) : (
+            <p className="text-[12.5px] leading-relaxed text-muted">
+              Bir düğüme tıkla — bağlantılarını gör. Yukarıdaki etiketlerle
+              kategoriye göre filtrele.
+            </p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}

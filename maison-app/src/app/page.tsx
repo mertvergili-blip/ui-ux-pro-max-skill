@@ -14,6 +14,7 @@ import { CalendarView } from "@/components/calendar/calendar-view";
 import { PathView } from "@/components/path/path-view";
 import { JournalView } from "@/components/journal/journal-view";
 import { RunwayView } from "@/components/runway/runway-view";
+import { DnaMapView } from "@/components/dna/dna-map-view";
 
 const VIEW_MAP = {
   studio: StudioView,
@@ -22,6 +23,7 @@ const VIEW_MAP = {
   path: PathView,
   journal: JournalView,
   runway: RunwayView,
+  dna: DnaMapView,
 } as const;
 
 export default function Home() {

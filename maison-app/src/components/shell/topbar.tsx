@@ -7,6 +7,7 @@ const TABS: { label: string; view: ViewName }[] = [
   { label: "Studio", view: "studio" },
   { label: "Calendar", view: "calendar" },
   { label: "Collections", view: "collections" },
+  { label: "DNA Map", view: "dna" },
   { label: "Path", view: "path" },
   { label: "Journal", view: "journal" },
   { label: "Runway", view: "runway" },

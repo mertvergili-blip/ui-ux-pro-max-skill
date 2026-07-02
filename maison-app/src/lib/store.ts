@@ -9,7 +9,8 @@ export type ViewName =
   | "collections"
   | "path"
   | "journal"
-  | "runway";
+  | "runway"
+  | "dna";
 
 export type MoodKey = "flowing" | "calm" | "stressed" | "grounded" | "tired";
 
