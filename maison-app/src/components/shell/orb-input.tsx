@@ -7,9 +7,10 @@ interface OrbInputProps {
   onChange: (value: string) => void;
   placeholder?: string;
   active: boolean;
+  loading?: boolean;
 }
 
-export function OrbInput({ value, onChange, placeholder, active }: OrbInputProps) {
+export function OrbInput({ value, onChange, placeholder, active, loading }: OrbInputProps) {
   return (
     <div className="flex flex-col items-center">
       <div className="relative mb-8 flex h-28 w-28 items-center justify-center">
@@ -20,10 +21,14 @@ export function OrbInput({ value, onChange, placeholder, active }: OrbInputProps
               "radial-gradient(circle at 35% 30%, rgba(231,201,143,0.9), rgba(122,90,36,0.5) 55%, transparent 75%)",
           }}
           animate={{
-            scale: active ? [1, 1.08, 1] : [1, 1.02, 1],
-            opacity: active ? [0.9, 1, 0.9] : [0.55, 0.7, 0.55],
+            scale: loading ? [1, 1.14, 1] : active ? [1, 1.08, 1] : [1, 1.02, 1],
+            opacity: loading ? [0.85, 1, 0.85] : active ? [0.9, 1, 0.9] : [0.55, 0.7, 0.55],
           }}
-          transition={{ duration: active ? 2.2 : 3.6, repeat: Infinity, ease: "easeInOut" }}
+          transition={{
+            duration: loading ? 1 : active ? 2.2 : 3.6,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
         />
         <motion.div
           className="absolute inset-0 rounded-full border border-gold/40"

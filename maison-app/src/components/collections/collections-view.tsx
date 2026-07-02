@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { localNoteInsight } from "@/lib/note-insight";
 
 interface FolderData {
   name: string;
@@ -205,10 +206,22 @@ function ProjectDetail({
     if (noteTimer.current) clearTimeout(noteTimer.current);
     const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
     if (wordCount < 3) return;
-    noteTimer.current = setTimeout(() => {
-      typeText(
-        `Not aldım — bunu "${folder.name}" için 'Konsept Notları' altında kategorize ettim. İstersen bir hatırlatma da ekleyeyim.`
-      );
+    noteTimer.current = setTimeout(async () => {
+      let insight = localNoteInsight(folder.name);
+      try {
+        const res = await fetch("/api/note-insight", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ projectName: folder.name, notes: text }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.insight) insight = data.insight;
+        }
+      } catch {
+        // local insight already set above
+      }
+      typeText(insight);
     }, 1400);
   };
 

@@ -32,6 +32,7 @@ export function AiStudioPanel() {
   const aiPanelOpen = useStore((s) => s.aiPanelOpen);
   const toggleAiPanel = useStore((s) => s.toggleAiPanel);
   const pendingSuggestion = useStore((s) => s.pendingSuggestion);
+  const suggestionLoading = useStore((s) => s.suggestionLoading);
   const proposeSuggestion = useStore((s) => s.proposeSuggestion);
   const updatePendingContent = useStore((s) => s.updatePendingContent);
   const confirmSuggestion = useStore((s) => s.confirmSuggestion);
@@ -125,9 +126,21 @@ export function AiStudioPanel() {
                 onChange={setInput}
                 placeholder="Bugünü anlat…"
                 active={Boolean(input.trim())}
+                loading={suggestionLoading}
               />
 
               <AnimatePresence mode="wait">
+                {suggestionLoading && !pendingSuggestion && (
+                  <motion.p
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="mt-8 text-[11px] uppercase tracking-[2px] text-muted"
+                  >
+                    düşünüyor…
+                  </motion.p>
+                )}
                 {pendingSuggestion && (
                   <motion.div
                     key="suggestion"

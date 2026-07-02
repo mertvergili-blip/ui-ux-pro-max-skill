@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { useStore, selectTodayEntry, type MoodKey } from "@/lib/store";
+import { useStore, selectTodayEntry, type MoodKey, type JournalDay } from "@/lib/store";
+import { localEditorLetter } from "@/lib/journal-letter";
 
 const MOODS: { key: MoodKey; label: string; gradient: string; color: string }[] = [
   { key: "flowing", label: "Flowing", gradient: "radial-gradient(circle at 35% 30%, #e7c98f, #7a5a24)", color: "#c4a469" },
@@ -53,17 +54,37 @@ export function JournalView() {
     });
   }, [journalEntries]);
 
-  const editorLetter = useMemo(() => {
-    const moods = journalEntries.slice(-7).map((e) => e.mood).filter(Boolean);
-    if (moods.length === 0) {
-      return "Bu hafta henüz bir ritim oluşmadı — ilk yansımanı bırak, buradan bir özet çıkarayım.";
-    }
-    const dominant = moods.sort(
-      (a, b) =>
-        moods.filter((m) => m === b).length - moods.filter((m) => m === a).length
-    )[0];
-    return `Bu hafta genel tonun "${dominant}" idi. ${moods.length} gün not düştün — bu ritmi korumak koleksiyon III için sağlam bir zemin.`;
-  }, [journalEntries]);
+  const last7 = useMemo(() => journalEntries.slice(-7), [journalEntries]);
+  const last7Key = useMemo(() => JSON.stringify(last7), [last7]);
+  const localLetter = useMemo(() => localEditorLetter(last7), [last7]);
+
+  // Shows the instant local summary right away; geminiLetter only overrides
+  // it once a fetch for the *current* last7Key resolves, so a fetch that
+  // completes after the user has already moved on can't clobber the view.
+  const [geminiLetter, setGeminiLetter] = useState<{ key: string; text: string } | null>(null);
+  const editorLetter =
+    geminiLetter && geminiLetter.key === last7Key ? geminiLetter.text : localLetter;
+
+  useEffect(() => {
+    const key = last7Key;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/editor-letter", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ entries: last7 satisfies JournalDay[] }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.letter) setGeminiLetter({ key, text: data.letter });
+      } catch {
+        // local summary already showing — nothing to do
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [last7Key]);
 
   return (
     <motion.div

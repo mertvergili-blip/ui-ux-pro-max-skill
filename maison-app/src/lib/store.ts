@@ -2,6 +2,9 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { localClassify, type SuggestionType } from "./classify";
+
+export type { SuggestionType };
 
 export type ViewName =
   | "studio"
@@ -13,14 +16,6 @@ export type ViewName =
   | "dna";
 
 export type MoodKey = "flowing" | "calm" | "stressed" | "grounded" | "tired";
-
-export type SuggestionType =
-  | "task"
-  | "idea"
-  | "note"
-  | "mood"
-  | "deadline"
-  | "calendar";
 
 export interface Task {
   id: string;
@@ -84,7 +79,8 @@ interface MaisonStore {
   aiPanelOpen: boolean;
   toggleAiPanel: () => void;
   pendingSuggestion: PendingSuggestion | null;
-  proposeSuggestion: (input: string) => void;
+  suggestionLoading: boolean;
+  proposeSuggestion: (input: string) => Promise<void>;
   updatePendingContent: (content: string) => void;
   confirmSuggestion: () => void;
   cancelSuggestion: () => void;
@@ -109,34 +105,6 @@ export function selectTodayEntry(journalEntries: JournalDay[]): JournalDay {
 export function selectCreativeEnergy(journalEntries: JournalDay[]): string {
   const entry = selectTodayEntry(journalEntries);
   return entry.mood ? MOOD_ENERGY[entry.mood] : "Flowing";
-}
-
-function classify(input: string): { type: SuggestionType; content: string } {
-  const text = input.trim();
-  const lower = text.toLowerCase();
-
-  if (
-    /\b(teslim|deadline|son gün|yetiştir)\b/.test(lower) ||
-    /\d{1,2}\s?(temmuz|ağustos|eylül|gün)/.test(lower)
-  ) {
-    return { type: "deadline", content: text };
-  }
-  if (/\b(hissediyorum|moral|enerji|yorgun|stresli|sakin)\b/.test(lower)) {
-    return { type: "mood", content: text };
-  }
-  if (/\b(randevu|toplantı|görüşme|saat \d)/.test(lower)) {
-    return { type: "calendar", content: text };
-  }
-  if (
-    /\b(yapmalıyım|tamamla|bitir|gönder|hazırla|çiz|topla)\b/.test(lower) ||
-    /^(brief|ritual|creative challenge)/i.test(text)
-  ) {
-    return { type: "task", content: text };
-  }
-  if (/\b(fikir|ne olsa|belki|konsept)\b/.test(lower)) {
-    return { type: "idea", content: text };
-  }
-  return { type: "note", content: text };
 }
 
 export const useStore = create<MaisonStore>()(
@@ -180,10 +148,32 @@ export const useStore = create<MaisonStore>()(
       aiPanelOpen: false,
       toggleAiPanel: () => set((s) => ({ aiPanelOpen: !s.aiPanelOpen })),
       pendingSuggestion: null,
-      proposeSuggestion: (input) => {
+      suggestionLoading: false,
+      proposeSuggestion: async (input) => {
         if (!input.trim()) return;
-        const { type, content } = classify(input);
-        set({ pendingSuggestion: { type, content, rawInput: input } });
+        set({ suggestionLoading: true });
+
+        let result: { type: SuggestionType; content: string };
+        try {
+          const res = await fetch("/api/classify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: input }),
+          });
+          if (!res.ok) throw new Error("classify request failed");
+          result = await res.json();
+        } catch {
+          result = localClassify(input);
+        }
+
+        // The input may have changed (or the panel closed) while the
+        // request was in flight — only apply a result that's still relevant.
+        if (get().suggestionLoading) {
+          set({
+            pendingSuggestion: { ...result, rawInput: input },
+            suggestionLoading: false,
+          });
+        }
       },
       updatePendingContent: (content) =>
         set((s) =>
@@ -213,7 +203,8 @@ export const useStore = create<MaisonStore>()(
         }
         set({ pendingSuggestion: null });
       },
-      cancelSuggestion: () => set({ pendingSuggestion: null }),
+      cancelSuggestion: () =>
+        set({ pendingSuggestion: null, suggestionLoading: false }),
 
       journalEntries: [],
       setTodayMood: (mood) =>
