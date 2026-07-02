@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useStore, type ViewName } from "@/lib/store";
 import { NotificationToggle } from "@/components/shell/notification-toggle";
+import { LogoutButton } from "@/components/shell/logout-button";
 
 const TABS: { label: string; view: ViewName }[] = [
   { label: "Studio", view: "studio" },
@@ -26,6 +27,7 @@ export function Topbar() {
           Maison
         </span>
         <NotificationToggle />
+        <LogoutButton />
       </div>
 
       {/* Below lg the pill becomes a horizontal scroll rail — all eight tabs

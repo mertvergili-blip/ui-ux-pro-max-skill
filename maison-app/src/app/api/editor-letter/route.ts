@@ -1,6 +1,7 @@
 import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { localEditorLetter } from "@/lib/journal-letter";
 import type { JournalDay } from "@/lib/store";
+import { requireSession } from "@/lib/auth";
 
 const SYSTEM_PROMPT = `Sen Maison adlı bir moda tasarım stüdyosu uygulamasının
 "Studio Assistant"ısın. Kullanıcının son 7 günlük journal kayıtlarını (mood
@@ -13,6 +14,9 @@ markdown, yıldız işareti ya da madde imi kullanma; çıktı doğrudan arayüz
 düz yazı olarak gösterilecek.`;
 
 export async function POST(request: Request) {
+  const unauthorized = await requireSession();
+  if (unauthorized) return unauthorized;
+
   const { entries } = (await request.json()) as { entries?: JournalDay[] };
 
   if (!entries) {

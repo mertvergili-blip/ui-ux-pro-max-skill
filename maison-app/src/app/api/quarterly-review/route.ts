@@ -1,5 +1,6 @@
 import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { localQuarterlyReview, type QuarterlyStats } from "@/lib/quarterly-review";
+import { requireSession } from "@/lib/auth";
 
 const SYSTEM_PROMPT = `Sen Maison adlı bir moda tasarım stüdyosu uygulamasının
 asistanısın. Kullanıcı sana kendi günlük istatistiklerini verecek: kaç gün
@@ -11,6 +12,9 @@ gelişim alanı öner. Türkçe yaz, düz metin — markdown, yıldız işareti
 kullanma. Uydurma detay ekleme, sadece verilen sayılara dayan.`;
 
 export async function POST(request: Request) {
+  const unauthorized = await requireSession();
+  if (unauthorized) return unauthorized;
+
   const stats = (await request.json()) as QuarterlyStats;
 
   if (typeof stats.entryCount !== "number") {

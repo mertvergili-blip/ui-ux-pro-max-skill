@@ -1,3 +1,5 @@
+import { requireSession } from "@/lib/auth";
+
 // Server-side crypto prices for the Finance Pulse widget. The widget used
 // to call CoinGecko straight from the browser, where ad blockers, CORS
 // hiccups and rate limits regularly left it stuck on "···" forever.
@@ -17,6 +19,9 @@ type PriceMap = Record<string, CoinData>;
 let cache: { prices: PriceMap; fetchedAt: number } | null = null;
 
 export async function GET() {
+  const unauthorized = await requireSession();
+  if (unauthorized) return unauthorized;
+
   if (cache && Date.now() - cache.fetchedAt < CACHE_TTL_MS) {
     return Response.json({ prices: cache.prices, stale: false });
   }

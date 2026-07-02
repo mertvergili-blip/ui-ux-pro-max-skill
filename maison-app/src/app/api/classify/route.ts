@@ -1,6 +1,7 @@
 import { Type } from "@google/genai";
 import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { localClassify, SUGGESTION_TYPES, type SuggestionType } from "@/lib/classify";
+import { requireSession } from "@/lib/auth";
 
 const SYSTEM_PROMPT = `Sen Maison adlı bir moda tasarım stüdyosu uygulamasının asistanısın.
 Kullanıcı serbest metinde günlük bir düşünce, görev, fikir, ruh hali, deadline
@@ -25,6 +26,9 @@ const RESPONSE_SCHEMA = {
 };
 
 export async function POST(request: Request) {
+  const unauthorized = await requireSession();
+  if (unauthorized) return unauthorized;
+
   const { text } = (await request.json()) as { text?: string };
 
   if (!text || !text.trim()) {

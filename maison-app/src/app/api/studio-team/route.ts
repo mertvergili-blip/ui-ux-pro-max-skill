@@ -1,6 +1,7 @@
 import { Type } from "@google/genai";
 import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { STUDIO_TEAM, localStudioTeamFeedback, type PersonaFeedback } from "@/lib/studio-team";
+import { requireSession } from "@/lib/auth";
 
 const PERSONA_IDS = STUDIO_TEAM.map((p) => p.id);
 
@@ -30,6 +31,9 @@ const RESPONSE_SCHEMA = {
 };
 
 export async function POST(request: Request) {
+  const unauthorized = await requireSession();
+  if (unauthorized) return unauthorized;
+
   const { text } = (await request.json()) as { text?: string };
 
   if (!text || !text.trim()) {

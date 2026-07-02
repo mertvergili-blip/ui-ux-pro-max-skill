@@ -1,5 +1,6 @@
 import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { localNoteInsight } from "@/lib/note-insight";
+import { requireSession } from "@/lib/auth";
 
 const SYSTEM_PROMPT = `Sen Maison adlı bir moda tasarım stüdyosu uygulamasının
 asistanısın. Kullanıcı bir koleksiyon projesi için serbest not yazıyor. Bu
@@ -11,6 +12,9 @@ yaz — markdown, yıldız işareti, madde imi ya da başlık biçimlendirmesi
 kullanma; çıktı doğrudan arayüzde düz yazı olarak gösterilecek.`;
 
 export async function POST(request: Request) {
+  const unauthorized = await requireSession();
+  if (unauthorized) return unauthorized;
+
   const { projectName, notes } = (await request.json()) as {
     projectName?: string;
     notes?: string;

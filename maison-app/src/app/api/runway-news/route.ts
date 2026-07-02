@@ -4,6 +4,7 @@ import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { decodeHtmlEntities } from "@/lib/html-entities";
 import { fetchOgImage } from "@/lib/og-image";
 import { LOCAL_RUNWAY_NEWS, type RunwayNewsItem, type RunwayTag } from "@/lib/runway-news";
+import { requireSession } from "@/lib/auth";
 
 // The "Fashion" category feed, not WWD's general firehose — the general
 // feed mixes in celebrity, sports-crossover, and business stories that
@@ -170,6 +171,9 @@ function localFallback(): CacheEntry {
 }
 
 export async function GET() {
+  const unauthorized = await requireSession();
+  if (unauthorized) return unauthorized;
+
   if (cache && Date.now() - cache.fetchedAt < CACHE_TTL_MS) {
     return Response.json(cache);
   }

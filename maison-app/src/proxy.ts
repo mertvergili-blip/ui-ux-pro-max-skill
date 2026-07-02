@@ -13,6 +13,9 @@ const PUBLIC_PATHS = [
   "/apple-icon",
   "/api/pwa-icon-192",
   "/sw.js",
+  // Vercel Cron calls this directly (no browser session) — it has its own
+  // Authorization: Bearer CRON_SECRET check inside the route instead.
+  "/api/cron/notify",
 ];
 
 export async function proxy(request: NextRequest) {

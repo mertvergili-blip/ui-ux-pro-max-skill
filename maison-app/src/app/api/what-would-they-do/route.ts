@@ -1,5 +1,6 @@
 import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { localWhatWouldTheyDo } from "@/lib/what-would-they-do";
+import { requireSession } from "@/lib/auth";
 
 const SYSTEM_PROMPT = `Sen Maison adlı bir moda tasarım stüdyosu uygulamasının
 asistanısın. Kullanıcı bir tasarımcının adını verecek. O tasarımcının bilinen
@@ -10,6 +11,9 @@ bilgiye dayan, uydurma. Türkçe yaz, düz metin — markdown, yıldız işareti
 kullanma.`;
 
 export async function POST(request: Request) {
+  const unauthorized = await requireSession();
+  if (unauthorized) return unauthorized;
+
   const { designerName } = (await request.json()) as { designerName?: string };
 
   if (!designerName || !designerName.trim()) {

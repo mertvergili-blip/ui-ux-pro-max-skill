@@ -48,6 +48,7 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoFocus
+          autoComplete="current-password"
           placeholder="Şifre"
           className="w-full border-b border-line bg-transparent pb-2.5 text-sm text-bone outline-none placeholder:text-muted focus:border-gold/50"
         />
