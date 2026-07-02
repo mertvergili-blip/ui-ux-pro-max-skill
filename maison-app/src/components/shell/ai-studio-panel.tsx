@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore, type SuggestionType } from "@/lib/store";
 import { OrbInput } from "./orb-input";
+import { HoverBorderGradient } from "@/components/vendor/hover-border-gradient";
 
 const TYPE_LABELS: Record<SuggestionType, string> = {
   task: "Task",
@@ -28,15 +29,13 @@ const TYPE_COLORS: Record<SuggestionType, string> = {
 const EASE = [0.32, 0.72, 0, 1] as const;
 
 export function AiStudioPanel() {
-  const {
-    aiPanelOpen,
-    toggleAiPanel,
-    pendingSuggestion,
-    proposeSuggestion,
-    updatePendingContent,
-    confirmSuggestion,
-    cancelSuggestion,
-  } = useStore();
+  const aiPanelOpen = useStore((s) => s.aiPanelOpen);
+  const toggleAiPanel = useStore((s) => s.toggleAiPanel);
+  const pendingSuggestion = useStore((s) => s.pendingSuggestion);
+  const proposeSuggestion = useStore((s) => s.proposeSuggestion);
+  const updatePendingContent = useStore((s) => s.updatePendingContent);
+  const confirmSuggestion = useStore((s) => s.confirmSuggestion);
+  const cancelSuggestion = useStore((s) => s.cancelSuggestion);
 
   const [input, setInput] = useState("");
   const [editing, setEditing] = useState(false);
@@ -73,18 +72,17 @@ export function AiStudioPanel() {
     <>
       {/* Trigger — bottom-left, mirrors the old Finance Pulse corner so it never
           collides with the image panel's caption on the right */}
-      <motion.button
+      <HoverBorderGradient
         onClick={toggleAiPanel}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.25, ease: EASE }}
-        className="fixed bottom-[22px] left-[22px] z-50 flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] py-2 pl-2 pr-4 text-[10.5px] uppercase tracking-[2px] text-muted backdrop-blur-xl transition-colors hover:text-bone"
+        duration={1.4}
+        containerClassName="fixed bottom-[22px] left-[22px] z-50 backdrop-blur-xl"
+        innerClassName="flex items-center gap-2.5 py-2 pl-2 pr-4 text-[10.5px] uppercase tracking-[2px] text-muted transition-colors hover:text-bone"
       >
         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06]">
           <span className="h-1.5 w-1.5 animate-[pulse-glow_2.4s_infinite] rounded-full bg-gold" />
         </span>
         Talk to your Studio
-      </motion.button>
+      </HoverBorderGradient>
 
       <AnimatePresence>
         {aiPanelOpen && (
@@ -160,15 +158,15 @@ export function AiStudioPanel() {
                         </p>
                       )}
                       <div className="flex justify-center gap-2 text-[10.5px] uppercase tracking-[1.5px]">
-                        <motion.button
+                        <HoverBorderGradient
                           onClick={handleConfirm}
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
-                          transition={{ duration: 0.2, ease: EASE }}
-                          className="rounded-full bg-gold px-4 py-2 text-ink"
+                          duration={0.9}
+                          gradientColor="var(--color-bone)"
+                          innerBg="var(--color-gold)"
+                          innerClassName="px-4 py-2 text-ink"
                         >
                           Confirm
-                        </motion.button>
+                        </HoverBorderGradient>
                         <motion.button
                           onClick={() => setEditing(!editing)}
                           whileHover={{ scale: 1.03 }}

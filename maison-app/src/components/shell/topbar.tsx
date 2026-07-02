@@ -13,7 +13,8 @@ const TABS: { label: string; view: ViewName }[] = [
 ];
 
 export function Topbar() {
-  const { currentView, setView } = useStore();
+  const currentView = useStore((s) => s.currentView);
+  const setView = useStore((s) => s.setView);
 
   return (
     <div className="sticky top-0 z-20 flex items-center justify-between bg-gradient-to-b from-ink from-60% to-transparent pb-7 pt-7">

@@ -25,7 +25,12 @@ const VIEW_MAP = {
 } as const;
 
 export default function Home() {
-  const { currentView, introVisible, setMousePos } = useStore();
+  // Selectors, not a full-store destructure — this component (and everything
+  // it renders, including IntroScreen) must not re-render on every mousemove
+  // just because setMousePos touches the same store as mousePos readers.
+  const currentView = useStore((s) => s.currentView);
+  const introVisible = useStore((s) => s.introVisible);
+  const setMousePos = useStore((s) => s.setMousePos);
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {

@@ -2,12 +2,25 @@
 
 import { useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useStore } from "@/lib/store";
 import { HeroSceneGate } from "./hero-scene-gate";
 import { EntranceMonogram } from "./entrance-monogram";
 
+const LiquidEther = dynamic(() => import("@/components/vendor/LiquidEther"), {
+  ssr: false,
+});
+
+// Module-level, not inline — an inline array literal gets a new reference on
+// every render, which re-triggers LiquidEther's setup effect (whose deps
+// include `colors`) and tears down/rebuilds the whole WebGL sim each time.
+const LIQUID_COLORS = ["#e3bd7e", "#b25a5a", "#5b87a6"];
+
 export function IntroScreen() {
-  const { introVisible, dismissIntro } = useStore();
+  // Selectors — this must not re-render (and tear down the WebGL scenes
+  // inside it) on every mousemove-driven mousePos update elsewhere in the store.
+  const introVisible = useStore((s) => s.introVisible);
+  const dismissIntro = useStore((s) => s.dismissIntro);
   const downPos = useRef({ x: 0, y: 0 });
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -36,6 +49,20 @@ export function IntroScreen() {
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
         >
+          <div className="pointer-events-none absolute inset-0">
+            <LiquidEther
+              colors={LIQUID_COLORS}
+              mouseForce={20}
+              cursorSize={110}
+              resolution={0.5}
+              autoDemo
+              autoSpeed={0.4}
+              autoIntensity={2}
+              autoResumeDelay={2400}
+              autoRampDuration={0.8}
+            />
+          </div>
+
           <div
             className="pointer-events-none absolute inset-0"
             style={{
@@ -50,7 +77,7 @@ export function IntroScreen() {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "linear-gradient(100deg, #0a0906 0%, rgba(10,9,6,0.6) 42%, transparent 70%)",
+                "linear-gradient(100deg, rgba(10,9,6,0.55) 0%, rgba(10,9,6,0.22) 38%, transparent 68%)",
             }}
           />
 

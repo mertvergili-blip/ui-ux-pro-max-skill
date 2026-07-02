@@ -1,38 +1,91 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
+import { Timeline, type TimelineEntry } from "@/components/vendor/timeline";
 
-const MILESTONES = [
+function HighlightTile({
+  label,
+  sub,
+  accent,
+}: {
+  label: string;
+  sub: string;
+  accent: string;
+}) {
+  return (
+    <div className="rounded-[1rem] bg-white/[0.02] p-1 ring-1 ring-white/[0.06]">
+      <div
+        className="rounded-[0.75rem] px-4 py-5"
+        style={{
+          background: `linear-gradient(150deg, color-mix(in srgb, ${accent} 30%, var(--color-ink)), var(--color-ink))`,
+        }}
+      >
+        <p className="mb-1 text-[9px] uppercase tracking-[2px]" style={{ color: accent }}>
+          {sub}
+        </p>
+        <p className="font-heading text-[15px] text-bone">{label}</p>
+      </div>
+    </div>
+  );
+}
+
+const YEARS: TimelineEntry[] = [
   {
-    year: "2025",
-    title: "İlk Koleksiyon",
-    detail: "İlk özgün 7 parçalık koleksiyonunu tamamladın — Rosé Poudré.",
-    done: true,
+    title: "2025",
+    content: (
+      <div>
+        <p className="mb-6 max-w-[420px] text-[13.5px] leading-relaxed text-bone-dim">
+          İlk özgün koleksiyonunu tamamladın — 7 parça, tamamen kendi elinden
+          çıkan ilk bütünlüklü çalışma. Creative Director yolculuğunun
+          başlangıç noktası.
+        </p>
+        <div className="grid max-w-[420px] grid-cols-2 gap-3">
+          <HighlightTile label="Rosé Poudré" sub="Okul Projesi" accent="var(--color-rose)" />
+          <HighlightTile label="7 Parça" sub="İlk Koleksiyon" accent="var(--color-rose)" />
+        </div>
+      </div>
+    ),
   },
   {
-    year: "Mart 2026",
-    title: "Portfolyo v2",
-    detail: "Portfolyonu editorial bir formatla yeniden kurdun.",
-    done: true,
+    title: "2026",
+    content: (
+      <div>
+        <p className="mb-6 max-w-[420px] text-[13.5px] leading-relaxed text-bone-dim">
+          Portfolyonu editorial bir formatla yeniden kurdun ve ikinci
+          koleksiyonunu tamamladın. Şimdi Terre &amp; Or üzerinde çalışıyorsun
+          — üçüncü koleksiyon 6 gün sonra teslim.
+        </p>
+        <div className="grid max-w-[420px] grid-cols-2 gap-3">
+          <HighlightTile label="Verre Bleu" sub="Mart · Tamamlandı" accent="var(--color-blue)" />
+          <HighlightTile label="Portfolyo v2" sub="Editorial Format" accent="var(--color-blue)" />
+          <HighlightTile label="Terre & Or" sub="Şimdi · 6 gün kaldı" accent="var(--color-gold)" />
+        </div>
+      </div>
+    ),
   },
   {
-    year: "Şimdi",
-    title: "Koleksiyon III",
-    detail: "Terre & Or üzerinde çalışıyorsun — 6 gün kaldı.",
-    active: true,
-  },
-  {
-    year: "2027",
-    title: "Staj Başvuruları",
-    detail:
-      "Büyük markalara staj başvuruların için portfolyo hazır olacak.",
+    title: "2027",
+    content: (
+      <div>
+        <p className="mb-6 max-w-[420px] text-[13.5px] leading-relaxed text-bone-dim">
+          Büyük markalara staj başvuruların için portfolyo hazır olacak —
+          Terre &amp; Or tamamlandığında dördüncü koleksiyon planlaması
+          başlayacak.
+        </p>
+        <div className="max-w-[420px] rounded-[1rem] border border-dashed border-line px-4 py-5">
+          <p className="text-[9px] uppercase tracking-[2px] text-muted">
+            Beklenen
+          </p>
+          <p className="font-heading text-[15px] text-bone-dim">
+            Staj Başvuruları
+          </p>
+        </div>
+      </div>
+    ),
   },
 ];
 
 export function PathView() {
-  const [expanded, setExpanded] = useState<number | null>(null);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -48,49 +101,7 @@ export function PathView() {
         Creative Director&apos;a giden yol.
       </h1>
 
-      <div className="flex flex-col">
-        {MILESTONES.map((m, i) => {
-          const isExpanded = expanded === i;
-          const isLast = i === MILESTONES.length - 1;
-          return (
-            <div
-              key={i}
-              className={`relative cursor-pointer pb-8 pl-[30px] ${
-                isLast ? "border-l border-transparent" : "border-l border-line"
-              }`}
-              onClick={() => setExpanded(isExpanded ? null : i)}
-            >
-              <div
-                className={`absolute -left-[5px] top-0.5 h-[9px] w-[9px] rounded-full transition-all duration-300 ${
-                  m.done
-                    ? "border border-gold bg-gold"
-                    : m.active
-                      ? "border border-gold bg-ink shadow-[0_0_0_4px_rgba(196,164,105,0.16)]"
-                      : "border border-muted bg-ink"
-                }`}
-              />
-              <p className="mb-1 text-[9.5px] uppercase tracking-[2px] text-muted">
-                {m.year}
-              </p>
-              <p
-                className={`font-heading text-lg transition-colors duration-250 hover:text-gold ${
-                  m.done || m.active ? "text-bone" : "text-bone-dim"
-                }`}
-              >
-                {m.title}
-              </p>
-              <div
-                className="overflow-hidden transition-all duration-400"
-                style={{ maxHeight: isExpanded ? 80 : 0 }}
-              >
-                <p className="mt-2 text-[13px] leading-relaxed text-bone-dim">
-                  {m.detail}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <Timeline data={YEARS} />
     </motion.div>
   );
 }
