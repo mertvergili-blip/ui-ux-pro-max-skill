@@ -1,7 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 
-const PUBLIC_PATHS = ["/login", "/api/login"];
+// Non-sensitive static assets the browser needs to fetch *before* the user
+// is authenticated — the PWA install criteria check (manifest + icons)
+// happens independently of app auth, so gating these would silently break
+// "Add to Home Screen".
+const PUBLIC_PATHS = [
+  "/login",
+  "/api/login",
+  "/manifest.webmanifest",
+  "/icon",
+  "/apple-icon",
+  "/api/pwa-icon-192",
+];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

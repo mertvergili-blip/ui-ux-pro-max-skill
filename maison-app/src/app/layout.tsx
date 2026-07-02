@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Josefin_Sans, Instrument_Serif, Manrope } from "next/font/google";
 import "./globals.css";
 
@@ -30,6 +30,18 @@ export const metadata: Metadata = {
   title: "Maison — Your Creative Studio",
   description:
     "A fashion-forward personal life management app. Your atelier, digitized.",
+  appleWebApp: {
+    capable: true,
+    title: "Maison",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#100d09",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
