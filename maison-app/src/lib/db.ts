@@ -40,6 +40,16 @@ async function ensureSchema() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
+  // A separate table rather than folding into app_state's JSON blob — a
+  // push subscription is a browser/device credential, not app data, and
+  // there can be more than one (phone + desktop both installed).
+  await sql`
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      endpoint TEXT PRIMARY KEY,
+      subscription JSONB NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `;
 }
 
 function ready() {
@@ -74,4 +84,31 @@ export async function saveAppState(data: unknown): Promise<void> {
     VALUES ('default', ${json}, now())
     ON CONFLICT (id) DO UPDATE SET data = ${json}, updated_at = now()
   `;
+}
+
+export async function savePushSubscription(
+  endpoint: string,
+  subscription: unknown
+): Promise<void> {
+  await ready();
+  const sql = getClient();
+  const json = sql.json(subscription as JSONValue);
+  await sql`
+    INSERT INTO push_subscriptions (endpoint, subscription)
+    VALUES (${endpoint}, ${json})
+    ON CONFLICT (endpoint) DO UPDATE SET subscription = ${json}
+  `;
+}
+
+export async function deletePushSubscription(endpoint: string): Promise<void> {
+  await ready();
+  const sql = getClient();
+  await sql`DELETE FROM push_subscriptions WHERE endpoint = ${endpoint}`;
+}
+
+export async function loadPushSubscriptions(): Promise<unknown[]> {
+  await ready();
+  const sql = getClient();
+  const rows = await sql`SELECT subscription FROM push_subscriptions`;
+  return rows.map((r) => r.subscription);
 }

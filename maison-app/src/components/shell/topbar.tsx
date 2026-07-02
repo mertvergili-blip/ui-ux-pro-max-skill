@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useStore, type ViewName } from "@/lib/store";
+import { NotificationToggle } from "@/components/shell/notification-toggle";
 
 const TABS: { label: string; view: ViewName }[] = [
   { label: "Studio", view: "studio" },
@@ -20,9 +21,12 @@ export function Topbar() {
 
   return (
     <div className="sticky top-0 z-20 flex flex-col gap-3.5 bg-gradient-to-b from-ink from-60% to-transparent pb-5 pt-5 lg:flex-row lg:items-center lg:justify-between lg:pb-7 lg:pt-7">
-      <span className="font-serif text-[19px] italic tracking-wide text-bone">
-        Maison
-      </span>
+      <div className="flex items-center gap-3">
+        <span className="font-serif text-[19px] italic tracking-wide text-bone">
+          Maison
+        </span>
+        <NotificationToggle />
+      </div>
 
       {/* Below lg the pill becomes a horizontal scroll rail — all eight tabs
           stay reachable without wrapping or shrinking below tap size. */}

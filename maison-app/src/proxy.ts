@@ -12,6 +12,7 @@ const PUBLIC_PATHS = [
   "/icon",
   "/apple-icon",
   "/api/pwa-icon-192",
+  "/sw.js",
 ];
 
 export async function proxy(request: NextRequest) {
