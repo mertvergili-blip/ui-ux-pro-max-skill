@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore, type SuggestionType } from "@/lib/store";
+import { OrbInput } from "./orb-input";
 
 const TYPE_LABELS: Record<SuggestionType, string> = {
   task: "Task",
@@ -57,12 +58,20 @@ export function AiStudioPanel() {
     setEditing(false);
   };
 
+  const handleClose = () => {
+    toggleAiPanel();
+    setInput("");
+    setEditing(false);
+    if (pendingSuggestion) cancelSuggestion();
+  };
+
   return (
     <>
-      {/* Trigger */}
+      {/* Trigger — bottom-left, mirrors the old Finance Pulse corner so it never
+          collides with the image panel's caption on the right */}
       <button
         onClick={toggleAiPanel}
-        className="fixed bottom-[22px] right-[22px] z-50 flex items-center gap-3 rounded-[3px] border border-line bg-ink/80 px-4 py-3 text-[10.5px] uppercase tracking-[2.5px] text-muted backdrop-blur-sm transition-colors hover:text-bone"
+        className="fixed bottom-[22px] left-[22px] z-50 flex items-center gap-3 rounded-[3px] border border-line bg-ink/80 px-4 py-3 text-[10.5px] uppercase tracking-[2.5px] text-muted backdrop-blur-sm transition-colors hover:text-bone"
       >
         <span className="h-1.5 w-1.5 animate-[pulse-glow_2.4s_infinite] rounded-full bg-gold" />
         Talk to your Studio
@@ -70,41 +79,43 @@ export function AiStudioPanel() {
 
       <AnimatePresence>
         {aiPanelOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-[90] bg-black/40"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={toggleAiPanel}
-            />
-            <motion.div
-              className="fixed right-0 top-0 z-[95] flex h-screen w-[400px] flex-col border-l border-line bg-ink p-8"
-              initial={{ x: 400 }}
-              animate={{ x: 0 }}
-              exit={{ x: 400 }}
-              transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
+          <motion.div
+            className="fixed inset-0 z-[95] flex items-center justify-center bg-ink/90 backdrop-blur-md"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) handleClose();
+            }}
+          >
+            <button
+              onClick={handleClose}
+              className="absolute right-8 top-8 text-muted transition-colors hover:text-bone"
             >
-              <div className="mb-8 flex items-center justify-between">
-                <p className="font-serif text-lg italic text-bone">Studio Assistant</p>
-                <button
-                  onClick={toggleAiPanel}
-                  className="text-muted transition-colors hover:text-bone"
-                >
-                  ✕
-                </button>
-              </div>
+              ✕
+            </button>
 
-              <p className="mb-6 text-[13px] leading-relaxed text-bone-dim">
+            <motion.div
+              className="flex w-full max-w-[480px] flex-col items-center px-8"
+              initial={{ opacity: 0, y: 16, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
+            >
+              <p className="mb-2 text-[10px] uppercase tracking-[3px] text-gold">
+                Studio Assistant
+              </p>
+              <p className="mb-10 max-w-[360px] text-center text-[13px] leading-relaxed text-bone-dim">
                 Bugünü, bir fikri ya da bir deadline&apos;ı anlat — ben türünü
                 belirleyip önereceğim. Onaylamadan hiçbir şey eklenmez.
               </p>
 
-              <textarea
+              <OrbInput
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Örn: yarın kumaş tedarikçisiyle görüşme var…"
-                className="min-h-[90px] w-full resize-none rounded-[3px] border border-line bg-transparent p-3.5 text-[13px] text-bone outline-none placeholder:text-muted focus:border-gold/50"
+                onChange={setInput}
+                placeholder="Bugünü anlat…"
+                active={Boolean(input.trim())}
               />
 
               <AnimatePresence mode="wait">
@@ -114,10 +125,10 @@ export function AiStudioPanel() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
-                    className="mt-5 rounded-[3px] border border-line p-4"
+                    className="mt-8 w-full rounded-[3px] border border-line p-5"
                   >
                     <p
-                      className="mb-2.5 text-[9.5px] uppercase tracking-[2.5px]"
+                      className="mb-2.5 text-center text-[9.5px] uppercase tracking-[2.5px]"
                       style={{ color: TYPE_COLORS[pendingSuggestion.type] }}
                     >
                       {TYPE_LABELS[pendingSuggestion.type]} olarak algıladım
@@ -126,16 +137,16 @@ export function AiStudioPanel() {
                       <textarea
                         value={pendingSuggestion.content}
                         onChange={(e) => updatePendingContent(e.target.value)}
-                        className="mb-3 w-full resize-none rounded-[3px] border border-line bg-transparent p-2.5 text-[13px] text-bone outline-none"
+                        className="mb-3 w-full resize-none rounded-[3px] border border-line bg-transparent p-2.5 text-center text-[13px] text-bone outline-none"
                         rows={2}
                         autoFocus
                       />
                     ) : (
-                      <p className="mb-3 text-[13.5px] leading-relaxed text-bone">
+                      <p className="mb-3 text-center text-[13.5px] leading-relaxed text-bone">
                         {pendingSuggestion.content}
                       </p>
                     )}
-                    <div className="flex gap-2 text-[10.5px] uppercase tracking-[1.5px]">
+                    <div className="flex justify-center gap-2 text-[10.5px] uppercase tracking-[1.5px]">
                       <button
                         onClick={handleConfirm}
                         className="rounded-[3px] border border-gold px-3.5 py-2 text-gold transition-colors hover:bg-gold hover:text-ink"
@@ -159,7 +170,7 @@ export function AiStudioPanel() {
                 )}
               </AnimatePresence>
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

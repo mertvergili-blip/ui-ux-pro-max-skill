@@ -3,7 +3,7 @@
 import { useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/lib/store";
-import { ObsidianObject } from "./obsidian-object";
+import { HeroSceneGate } from "./hero-scene-gate";
 import { EntranceMonogram } from "./entrance-monogram";
 
 export function IntroScreen() {
@@ -44,7 +44,7 @@ export function IntroScreen() {
             }}
           />
 
-          <ObsidianObject />
+          <HeroSceneGate />
 
           <div
             className="pointer-events-none absolute inset-0"
