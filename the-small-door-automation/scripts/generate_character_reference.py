@@ -11,17 +11,22 @@ used across the industry is: design the character once as a still image
 into every video scene via image-to-video instead of re-describing the
 character in text each time.
 
-Uses Kling's own text-to-image endpoint (create_text2image_task) — the same
-KLING_API_KEY/KLING_ACCESS_KEY+SECRET already configured for video, no
-separate image-model API key required.
+Image generator priority:
+  1. Nano Banana (Gemini 2.5 Flash Image) if GEMINI_API_KEY/NANOBANANA_API_KEY
+     is set in .env — specifically strong at consistent, multi-view
+     character sheets. Get a free key at https://aistudio.google.com/apikey.
+  2. Kling's own text-to-image endpoint (create_text2image_task) as fallback
+     — reuses KLING_API_KEY/KLING_ACCESS_KEY+SECRET already configured for
+     video, no separate key needed if Nano Banana isn't configured.
 
 Usage:
-    python3 scripts/generate_character_reference.py --video-id 042 --character battery                # dry-run
-    python3 scripts/generate_character_reference.py --video-id 042 --character battery --live-kling    # real Kling API call
+    python3 scripts/generate_character_reference.py --video-id 042 --character battery             # dry-run
+    python3 scripts/generate_character_reference.py --video-id 042 --character battery --live       # real API call (Nano Banana or Kling, whichever is configured)
+    python3 scripts/generate_character_reference.py --video-id 042 --character battery --live --provider kling  # force Kling even if Nano Banana is configured
 
 Reads the character definition from outputs/metadata/<video_id>_scenes.json
 -> character_continuity_lock.<character>, and writes the reference sheet
-prompt + (if --live-kling) the downloaded image to
+prompt + (if --live) the downloaded image to
 outputs/metadata/<video_id>_character_refs/<character>_reference.jpg plus a
 sidecar outputs/metadata/<video_id>_character_refs/<character>_reference.json
 recording the prompt used (for trait-locking future scene prompts verbatim).
@@ -41,8 +46,14 @@ REFERENCE_SHEET_SUFFIX = (
     "no caption, no watermark, no logo, no other characters in frame"
 )
 
+NEGATIVE_PROMPT = (
+    "text, caption, watermark, logo, multiple different characters, "
+    "inconsistent proportions between views, extra limbs, distorted face, "
+    "cluttered background, other objects"
+)
 
-def build_reference_prompt(character_name: str, continuity_lock_entry: str) -> str:
+
+def build_reference_prompt(continuity_lock_entry: str) -> str:
     """Build a capped, trait-locked reference-sheet prompt.
 
     Per research: 2-3 character descriptors max (silhouette + one
@@ -52,11 +63,20 @@ def build_reference_prompt(character_name: str, continuity_lock_entry: str) -> s
     return f"{continuity_lock_entry.strip()}. {REFERENCE_SHEET_SUFFIX}"
 
 
+def pick_provider(env: dict, forced: str | None) -> str:
+    if forced:
+        return forced
+    if env.get("GEMINI_API_KEY") or env.get("NANOBANANA_API_KEY"):
+        return "nanobanana"
+    return "kling"
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--video-id", required=True)
     parser.add_argument("--character", required=True, help="key into character_continuity_lock, e.g. 'battery'")
-    parser.add_argument("--live-kling", action="store_true", help="Perform a real Kling text2image API call")
+    parser.add_argument("--live", "--live-kling", dest="live", action="store_true", help="Perform a real image-generation API call")
+    parser.add_argument("--provider", choices=["nanobanana", "kling"], default=None, help="Force a provider instead of auto-picking by configured API key")
     args = parser.parse_args()
 
     env = load_env()
@@ -68,52 +88,64 @@ def main():
             f"Available: {list(lock.keys())}"
         )
 
-    prompt = build_reference_prompt(args.character, lock[args.character])
-    negative_prompt = (
-        "text, caption, watermark, logo, multiple different characters, "
-        "inconsistent proportions between views, extra limbs, distorted face, "
-        "cluttered background, other objects"
-    )
-
+    prompt = build_reference_prompt(lock[args.character])
+    provider = pick_provider(env, args.provider)
     ref_dir = OUTPUTS_DIR / "metadata" / f"{args.video_id}_character_refs"
 
-    if not args.live_kling:
+    if not args.live:
         logger.info(
-            "[DRY-RUN] Would call Kling text2image for video_id=%s character=%s: %s",
-            args.video_id, args.character, safe_log_context({"prompt": prompt, "negative_prompt": negative_prompt}),
+            "[DRY-RUN] Would call %s text2image for video_id=%s character=%s: %s",
+            provider, args.video_id, args.character,
+            safe_log_context({"prompt": prompt, "negative_prompt": NEGATIVE_PROMPT}),
         )
+        print(f"[DRY-RUN] Provider that would be used: {provider}")
         print(f"[DRY-RUN] Reference sheet prompt for '{args.character}':\n{prompt}\n")
         print(f"[DRY-RUN] Would write to {ref_dir}/{args.character}_reference.jpg (no API call made)")
         return
 
-    from kling_client import KlingClient, KlingAPIError
-
-    client = KlingClient(env)
     ref_dir.mkdir(parents=True, exist_ok=True)
     out_image = ref_dir / f"{args.character}_reference.jpg"
     out_sidecar = ref_dir / f"{args.character}_reference.json"
 
-    try:
-        task_id = client.create_text2image_task(prompt=prompt, negative_prompt=negative_prompt, n=1)
-        logger.info("Character reference task_id=%s submitted for %s/%s", task_id, args.video_id, args.character)
-        task_data = client.wait_for_task(task_id, task_type="text2image")
-        image_urls = client.extract_image_urls(task_data)
-        client.download_video(image_urls[0], out_image)  # same streaming download helper works for any URL
-        out_sidecar.write_text(json.dumps({
-            "video_id": args.video_id,
-            "character": args.character,
-            "prompt": prompt,
-            "negative_prompt": negative_prompt,
-            "task_id": task_id,
-            "image_file": str(out_image.relative_to(OUTPUTS_DIR.parent)),
-        }, indent=2))
-        logger.info("Character reference for %s/%s downloaded to %s", args.video_id, args.character, out_image)
-        print(f"Wrote {out_image}")
-        print(f"Wrote {out_sidecar}")
-        print("Next: use this image with create_image2video_task(image_url=...) for every scene featuring this character.")
-    except KlingAPIError as exc:
-        logger.warning("Character reference generation failed for %s/%s: %s", args.video_id, args.character, exc)
-        raise SystemExit(f"Kling text2image failed: {exc}")
+    if provider == "nanobanana":
+        from nanobanana_client import NanoBananaClient, NanoBananaAPIError, NanoBananaConfigError
+
+        try:
+            client = NanoBananaClient(env)
+            image_bytes = client.generate_image(prompt=prompt, negative_prompt=NEGATIVE_PROMPT)
+            client.save_image(image_bytes, out_image)
+            task_id = None
+            logger.info("Character reference (Nano Banana) for %s/%s saved to %s", args.video_id, args.character, out_image)
+        except (NanoBananaAPIError, NanoBananaConfigError) as exc:
+            logger.warning("Nano Banana reference generation failed for %s/%s: %s", args.video_id, args.character, exc)
+            raise SystemExit(f"Nano Banana image generation failed: {exc}")
+    else:
+        from kling_client import KlingClient, KlingAPIError
+
+        try:
+            client = KlingClient(env)
+            task_id = client.create_text2image_task(prompt=prompt, negative_prompt=NEGATIVE_PROMPT, n=1)
+            logger.info("Character reference task_id=%s submitted for %s/%s", task_id, args.video_id, args.character)
+            task_data = client.wait_for_task(task_id, task_type="text2image")
+            image_urls = client.extract_image_urls(task_data)
+            client.download_video(image_urls[0], out_image)  # same streaming download helper works for any URL
+            logger.info("Character reference (Kling) for %s/%s downloaded to %s", args.video_id, args.character, out_image)
+        except KlingAPIError as exc:
+            logger.warning("Kling reference generation failed for %s/%s: %s", args.video_id, args.character, exc)
+            raise SystemExit(f"Kling text2image failed: {exc}")
+
+    out_sidecar.write_text(json.dumps({
+        "video_id": args.video_id,
+        "character": args.character,
+        "provider": provider,
+        "prompt": prompt,
+        "negative_prompt": NEGATIVE_PROMPT,
+        "task_id": task_id,
+        "image_file": str(out_image.relative_to(OUTPUTS_DIR.parent)),
+    }, indent=2))
+    print(f"Wrote {out_image}")
+    print(f"Wrote {out_sidecar}")
+    print("Next: use this image with create_image2video_task(image_url=...) for every scene featuring this character.")
 
 
 if __name__ == "__main__":

@@ -17,8 +17,10 @@ Converts scene prompts into Kling production tasks and tracks retries.
   `data/ai_video_quality_research_2026.md`. Workflow:
   1. Run `scripts/generate_character_reference.py --video-id <id> --character <name>`
      for every named character in `character_continuity_lock` (dry-run
-     first). This calls Kling's own text2image endpoint — no separate
-     image-model API key needed.
+     first). Auto-picks Nano Banana (Gemini 2.5 Flash Image) if
+     `GEMINI_API_KEY`/`NANOBANANA_API_KEY` is set in `.env` — best-in-class
+     for consistent multi-view character sheets — otherwise falls back to
+     Kling's own text2image endpoint (no separate key needed either way).
   2. Once approved, add the resulting image URL/path to each scene's
      `reference_image` field in `<video_id>_scenes.json` for every scene
      that character appears in.
