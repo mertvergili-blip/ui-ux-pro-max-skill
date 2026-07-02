@@ -177,13 +177,13 @@ export function DnaMapView() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-      className="pr-14"
+      className="lg:pr-14"
     >
       <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
         <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
         Reference DNA Map
       </p>
-      <h1 className="mb-2 font-heading text-[34px] font-normal leading-[1.12] text-[#f7f2e6]">
+      <h1 className="mb-2 font-heading text-[28px] font-normal leading-[1.12] text-[#f7f2e6] lg:text-[34px]">
         Yaratıcı kimliğini zaman içinde gör.
       </h1>
       <p className="mb-7 max-w-[460px] text-[13.5px] leading-relaxed text-bone-dim">
@@ -220,13 +220,13 @@ export function DnaMapView() {
         })}
       </div>
 
-      <div className="flex gap-8">
+      <div className="flex flex-col gap-8 lg:flex-row">
         <div className="rounded-[1.5rem] bg-white/[0.02] p-1.5 ring-1 ring-white/[0.06]">
           <div className="rounded-[1.15rem] bg-black/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
             <svg
               ref={svgRef}
               viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-              className="h-[460px] w-[620px]"
+              className="h-auto w-full lg:h-[460px] lg:w-[620px]"
             >
               {DNA_EDGES.map((e, i) => {
                 const a = byId.get(e.from);
@@ -260,7 +260,7 @@ export function DnaMapView() {
                 const dim =
                   (activeCategory && n.category !== activeCategory) ||
                   (connectedIds && !connectedIds.has(n.id));
-                const r = n.category === "collection" ? 9 : 5 + degreeOf(n.id) * 0.6;
+                const r = n.category === "collection" ? 10 : 6 + degreeOf(n.id) * 0.7;
                 return (
                   <g
                     key={n.id}
@@ -289,9 +289,9 @@ export function DnaMapView() {
                     />
                     <text
                       x={n.x}
-                      y={n.y - r - 7}
+                      y={n.y - r - 8}
                       textAnchor="middle"
-                      fontSize={n.category === "collection" ? 10.5 : 9}
+                      fontSize={n.category === "collection" ? 13 : 11}
                       fill={dim ? "transparent" : "var(--color-bone-dim)"}
                       style={{
                         fontFamily: "var(--font-sans)",
@@ -308,7 +308,7 @@ export function DnaMapView() {
           </div>
         </div>
 
-        <div className="w-[220px] flex-shrink-0 pt-2">
+        <div className="w-full flex-shrink-0 pt-2 lg:w-[220px]">
           {selectedNode ? (
             <motion.div
               key={selectedNode.id}

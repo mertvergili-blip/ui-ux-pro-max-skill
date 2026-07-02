@@ -32,9 +32,11 @@ export function layoutDnaGraph(
   });
 
   const byId = new Map(positioned.map((n) => [n.id, n]));
-  const REPULSION = 2600;
+  // Tuned to fill the 900×560 viewBox — the earlier 2600/140 settle left
+  // the whole graph huddled in the middle with tiny unreadable labels.
+  const REPULSION = 4400;
   const SPRING = 0.02;
-  const SPRING_LENGTH = 140;
+  const SPRING_LENGTH = 170;
   const CENTER_PULL = 0.008;
 
   for (let iter = 0; iter < 220; iter++) {

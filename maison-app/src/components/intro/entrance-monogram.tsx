@@ -35,7 +35,7 @@ export function EntranceMonogram({ onSequenceDone }: Props) {
   }, []);
 
   return (
-    <div className="pointer-events-none absolute left-[8%] top-1/2 z-5 max-w-[460px] -translate-y-1/2">
+    <div className="pointer-events-none absolute left-[8%] right-[8%] top-1/2 z-5 -translate-y-1/2 sm:right-auto sm:max-w-[460px]">
       <svg ref={svgRef} width="72" height="72" viewBox="0 0 72 72" className="mb-5">
         <path
           d="M8 60 L8 12 L26 42 L44 12 L44 60 M52 12 L64 12 M58 12 L58 60"
@@ -51,7 +51,7 @@ export function EntranceMonogram({ onSequenceDone }: Props) {
 
       <p className="mb-3.5 text-[10px] uppercase tracking-[3px] text-gold">Maison</p>
 
-      <h1 className="mb-5 font-heading text-[50px] font-normal leading-[1.12] tracking-tight text-[#f7f2e6]">
+      <h1 className="mb-5 font-heading text-[34px] font-normal leading-[1.12] tracking-tight text-[#f7f2e6] sm:text-[50px]">
         {showHeadline && (
           <>
             <EncryptedText

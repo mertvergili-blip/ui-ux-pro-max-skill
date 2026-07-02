@@ -7,12 +7,12 @@ import { OrbInput } from "./orb-input";
 import { HoverBorderGradient } from "@/components/vendor/hover-border-gradient";
 
 const TYPE_LABELS: Record<SuggestionType, string> = {
-  task: "Task",
-  idea: "Idea",
-  note: "Note",
-  mood: "Mood",
+  task: "Görev",
+  idea: "Fikir",
+  note: "Not",
+  mood: "Ruh Hali",
   deadline: "Deadline",
-  calendar: "Calendar Block",
+  calendar: "Takvim Bloğu",
 };
 
 // Gold is reserved for urgency (deadlines) — every other type gets its own
@@ -178,7 +178,7 @@ export function AiStudioPanel() {
                           innerBg="var(--color-gold)"
                           innerClassName="px-4 py-2 text-ink"
                         >
-                          Confirm
+                          Onayla
                         </HoverBorderGradient>
                         <motion.button
                           onClick={() => setEditing(!editing)}
@@ -187,7 +187,7 @@ export function AiStudioPanel() {
                           transition={{ duration: 0.2, ease: EASE }}
                           className="rounded-full border border-white/10 px-4 py-2 text-bone-dim hover:border-white/25"
                         >
-                          {editing ? "Done" : "Edit"}
+                          {editing ? "Tamam" : "Düzenle"}
                         </motion.button>
                         <motion.button
                           onClick={handleCancel}
@@ -196,7 +196,7 @@ export function AiStudioPanel() {
                           transition={{ duration: 0.2, ease: EASE }}
                           className="rounded-full border border-white/10 px-4 py-2 text-muted hover:border-white/25"
                         >
-                          Cancel
+                          Vazgeç
                         </motion.button>
                       </div>
                     </div>

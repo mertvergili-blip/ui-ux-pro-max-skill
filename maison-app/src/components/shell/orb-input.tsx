@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useSpeechRecognition } from "@/lib/use-speech-recognition";
 
@@ -13,6 +14,16 @@ interface OrbInputProps {
 
 export function OrbInput({ value, onChange, placeholder, active, loading }: OrbInputProps) {
   const { isSupported, listening, start, stop } = useSpeechRecognition(onChange);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-grow with the content — a fixed rows={2} let longer notes spill
+  // over the mic hint below.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 132)}px`;
+  }, [value]);
 
   const handleOrbClick = () => {
     if (listening) stop();
@@ -96,11 +107,12 @@ export function OrbInput({ value, onChange, placeholder, active, loading }: OrbI
       </div>
 
       <textarea
+        ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={listening ? "Dinliyorum…" : placeholder}
-        rows={2}
-        className="w-full max-w-[360px] resize-none border-b border-line bg-transparent px-1 pb-3 text-center font-serif text-[17px] italic text-bone outline-none placeholder:text-muted focus:border-gold/50"
+        rows={1}
+        className="w-full max-w-[360px] resize-none overflow-y-auto border-b border-line bg-transparent px-1 pb-3 text-center font-serif text-[17px] italic leading-snug text-bone outline-none placeholder:text-muted focus:border-gold/50"
       />
       {isSupported && (
         <p className="mt-2 text-[10px] uppercase tracking-[1.5px] text-muted">

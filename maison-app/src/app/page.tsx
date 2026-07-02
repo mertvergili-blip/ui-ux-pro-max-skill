@@ -59,7 +59,7 @@ export default function Home() {
       {!introVisible && (
         <>
           <ImagePanel />
-          <div className="relative z-5 min-h-screen w-[60%] pb-24 pl-[72px]">
+          <div className="relative z-5 min-h-screen w-full px-5 pb-24 sm:px-9 lg:w-[60%] lg:px-0 lg:pl-[72px]">
             <Topbar />
             <div className="pt-[38px]">
               <ActiveView />

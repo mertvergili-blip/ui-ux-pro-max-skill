@@ -51,12 +51,12 @@ export function IntroScreen() {
           <div className="pointer-events-none absolute inset-0">
             <LiquidEther
               colors={LIQUID_COLORS}
-              mouseForce={20}
-              cursorSize={110}
+              mouseForce={22}
+              cursorSize={120}
               resolution={0.5}
               autoDemo
-              autoSpeed={0.4}
-              autoIntensity={2}
+              autoSpeed={0.5}
+              autoIntensity={2.8}
               autoResumeDelay={2400}
               autoRampDuration={0.8}
             />
@@ -66,7 +66,7 @@ export function IntroScreen() {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(ellipse 900px 700px at 72% 50%, rgba(196,164,105,0.05), transparent 60%)",
+                "radial-gradient(ellipse 900px 700px at 72% 50%, rgba(196,164,105,0.09), transparent 60%)",
             }}
           />
 

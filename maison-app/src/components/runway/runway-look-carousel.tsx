@@ -25,6 +25,9 @@ type Slide =
 export function RunwayLookCarousel() {
   const photos = useStore((s) => s.runwayPhotos);
   const [curatedImages, setCuratedImages] = useState<Record<string, string | null>>({});
+  // Fetched URLs can still fail at render time — drop to the editorial
+  // placeholder instead of a broken image.
+  const [failedIds, setFailedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -62,9 +65,9 @@ export function RunwayLookCarousel() {
       mood: show.mood,
       reviewUrl: show.reviewUrl,
       palette: show.palette,
-      image: curatedImages[show.id] ?? null,
+      image: failedIds.has(show.id) ? null : (curatedImages[show.id] ?? null),
     }));
-  }, [photos, curatedImages]);
+  }, [photos, curatedImages, failedIds]);
 
   const [rawIndex, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -129,6 +132,10 @@ export function RunwayLookCarousel() {
               <img
                 src={slide.image}
                 alt={`${slide.designer} ${slide.season}`}
+                referrerPolicy="no-referrer"
+                onError={() =>
+                  setFailedIds((prev) => new Set(prev).add(slide.id))
+                }
                 className="h-full w-full object-cover"
               />
             ) : (

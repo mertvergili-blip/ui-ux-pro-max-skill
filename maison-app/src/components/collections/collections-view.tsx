@@ -166,7 +166,7 @@ function Folder({
               e.stopPropagation();
               onRemove();
             }}
-            className="text-[9.5px] uppercase tracking-[1.5px] text-muted opacity-0 transition-opacity duration-200 hover:text-rose group-hover:opacity-100"
+            className="text-[9.5px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity duration-200 hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
           >
             Kaldır
           </button>
@@ -179,7 +179,7 @@ function Folder({
           </p>
         )}
         <span
-          className="mt-2.5 inline-block translate-x-[-4px] text-[10.5px] uppercase tracking-[1.5px] opacity-0 transition-all duration-250 group-hover:translate-x-0 group-hover:opacity-100"
+          className="mt-2.5 inline-block text-[10.5px] uppercase tracking-[1.5px] transition-all duration-250 lg:translate-x-[-4px] lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100"
           style={{ color: data.accent }}
           onClick={(e) => {
             e.stopPropagation();
@@ -551,7 +551,7 @@ function IterationLog({ collectionId }: { collectionId: string }) {
             </div>
             <button
               onClick={() => removeIterationEntry(e.id)}
-              className="flex-shrink-0 text-[10px] uppercase tracking-[1.5px] text-muted opacity-0 transition-opacity hover:text-rose group-hover:opacity-100"
+              className="flex-shrink-0 text-[10px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
             >
               Kaldır
             </button>
@@ -613,7 +613,7 @@ export function CollectionsView() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-      className="pr-14"
+      className="lg:pr-14"
     >
       <AnimatePresence mode="wait">
         {openProject ? (
@@ -644,10 +644,10 @@ export function CollectionsView() {
                 {portfolioMode ? "Portfolyo Modu · Açık" : "Portfolyo Modu"}
               </button>
             </div>
-            <h1 className="mb-7 font-heading text-[34px] font-normal leading-[1.12] text-[#f7f2e6]">
+            <h1 className="mb-7 font-heading text-[28px] font-normal leading-[1.12] text-[#f7f2e6] lg:text-[34px]">
               Klasörü aç, içindeki parçaları gör.
             </h1>
-            <div className="mt-[90px] grid grid-cols-3 gap-x-[26px] gap-y-[34px]">
+            <div className="mt-12 grid grid-cols-1 gap-x-[26px] gap-y-[34px] sm:grid-cols-2 lg:mt-[90px] lg:grid-cols-3">
               {collections.map((f) => (
                 <Folder
                   key={f.id}

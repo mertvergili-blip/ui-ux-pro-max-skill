@@ -1,6 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import { Type } from "@google/genai";
 import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
+import { decodeHtmlEntities } from "@/lib/html-entities";
 import { fetchOgImage } from "@/lib/og-image";
 import { LOCAL_RUNWAY_NEWS, type RunwayNewsItem, type RunwayTag } from "@/lib/runway-news";
 
@@ -56,9 +57,11 @@ async function fetchWwdItems(): Promise<RawFeedItem[]> {
   const list = Array.isArray(rawItems) ? rawItems : rawItems ? [rawItems] : [];
 
   return list.slice(0, 8).map((item) => {
-    const description = textOf(item.description).replace(/<[^>]+>/g, "").trim();
+    const description = decodeHtmlEntities(
+      textOf(item.description).replace(/<[^>]+>/g, "")
+    ).trim();
     return {
-      title: textOf(item.title).trim(),
+      title: decodeHtmlEntities(textOf(item.title)).trim(),
       link: textOf(item.link).trim(),
       description: description || undefined,
     };

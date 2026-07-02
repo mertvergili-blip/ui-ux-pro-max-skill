@@ -109,13 +109,13 @@ export function PathView() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-      className="pr-14"
+      className="lg:pr-14"
     >
       <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
         <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
         Career Path
       </p>
-      <h1 className="mb-7 font-heading text-[34px] font-normal leading-[1.12] text-[#f7f2e6]">
+      <h1 className="mb-7 font-heading text-[28px] font-normal leading-[1.12] text-[#f7f2e6] lg:text-[34px]">
         Creative Director&apos;a giden yol.
       </h1>
 

@@ -19,11 +19,15 @@ function NewsCard({
 }: RunwayNewsItem & { matchedLabels?: string[] }) {
   const color = RUNWAY_TAG_COLOR[tag];
   const Wrapper = link ? "a" : "div";
+  // A fetched og:image URL can still fail at render time (CDN hiccup,
+  // hotlink rules) — fall back to the editorial placeholder, never a
+  // broken-image icon.
+  const [imgFailed, setImgFailed] = useState(false);
   return (
     <Wrapper
       {...(link ? { href: link, target: "_blank", rel: "noopener noreferrer" } : {})}
       className={`group block cursor-pointer overflow-hidden rounded border border-line transition-all duration-300 hover:-translate-y-0.5 ${
-        large ? "col-span-2" : ""
+        large ? "sm:col-span-2" : ""
       }`}
       style={
         {
@@ -32,10 +36,16 @@ function NewsCard({
       }
     >
       <div className="relative" style={{ height: large ? 200 : 120 }}>
-        {image ? (
+        {image && !imgFailed ? (
           // Real og:image from the article's own page (see src/lib/og-image.ts).
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={image} alt={title} className="h-full w-full object-cover" />
+          <img
+            src={image}
+            alt={title}
+            referrerPolicy="no-referrer"
+            onError={() => setImgFailed(true)}
+            className="h-full w-full object-cover"
+          />
         ) : (
           <EditorialPlaceholder
             palette={[color, "#100d09"]}
@@ -100,7 +110,7 @@ function RunwayGallery() {
   };
 
   return (
-    <div className="mr-5 mt-11 border-t border-line pt-7">
+    <div className="mt-11 border-t border-line pt-7 lg:mr-5">
       <div className="mb-1.5 flex items-center justify-between">
         <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
           Runway Galerin
@@ -249,13 +259,13 @@ export function RunwayView() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-      className="pr-14"
+      className="lg:pr-14"
     >
       <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
         <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
         Runway Intel
       </p>
-      <h1 className="mb-1.5 font-heading text-[34px] font-normal leading-[1.12] text-[#f7f2e6]">
+      <h1 className="mb-1.5 font-heading text-[28px] font-normal leading-[1.12] text-[#f7f2e6] lg:text-[34px]">
         Bugünün moda özeti.
       </h1>
       <p className="mb-7 max-w-[380px] text-[13.5px] leading-relaxed text-bone-dim">
@@ -267,7 +277,7 @@ export function RunwayView() {
       </p>
 
       {radar.length > 0 && (
-        <div className="mr-5 mb-7 rounded-[1.25rem] bg-white/[0.02] p-1.5 ring-1 ring-gold/15">
+        <div className="mb-7 rounded-[1.25rem] bg-white/[0.02] p-1.5 ring-1 ring-gold/15 lg:mr-5">
           <div className="rounded-[1rem] bg-black/20 px-5 py-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
             <p className="mb-1.5 text-[9.5px] uppercase tracking-[2.5px] text-gold">
               Trend Radar · Sana Özel
@@ -282,7 +292,7 @@ export function RunwayView() {
         </div>
       )}
 
-      <div className="mr-5 grid grid-cols-2 gap-[18px]">
+      <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2 lg:mr-5">
         {news.map((n, i) => (
           <NewsCard key={i} {...n} matchedLabels={matchedByTitle.get(n.title)} />
         ))}

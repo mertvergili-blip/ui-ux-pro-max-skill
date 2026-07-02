@@ -72,7 +72,8 @@ export function JournalView() {
     const moodColor = (key: MoodKey) =>
       MOODS.find((m) => m.key === key)?.color ?? "var(--color-bone-dim)";
     if (last7.length === 0) {
-      return Array.from({ length: 7 }, () => ({ h: 0.3, color: "var(--color-line)" }));
+      // Thin baseline ticks — chunky gray blocks read as broken data.
+      return Array.from({ length: 7 }, () => ({ h: 0.06, color: "var(--color-line)" }));
     }
     return Array.from({ length: 7 }, (_, i) => {
       const e = last7[i];
@@ -119,17 +120,17 @@ export function JournalView() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-      className="pr-14"
+      className="lg:pr-14"
     >
       <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
         <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
         Journal
       </p>
-      <h1 className="mb-2 font-heading text-[34px] font-normal leading-[1.12] text-[#f7f2e6]">
+      <h1 className="mb-2 font-heading text-[28px] font-normal leading-[1.12] text-[#f7f2e6] lg:text-[34px]">
         Bugün nasılsın?
       </h1>
 
-      <div className="my-2 mb-8 flex gap-4">
+      <div className="my-2 mb-8 flex gap-3 sm:gap-4">
         {MOODS.map((m) => (
           <div
             key={m.key}
@@ -161,7 +162,7 @@ export function JournalView() {
         onChange={(e) => setTodayReflection(e.target.value)}
       />
 
-      <div className="mt-9 grid max-w-[520px] grid-cols-2 gap-10">
+      <div className="mt-9 grid max-w-[520px] grid-cols-1 gap-10 sm:grid-cols-2">
         <div>
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
             Energy Rhythm
@@ -175,6 +176,11 @@ export function JournalView() {
               />
             ))}
           </div>
+          {journalEntries.length === 0 && (
+            <p className="mt-2 text-[10.5px] italic text-muted">
+              Mood seçtikçe burada birikecek.
+            </p>
+          )}
         </div>
         <div>
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">

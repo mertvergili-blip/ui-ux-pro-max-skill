@@ -19,21 +19,30 @@ const COINS = [
   { id: "solana", sym: "SOL" },
 ] as const;
 
+type Status = "loading" | "live" | "unavailable";
+
 export function FinancePulse() {
   const [prices, setPrices] = useState<PriceMap>({});
+  const [status, setStatus] = useState<Status>("loading");
 
   useEffect(() => {
     let cancelled = false;
 
     const fetchPrices = async () => {
       try {
-        const res = await fetch(
-          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true"
-        );
+        const res = await fetch("/api/finance");
+        if (!res.ok) throw new Error("finance route failed");
         const data = await res.json();
-        if (!cancelled) setPrices(data);
+        if (!cancelled && data.prices) {
+          setPrices(data.prices);
+          setStatus("live");
+        }
       } catch {
-        /* silent */
+        // Keep whatever we last had; only mark unavailable if we never
+        // got anything — a stuck "···" was the old failure mode.
+        if (!cancelled) {
+          setStatus((s) => (s === "live" ? s : "unavailable"));
+        }
       }
     };
 
@@ -58,15 +67,17 @@ export function FinancePulse() {
               d.usd.toLocaleString("en-US", {
                 maximumFractionDigits: d.usd > 100 ? 0 : 2,
               })
-            : "···";
+            : status === "unavailable"
+              ? "—"
+              : "···";
           const chg = d?.usd_24h_change;
           return (
             <div key={id} className="flex items-baseline gap-2 text-[12px]">
               <span className="w-7 tracking-wide text-muted">{sym}</span>
-              <span className="font-heading text-bone-dim">{price}</span>
+              <span className="font-heading tabular-nums text-bone-dim">{price}</span>
               {chg !== undefined && (
                 <span
-                  className={`text-[10px] ${chg >= 0 ? "text-[#8fae82]" : "text-[#c47a7a]"}`}
+                  className={`text-[10px] tabular-nums ${chg >= 0 ? "text-[#8fae82]" : "text-[#c47a7a]"}`}
                 >
                   {chg >= 0 ? "+" : ""}
                   {chg.toFixed(1)}%
@@ -76,6 +87,11 @@ export function FinancePulse() {
           );
         })}
       </div>
+      {status === "unavailable" && (
+        <p className="mt-2 text-[10px] italic text-muted">
+          Piyasa verisine şu an ulaşılamıyor.
+        </p>
+      )}
     </div>
   );
 }

@@ -141,3 +141,7 @@
 @keyframes strike {
   to { right: 0; }
 }
+
+/* Horizontal scroll rails (mobile nav) — scrollable but chromeless */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

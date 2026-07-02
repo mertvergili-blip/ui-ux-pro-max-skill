@@ -52,7 +52,7 @@ function MaterialCard({
           />
           <button
             onClick={onRemove}
-            className="text-[10px] uppercase tracking-[1.5px] text-muted opacity-0 transition-opacity duration-200 hover:text-rose group-hover:opacity-100"
+            className="text-[10px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity duration-200 hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
           >
             Kaldır
           </button>
@@ -181,6 +181,55 @@ function AddMaterialCard() {
   );
 }
 
+const GHOST_EXAMPLES = [
+  {
+    name: "Yün Krep",
+    supplier: "Bursa İpekçilik",
+    costNote: "metre 340₺",
+    sampleNote: "Numune istendi, yolda",
+    colorTag: "#4a3f35",
+  },
+  {
+    name: "Organze — Buz Mavisi",
+    supplier: "Zeytinburnu Tekstil",
+    costNote: "metre 210₺",
+    sampleNote: "Drape testi yapıldı",
+    colorTag: "#3d5a6c",
+  },
+] as const;
+
+// Shown only while the archive is empty — sketches what a filled library
+// will look like without pretending to be the user's data.
+function GhostMaterialCard({
+  name,
+  supplier,
+  costNote,
+  sampleNote,
+  colorTag,
+}: (typeof GHOST_EXAMPLES)[number]) {
+  return (
+    <div className="relative rounded-[1.25rem] border border-dashed border-line/80 p-1.5 opacity-60">
+      <span className="absolute right-4 top-4 text-[8.5px] uppercase tracking-[2px] text-muted">
+        Örnek
+      </span>
+      <div className="rounded-[1rem] p-5">
+        <div
+          className="mb-4 h-10 w-10 rounded-full opacity-70 ring-1 ring-white/10"
+          style={{ background: colorTag }}
+        />
+        <p className="mb-1 font-heading text-[16px] text-bone-dim">{name}</p>
+        <p className="mb-3 text-xs text-muted">{supplier}</p>
+        <p className="mb-1 text-[12px] leading-relaxed text-muted">
+          Maliyet · {costNote}
+        </p>
+        <p className="text-[12px] leading-relaxed text-muted">
+          Numune · {sampleNote}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function MaterialLibraryView() {
   const materials = useStore((s) => s.materials);
   const removeMaterial = useStore((s) => s.removeMaterial);
@@ -190,13 +239,13 @@ export function MaterialLibraryView() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-      className="pr-14"
+      className="lg:pr-14"
     >
       <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
         <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
         Material Library
       </p>
-      <h1 className="mb-1.5 font-heading text-[34px] font-normal leading-[1.12] text-[#f7f2e6]">
+      <h1 className="mb-1.5 font-heading text-[28px] font-normal leading-[1.12] text-[#f7f2e6] lg:text-[34px]">
         Kumaş ve materyal arşivin.
       </h1>
       <p className="mb-7 max-w-[420px] text-[13.5px] leading-relaxed text-bone-dim">
@@ -204,7 +253,7 @@ export function MaterialLibraryView() {
         tedarikçi, maliyet, numune notları.
       </p>
 
-      <div className="mr-5 grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:mr-5 lg:grid-cols-3">
         <AnimatePresence mode="popLayout">
           {materials.map((m) => (
             <MaterialCard
@@ -215,6 +264,8 @@ export function MaterialLibraryView() {
           ))}
         </AnimatePresence>
         <AddMaterialCard />
+        {materials.length === 0 &&
+          GHOST_EXAMPLES.map((g) => <GhostMaterialCard key={g.name} {...g} />)}
       </div>
     </motion.div>
   );

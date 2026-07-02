@@ -11,7 +11,7 @@ function HeadlineReveal() {
   const words = "Bugün sakin bir gün. Bir teslim tarihi *yaklaşıyor.*".split(" ");
 
   return (
-    <h1 className="mb-9 max-w-[600px] font-heading text-[46px] font-normal leading-[1.12] tracking-tight text-[#f7f2e6]">
+    <h1 className="mb-9 max-w-[600px] font-heading text-[32px] font-normal leading-[1.12] tracking-tight text-[#f7f2e6] sm:text-[40px] lg:text-[46px]">
       {words.map((w, i) => {
         const isEm = w.includes("*");
         const clean = w.replace(/\*/g, "");
@@ -103,7 +103,7 @@ export function StudioView() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-      className="pr-14"
+      className="lg:pr-14"
     >
       <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
         <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
@@ -112,7 +112,7 @@ export function StudioView() {
 
       <HeadlineReveal />
 
-      <div className="flex gap-[50px]">
+      <div className="flex flex-col gap-10 lg:flex-row lg:gap-[50px]">
         <div className="flex-[1.3]">
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
             Studio Focus
@@ -149,7 +149,7 @@ export function StudioView() {
           <CapsuleDayCard />
         </div>
 
-        <div className="flex flex-col gap-6 border-l border-line pl-7">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-7 border-t border-line pt-7 lg:flex lg:flex-col lg:gap-6 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-0">
           <div>
             <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
               Streak
@@ -185,7 +185,7 @@ export function StudioView() {
               )}
             </p>
           </div>
-          <div className="border-t border-line pt-6">
+          <div className="col-span-2 border-t border-line pt-6">
             <FinancePulse />
           </div>
         </div>
