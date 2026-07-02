@@ -6,6 +6,7 @@ import { LOCAL_RUNWAY_NEWS, RUNWAY_TAG_COLOR, type RunwayNewsItem } from "@/lib/
 import { useStore } from "@/lib/store";
 import { resizeImageFile } from "@/lib/image-resize";
 import { rankTrendRadar } from "@/lib/trend-radar";
+import { EditorialPlaceholder } from "@/components/shared/editorial-placeholder";
 
 function NewsCard({
   tag,
@@ -13,6 +14,7 @@ function NewsCard({
   sub,
   link,
   large,
+  image,
   matchedLabels,
 }: RunwayNewsItem & { matchedLabels?: string[] }) {
   const color = RUNWAY_TAG_COLOR[tag];
@@ -29,23 +31,18 @@ function NewsCard({
         } as React.CSSProperties
       }
     >
-      <div
-        className="relative"
-        style={{
-          height: large ? 200 : 120,
-          background: `
-            radial-gradient(circle at 25% 30%, color-mix(in srgb, ${color} 55%, transparent), transparent 60%),
-            radial-gradient(circle at 80% 70%, color-mix(in srgb, ${color} 30%, transparent), transparent 55%),
-            linear-gradient(150deg, #232019, #100d09)
-          `,
-        }}
-      >
-        <div
-          className="absolute inset-0 opacity-5 mix-blend-overlay"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          }}
-        />
+      <div className="relative" style={{ height: large ? 200 : 120 }}>
+        {image ? (
+          // Real og:image from the article's own page (see src/lib/og-image.ts).
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image} alt={title} className="h-full w-full object-cover" />
+        ) : (
+          <EditorialPlaceholder
+            palette={[color, "#100d09"]}
+            label={tag}
+            className="h-full w-full"
+          />
+        )}
         {matchedLabels && matchedLabels.length > 0 && (
           <span className="absolute right-2.5 top-2.5 rounded-full border border-gold/30 bg-ink/60 px-2 py-1 text-[8.5px] uppercase tracking-[1px] text-gold backdrop-blur-sm">
             DNA&apos;na uygun
@@ -123,8 +120,8 @@ function RunwayGallery() {
         />
       </div>
       <p className="mb-5 max-w-[420px] text-[12px] leading-relaxed text-muted">
-        Vogue Runway, WWD ya da bir markanın sitesinden beğendiğin defile
-        fotoğraflarını kaydedip buraya yükle — sağdaki panelde otomatik akar.
+        Sağdaki panel zaten arşivden gerçek görsellerle akıyor — istersen
+        kendi beğendiğin defile fotoğraflarını da yükleyip önceliklendirebilirsin.
       </p>
 
       <AnimatePresence>
@@ -216,7 +213,7 @@ function RunwayGallery() {
 
 export function RunwayView() {
   const [news, setNews] = useState<RunwayNewsItem[]>(LOCAL_RUNWAY_NEWS);
-  const [live, setLive] = useState(false);
+  const [newsSource, setNewsSource] = useState<"gemini" | "rss" | "local">("local");
 
   useEffect(() => {
     let cancelled = false;
@@ -228,7 +225,7 @@ export function RunwayView() {
         const data = await res.json();
         if (!cancelled && Array.isArray(data.items) && data.items.length > 0) {
           setNews(data.items);
-          setLive(data.source === "gemini");
+          setNewsSource(data.source ?? "local");
         }
       } catch {
         // local fallback already showing
@@ -262,9 +259,11 @@ export function RunwayView() {
         Bugünün moda özeti.
       </h1>
       <p className="mb-7 max-w-[380px] text-[13.5px] leading-relaxed text-bone-dim">
-        {live
-          ? "WWD'den gerçek zamanlı haberler, AI tarafından Türkçe'ye çevrilip özetlendi."
-          : "Bağlantı kurulamadı — örnek içerik gösteriliyor."}
+        {newsSource === "gemini" &&
+          "WWD'den gerçek zamanlı haberler, AI tarafından Türkçe'ye çevrilip özetlendi."}
+        {newsSource === "rss" &&
+          "WWD'den gerçek zamanlı haberler — AI özeti şu an kullanılamıyor, orijinal başlıklar gösteriliyor."}
+        {newsSource === "local" && "Bağlantı kurulamadı — örnek içerik gösteriliyor."}
       </p>
 
       {radar.length > 0 && (

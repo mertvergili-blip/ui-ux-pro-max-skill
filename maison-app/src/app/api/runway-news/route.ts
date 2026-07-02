@@ -1,6 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import { Type } from "@google/genai";
 import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
+import { fetchOgImage } from "@/lib/og-image";
 import { LOCAL_RUNWAY_NEWS, type RunwayNewsItem, type RunwayTag } from "@/lib/runway-news";
 
 const FEED_URL = "https://wwd.com/feed/";
@@ -8,9 +9,15 @@ const CACHE_TTL_MS = 45 * 60 * 1000; // 45 minutes — fashion news doesn't need
 const ITEM_COUNT = 4;
 const TAGS: RunwayTag[] = ["Marka Haberi", "Tasarımcı", "Materyal & Zanaat", "Trend"];
 
+// "gemini": real WWD items, AI-translated/summarized.
+// "rss": real WWD items, but the AI summary step failed — untranslated
+// titles, still live content (not the hardcoded placeholder).
+// "local": the feed itself was unreachable — hardcoded placeholder.
+type NewsSource = "gemini" | "rss" | "local";
+
 interface CacheEntry {
   items: RunwayNewsItem[];
-  source: "gemini" | "local";
+  source: NewsSource;
   fetchedAt: number;
 }
 
@@ -102,28 +109,66 @@ biri için:
   });
 }
 
+// Used when the feed itself is fine but Gemini couldn't summarize it —
+// still real, live WWD items (untranslated) rather than discarding them
+// for the hardcoded placeholder.
+function buildRssOnlySummary(items: RawFeedItem[]): RunwayNewsItem[] {
+  return items.slice(0, ITEM_COUNT).map((it, i) => ({
+    tag: "Trend" as RunwayTag,
+    title: it.title,
+    sub: i === 0 ? it.description : undefined,
+    link: it.link,
+    source: "WWD",
+    large: i === 0,
+  }));
+}
+
+// Best-effort real preview images from each article's own og:image — see
+// src/lib/og-image.ts for why this isn't scraping.
+async function attachImages(items: RunwayNewsItem[]): Promise<RunwayNewsItem[]> {
+  return Promise.all(
+    items.map(async (item) => {
+      if (!item.link) return item;
+      const image = await fetchOgImage(item.link);
+      return image ? { ...item, image } : item;
+    })
+  );
+}
+
+function localFallback(): CacheEntry {
+  const fallback: CacheEntry = { items: LOCAL_RUNWAY_NEWS, source: "local", fetchedAt: Date.now() };
+  // Cache the fallback too, briefly — avoids hammering a broken feed on
+  // every page load, but retries again soon rather than sticking to stale
+  // local content for the full 45 minutes.
+  cache = { ...fallback, fetchedAt: Date.now() - CACHE_TTL_MS + 5 * 60 * 1000 };
+  return fallback;
+}
+
 export async function GET() {
   if (cache && Date.now() - cache.fetchedAt < CACHE_TTL_MS) {
     return Response.json(cache);
   }
 
+  let rawItems: RawFeedItem[];
   try {
-    const rawItems = await fetchWwdItems();
+    rawItems = await fetchWwdItems();
     if (rawItems.length === 0) throw new Error("No items in feed");
-
-    const items = await summarizeWithGemini(rawItems);
-    cache = { items, source: "gemini", fetchedAt: Date.now() };
-    return Response.json(cache);
   } catch {
-    const fallback: CacheEntry = {
-      items: LOCAL_RUNWAY_NEWS,
-      source: "local",
-      fetchedAt: Date.now(),
-    };
-    // Cache the fallback too, briefly — avoids hammering a broken feed
-    // on every page load, but retries again soon rather than sticking to
-    // stale local content for the full 45 minutes.
-    cache = { ...fallback, fetchedAt: Date.now() - CACHE_TTL_MS + 5 * 60 * 1000 };
-    return Response.json(fallback);
+    return Response.json(localFallback());
   }
+
+  let items: RunwayNewsItem[];
+  let source: NewsSource;
+  try {
+    items = await summarizeWithGemini(rawItems);
+    source = "gemini";
+  } catch {
+    items = buildRssOnlySummary(rawItems);
+    source = "rss";
+  }
+
+  items = await attachImages(items);
+
+  cache = { items, source, fetchedAt: Date.now() };
+  return Response.json(cache);
 }

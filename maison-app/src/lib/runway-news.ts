@@ -7,6 +7,10 @@ export interface RunwayNewsItem {
   link?: string;
   source?: string;
   large?: boolean;
+  // The article's own og:image — fetched from the page WWD's RSS feed
+  // already pointed us to, not a scraped gallery. Absent when the fetch
+  // failed or the article has no preview image.
+  image?: string;
 }
 
 export const RUNWAY_TAG_COLOR: Record<RunwayTag, string> = {
