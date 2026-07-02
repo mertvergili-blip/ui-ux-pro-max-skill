@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { useStore, selectCreativeEnergy } from "@/lib/store";
+import { useStore, selectCreativeEnergy, selectDaysRemaining } from "@/lib/store";
 import { FinancePulse } from "@/components/shared/finance-pulse";
 
 function HeadlineReveal() {
@@ -92,6 +92,9 @@ export function StudioView() {
   const notes = useStore((s) => s.notes);
   const toggleAiPanel = useStore((s) => s.toggleAiPanel);
   const latestNote = notes[notes.length - 1];
+  const deadlineLabel = useStore((s) => s.deadlineLabel);
+  const deadlineDate = useStore((s) => s.deadlineDate);
+  const daysRemaining = useMemo(() => selectDaysRemaining(deadlineDate), [deadlineDate]);
 
   return (
     <motion.div
@@ -162,8 +165,10 @@ export function StudioView() {
             <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
               Next Deadline
             </p>
-            <p className="font-heading text-[15px]">Koleksiyon III</p>
-            <p className="mt-0.5 text-[11.5px] text-muted">6 gün kaldı</p>
+            <p className="font-heading text-[15px]">{deadlineLabel}</p>
+            <p className="mt-0.5 text-[11.5px] text-muted">
+              {daysRemaining === 0 ? "Bugün teslim" : `${daysRemaining} gün kaldı`}
+            </p>
           </div>
           <div className="border-t border-line pt-6">
             <FinancePulse />

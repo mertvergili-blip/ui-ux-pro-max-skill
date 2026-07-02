@@ -13,7 +13,8 @@ export type ViewName =
   | "path"
   | "journal"
   | "runway"
-  | "dna";
+  | "dna"
+  | "materials";
 
 export type MoodKey = "flowing" | "calm" | "stressed" | "grounded" | "tired";
 
@@ -43,6 +44,16 @@ export interface PendingSuggestion {
   rawInput: string;
 }
 
+export interface Material {
+  id: string;
+  name: string;
+  supplier: string;
+  costNote: string;
+  sampleNote: string;
+  colorTag: string; // hex or css color, used as the swatch
+  createdAt: number;
+}
+
 const MOOD_ENERGY: Record<MoodKey, string> = {
   flowing: "Flowing",
   calm: "Calm",
@@ -53,6 +64,19 @@ const MOOD_ENERGY: Record<MoodKey, string> = {
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
+}
+
+export function selectDaysRemaining(deadlineDate: string): number {
+  const deadline = new Date(deadlineDate + "T00:00:00");
+  const today = new Date(todayKey() + "T00:00:00");
+  return Math.max(0, Math.ceil((deadline.getTime() - today.getTime()) / 86400000));
+}
+
+// 0 = calm/cool, 1 = maximum urgency/warm — drives the ambient tint, not any banner
+export function selectUrgency(deadlineDate: string): number {
+  const daysLeft = selectDaysRemaining(deadlineDate);
+  const URGENCY_WINDOW = 10; // days out where urgency starts ramping in
+  return Math.max(0, Math.min(1, 1 - daysLeft / URGENCY_WINDOW));
 }
 
 interface MaisonStore {
@@ -72,8 +96,17 @@ interface MaisonStore {
 
   streak: number;
 
+  // Next deadline — drives both the Studio stat and the ambient urgency tint
+  deadlineLabel: string;
+  deadlineDate: string; // YYYY-MM-DD
+
   // AI notes log (confirmed suggestions land here, or in their target slice)
   notes: AiNote[];
+
+  // Material library
+  materials: Material[];
+  addMaterial: (m: Omit<Material, "id" | "createdAt">) => void;
+  removeMaterial: (id: string) => void;
 
   // AI Studio panel
   aiPanelOpen: boolean;
@@ -143,7 +176,25 @@ export const useStore = create<MaisonStore>()(
 
       streak: 12,
 
+      deadlineLabel: "Koleksiyon III",
+      deadlineDate: (() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 6);
+        return d.toISOString().slice(0, 10);
+      })(),
+
       notes: [],
+
+      materials: [],
+      addMaterial: (m) =>
+        set((s) => ({
+          materials: [
+            { ...m, id: `mat${Date.now()}`, createdAt: Date.now() },
+            ...s.materials,
+          ],
+        })),
+      removeMaterial: (id) =>
+        set((s) => ({ materials: s.materials.filter((m) => m.id !== id) })),
 
       aiPanelOpen: false,
       toggleAiPanel: () => set((s) => ({ aiPanelOpen: !s.aiPanelOpen })),
@@ -249,6 +300,7 @@ export const useStore = create<MaisonStore>()(
         notes: s.notes,
         journalEntries: s.journalEntries,
         streak: s.streak,
+        materials: s.materials,
       }),
     }
   )

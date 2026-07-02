@@ -8,6 +8,7 @@ const TABS: { label: string; view: ViewName }[] = [
   { label: "Calendar", view: "calendar" },
   { label: "Collections", view: "collections" },
   { label: "DNA Map", view: "dna" },
+  { label: "Materials", view: "materials" },
   { label: "Path", view: "path" },
   { label: "Journal", view: "journal" },
   { label: "Runway", view: "runway" },
@@ -30,7 +31,7 @@ export function Topbar() {
             <button
               key={view}
               onClick={() => setView(view)}
-              className={`relative rounded-full px-4 py-2 text-[10.5px] uppercase tracking-[2px] transition-colors duration-300 ${
+              className={`relative rounded-full px-3.5 py-2 text-[10px] uppercase tracking-[1.5px] transition-colors duration-300 ${
                 active ? "text-ink" : "text-muted hover:text-bone"
               }`}
               style={{ transitionTimingFunction: "cubic-bezier(.32,.72,0,1)" }}
