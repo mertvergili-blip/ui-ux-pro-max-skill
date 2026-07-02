@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { LOCAL_RUNWAY_NEWS, RUNWAY_TAG_COLOR, type RunwayNewsItem } from "@/lib/runway-news";
+import { useStore } from "@/lib/store";
+import { resizeImageFile } from "@/lib/image-resize";
 
 function NewsCard({ tag, title, sub, link, large }: RunwayNewsItem) {
   const color = RUNWAY_TAG_COLOR[tag];
@@ -53,6 +55,149 @@ function NewsCard({ tag, title, sub, link, large }: RunwayNewsItem) {
       {sub && <p className="mx-4 mb-4 text-xs text-muted">{sub}</p>}
       {!sub && <div className="mb-4" />}
     </Wrapper>
+  );
+}
+
+function RunwayGallery() {
+  const photos = useStore((s) => s.runwayPhotos);
+  const addRunwayPhoto = useStore((s) => s.addRunwayPhoto);
+  const removeRunwayPhoto = useStore((s) => s.removeRunwayPhoto);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const [pendingFile, setPendingFile] = useState<{ file: File; preview: string } | null>(null);
+  const [designer, setDesigner] = useState("");
+  const [season, setSeason] = useState("");
+
+  const handleFilePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPendingFile({ file, preview: URL.createObjectURL(file) });
+    e.target.value = "";
+  };
+
+  const handleSave = async () => {
+    if (!pendingFile) return;
+    const dataUrl = await resizeImageFile(pendingFile.file);
+    addRunwayPhoto({
+      dataUrl,
+      designer: designer.trim() || "Bilinmeyen",
+      season: season.trim() || "—",
+    });
+    URL.revokeObjectURL(pendingFile.preview);
+    setPendingFile(null);
+    setDesigner("");
+    setSeason("");
+  };
+
+  return (
+    <div className="mr-5 mt-11 border-t border-line pt-7">
+      <div className="mb-1.5 flex items-center justify-between">
+        <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
+          Runway Galerin
+        </p>
+        <button
+          onClick={() => fileRef.current?.click()}
+          className="text-[10px] uppercase tracking-[1.5px] text-muted transition-colors hover:text-gold"
+        >
+          + Fotoğraf Ekle
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFilePick}
+          className="hidden"
+        />
+      </div>
+      <p className="mb-5 max-w-[420px] text-[12px] leading-relaxed text-muted">
+        Vogue Runway, WWD ya da bir markanın sitesinden beğendiğin defile
+        fotoğraflarını kaydedip buraya yükle — sağdaki panelde otomatik akar.
+      </p>
+
+      <AnimatePresence>
+        {pendingFile && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-5 overflow-hidden"
+          >
+            <div className="flex gap-4 rounded-[1rem] border border-dashed border-gold/25 p-4">
+              {/* Local blob preview of a just-picked file — not a remote asset. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={pendingFile.preview}
+                alt=""
+                className="h-24 w-20 flex-shrink-0 rounded-[0.5rem] object-cover"
+              />
+              <div className="flex flex-1 flex-col gap-2.5">
+                <input
+                  value={designer}
+                  onChange={(e) => setDesigner(e.target.value)}
+                  placeholder="Tasarımcı / marka"
+                  autoFocus
+                  className="border-b border-line bg-transparent pb-1.5 text-[13px] text-bone outline-none placeholder:text-muted focus:border-gold/50"
+                />
+                <input
+                  value={season}
+                  onChange={(e) => setSeason(e.target.value)}
+                  placeholder="Sezon (örn. SS25)"
+                  className="border-b border-line bg-transparent pb-1.5 text-[12.5px] text-bone-dim outline-none placeholder:text-muted focus:border-gold/50"
+                />
+                <div className="mt-1 flex gap-2 text-[10px] uppercase tracking-[1.5px]">
+                  <button
+                    onClick={handleSave}
+                    className="rounded-full bg-gold px-3.5 py-1.5 text-ink"
+                  >
+                    Kaydet
+                  </button>
+                  <button
+                    onClick={() => {
+                      URL.revokeObjectURL(pendingFile.preview);
+                      setPendingFile(null);
+                    }}
+                    className="rounded-full border border-white/10 px-3.5 py-1.5 text-muted hover:border-white/25"
+                  >
+                    Vazgeç
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {photos.length > 0 && (
+        <div className="flex flex-wrap gap-3">
+          <AnimatePresence mode="popLayout">
+            {photos.map((p) => (
+              <motion.div
+                key={p.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="group relative h-24 w-20 flex-shrink-0 overflow-hidden rounded-[0.5rem]"
+              >
+                {/* Stored data URL from the user's own upload. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={p.dataUrl}
+                  alt={`${p.designer} ${p.season}`}
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  onClick={() => removeRunwayPhoto(p.id)}
+                  className="absolute inset-0 flex items-center justify-center bg-ink/70 text-[9.5px] uppercase tracking-[1.5px] text-bone opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  Kaldır
+                </button>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -108,6 +253,8 @@ export function RunwayView() {
           <NewsCard key={i} {...n} />
         ))}
       </div>
+
+      <RunwayGallery />
     </motion.div>
   );
 }

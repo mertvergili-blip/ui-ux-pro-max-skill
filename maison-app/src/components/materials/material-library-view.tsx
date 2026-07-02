@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/lib/store";
+import { Tilt } from "@/components/unlumen-ui/tilt";
 
 const SWATCH_PRESETS = [
   "#c4a469", // gold
@@ -39,7 +40,11 @@ function MaterialCard({
       transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
       className="group relative rounded-[1.25rem] bg-white/[0.02] p-1.5 ring-1 ring-white/[0.06]"
     >
-      <div className="rounded-[1rem] bg-black/20 p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
+      <Tilt
+        rotationFactor={5}
+        springOptions={{ stiffness: 200, damping: 22 }}
+        className="rounded-[1rem] bg-black/20 p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]"
+      >
         <div className="mb-4 flex items-center justify-between">
           <div
             className="h-10 w-10 rounded-full ring-1 ring-white/10"
@@ -66,7 +71,7 @@ function MaterialCard({
             {sampleNote}
           </p>
         )}
-      </div>
+      </Tilt>
     </motion.div>
   );
 }

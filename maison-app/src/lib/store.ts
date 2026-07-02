@@ -77,6 +77,14 @@ export interface CalendarEvent {
   text: string;
 }
 
+export interface RunwayPhoto {
+  id: string;
+  dataUrl: string;
+  designer: string;
+  season: string;
+  createdAt: number;
+}
+
 const MOOD_ENERGY: Record<MoodKey, string> = {
   flowing: "Flowing",
   calm: "Calm",
@@ -152,6 +160,13 @@ interface MaisonStore {
   setSelectedCalendarDay: (day: number | null) => void;
   addCalendarEvent: (day: number, text: string) => void;
   removeCalendarEvent: (id: string) => void;
+
+  // Runway — user-saved reference photos for the Runway right-panel carousel.
+  // Real photography can't be auto-fetched (Vogue/WWD/Instagram all block
+  // bot access), so this is a personal upload archive instead.
+  runwayPhotos: RunwayPhoto[];
+  addRunwayPhoto: (p: Omit<RunwayPhoto, "id" | "createdAt">) => void;
+  removeRunwayPhoto: (id: string) => void;
 
   // AI Studio panel
   aiPanelOpen: boolean;
@@ -316,6 +331,19 @@ export const useStore = create<MaisonStore>()(
           calendarEvents: s.calendarEvents.filter((e) => e.id !== id),
         })),
 
+      runwayPhotos: [],
+      addRunwayPhoto: (p) =>
+        set((s) => ({
+          runwayPhotos: [
+            { ...p, id: `rw${Date.now()}`, createdAt: Date.now() },
+            ...s.runwayPhotos,
+          ],
+        })),
+      removeRunwayPhoto: (id) =>
+        set((s) => ({
+          runwayPhotos: s.runwayPhotos.filter((p) => p.id !== id),
+        })),
+
       aiPanelOpen: false,
       toggleAiPanel: () => set((s) => ({ aiPanelOpen: !s.aiPanelOpen })),
       pendingSuggestion: null,
@@ -425,6 +453,7 @@ export const useStore = create<MaisonStore>()(
         completedCapsuleIds: s.completedCapsuleIds,
         collections: s.collections,
         calendarEvents: s.calendarEvents,
+        runwayPhotos: s.runwayPhotos,
       }),
     }
   )

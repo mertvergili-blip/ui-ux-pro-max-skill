@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useStore, selectCreativeEnergy, selectDaysRemaining } from "@/lib/store";
 import { FinancePulse } from "@/components/shared/finance-pulse";
 import { CapsuleDayCard } from "@/components/studio/capsule-day-card";
+import { AnimateDigits } from "@/components/unlumen-ui/animate-digits";
 
 function HeadlineReveal() {
   const words = "Bugün sakin bir gün. Bir teslim tarihi *yaklaşıyor.*".split(" ");
@@ -153,8 +154,8 @@ export function StudioView() {
             <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
               Streak
             </p>
-            <p className="font-heading text-[28px]">
-              {streak}
+            <p className="flex items-baseline font-heading text-[28px]">
+              <AnimateDigits value={String(streak)} enterY={20} />
               <small className="ml-1.5 font-sans text-xs text-muted">gün</small>
             </p>
           </div>
@@ -169,8 +170,19 @@ export function StudioView() {
               Next Deadline
             </p>
             <p className="font-heading text-[15px]">{deadlineLabel}</p>
-            <p className="mt-0.5 text-[11.5px] text-muted">
-              {daysRemaining === 0 ? "Bugün teslim" : `${daysRemaining} gün kaldı`}
+            <p className="mt-0.5 flex items-baseline text-[11.5px] text-muted">
+              {daysRemaining === 0 ? (
+                "Bugün teslim"
+              ) : (
+                <>
+                  <AnimateDigits
+                    value={String(daysRemaining)}
+                    enterY={14}
+                    className="text-[11.5px]"
+                  />
+                  <span className="ml-1">gün kaldı</span>
+                </>
+              )}
             </p>
           </div>
           <div className="border-t border-line pt-6">
