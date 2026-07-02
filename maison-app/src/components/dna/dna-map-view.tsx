@@ -9,7 +9,12 @@ import {
   DNA_NODES,
   type DnaCategory,
 } from "@/lib/dna-data";
-import { layoutDnaGraph, type LaidOutNode } from "@/lib/dna-layout";
+import {
+  layoutDnaGraph,
+  createSimNodes,
+  stepDnaSimulation,
+  type SimNode,
+} from "@/lib/dna-layout";
 import { localWhatWouldTheyDo } from "@/lib/what-would-they-do";
 import { useTypewriter } from "@/lib/use-typewriter";
 
@@ -18,6 +23,10 @@ const HEIGHT = 560;
 
 function degreeOf(nodeId: string): number {
   return DNA_EDGES.filter((e) => e.from === nodeId || e.to === nodeId).length;
+}
+
+function radiusOf(node: { id: string; category: DnaCategory }): number {
+  return node.category === "collection" ? 10 : 6 + degreeOf(node.id) * 0.7;
 }
 
 // Client coords -> SVG viewBox coords, accounting for the element's current
@@ -39,16 +48,33 @@ export function DnaMapView() {
   const [activeCategory, setActiveCategory] = useState<DnaCategory | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const laidOut = useMemo<LaidOutNode[]>(
+  // Metadata-only lookup (label/category/note) — never touched by physics.
+  const nodeById = useMemo(() => new Map(DNA_NODES.map((n) => [n.id, n])), []);
+
+  // The one-shot settle, computed once for the very first paint only — a
+  // plain memoized value (not a ref) so it's safe to read during render.
+  // Positions after that live entirely in simNodesRef below, which the
+  // physics effect creates/owns and never gets read during render.
+  const initialLaidOut = useMemo(
     () => layoutDnaGraph(DNA_NODES, DNA_EDGES, WIDTH, HEIGHT),
     []
   );
-
-  // Positions start from the force-directed settle, then become freely
-  // draggable — an Obsidian-style graph you can rearrange by hand.
-  const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>(
-    () => Object.fromEntries(laidOut.map((n) => [n.id, { x: n.x, y: n.y }]))
+  const initialById = useMemo(
+    () => new Map(initialLaidOut.map((n) => [n.id, n])),
+    [initialLaidOut]
   );
+
+  // Positions + velocities live in a ref, not React state — an always-on
+  // Obsidian-style force sim mutates this every animation frame and writes
+  // straight to the DOM (see the effect below), which would be fighting
+  // React's reconciliation if this were state driving JSX on every tick.
+  const simNodesRef = useRef<Map<string, SimNode> | null>(null);
+
+  const circleRefs = useRef(new Map<string, SVGCircleElement>());
+  const hitRefs = useRef(new Map<string, SVGCircleElement>());
+  const textRefs = useRef(new Map<string, SVGTextElement>());
+  const lineRefs = useRef(new Map<number, SVGLineElement>());
+
   const dragState = useRef<{
     id: string;
     offsetX: number;
@@ -56,22 +82,60 @@ export function DnaMapView() {
     moved: boolean;
   } | null>(null);
 
-  const positioned = useMemo<LaidOutNode[]>(
-    () =>
-      laidOut.map((n) => ({
-        ...n,
-        x: positions[n.id]?.x ?? n.x,
-        y: positions[n.id]?.y ?? n.y,
-      })),
-    [laidOut, positions]
-  );
-  const byId = useMemo(() => new Map(positioned.map((n) => [n.id, n])), [positioned]);
+  // Continuous simulation — runs for the component's whole lifetime, not
+  // just while dragging, so releasing a node lets it keep settling and
+  // dragging one node visibly tugs its spring-connected neighbors along.
+  useEffect(() => {
+    const nodes = createSimNodes(initialLaidOut);
+    simNodesRef.current = nodes;
+    let raf: number;
+
+    const tick = () => {
+      const draggedId = dragState.current?.moved ? dragState.current.id : null;
+      stepDnaSimulation(nodes, DNA_EDGES, WIDTH, HEIGHT, draggedId);
+
+      for (const [id, node] of nodes) {
+        const c = circleRefs.current.get(id);
+        const h = hitRefs.current.get(id);
+        const t = textRefs.current.get(id);
+        if (c) {
+          c.setAttribute("cx", String(node.x));
+          c.setAttribute("cy", String(node.y));
+        }
+        if (h) {
+          h.setAttribute("cx", String(node.x));
+          h.setAttribute("cy", String(node.y));
+        }
+        if (t) {
+          t.setAttribute("x", String(node.x));
+          t.setAttribute("y", String(node.y - radiusOf(node) - 8));
+        }
+      }
+
+      DNA_EDGES.forEach((e, i) => {
+        const line = lineRefs.current.get(i);
+        const a = nodes.get(e.from);
+        const b = nodes.get(e.to);
+        if (line && a && b) {
+          line.setAttribute("x1", String(a.x));
+          line.setAttribute("y1", String(a.y));
+          line.setAttribute("x2", String(b.x));
+          line.setAttribute("y2", String(b.y));
+        }
+      });
+
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [initialLaidOut]);
 
   const handlePointerDown = (e: React.PointerEvent<SVGGElement>, nodeId: string) => {
     const svg = svgRef.current;
     if (!svg) return;
     const svgPt = toSvgPoint(svg, e.clientX, e.clientY);
-    const node = byId.get(nodeId);
+    const node = simNodesRef.current?.get(nodeId);
     if (!node) return;
     dragState.current = {
       id: nodeId,
@@ -86,23 +150,22 @@ export function DnaMapView() {
     const drag = dragState.current;
     const svg = svgRef.current;
     if (!drag || !svg) return;
+    const node = simNodesRef.current?.get(drag.id);
+    if (!node) return;
     const svgPt = toSvgPoint(svg, e.clientX, e.clientY);
     const nx = svgPt.x - drag.offsetX;
     const ny = svgPt.y - drag.offsetY;
-    if (!drag.moved) {
-      const node = byId.get(drag.id);
-      if (node && Math.hypot(nx - node.x, ny - node.y) > DRAG_THRESHOLD) {
-        drag.moved = true;
-      }
+    if (!drag.moved && Math.hypot(nx - node.x, ny - node.y) > DRAG_THRESHOLD) {
+      drag.moved = true;
     }
     if (drag.moved) {
-      setPositions((prev) => ({
-        ...prev,
-        [drag.id]: {
-          x: Math.max(24, Math.min(WIDTH - 24, nx)),
-          y: Math.max(24, Math.min(HEIGHT - 24, ny)),
-        },
-      }));
+      // Kinematic while held — the simulation (see the effect above) skips
+      // force integration for whichever node id is currently dragged and
+      // just lets its neighbors react to it moving.
+      node.x = Math.max(24, Math.min(WIDTH - 24, nx));
+      node.y = Math.max(24, Math.min(HEIGHT - 24, ny));
+      node.vx = 0;
+      node.vy = 0;
     }
   };
 
@@ -125,7 +188,7 @@ export function DnaMapView() {
     return ids;
   }, [selectedId]);
 
-  const selectedNode = selectedId ? byId.get(selectedId) : null;
+  const selectedNode = selectedId ? nodeById.get(selectedId) : null;
 
   const [wwtd, setWwtd] = useState<{ id: string; text: string } | null>(null);
   const wwtdDisplay = useTypewriter(wwtd?.text ?? "");
@@ -191,7 +254,8 @@ export function DnaMapView() {
       <p className="mb-7 max-w-[460px] text-[13.5px] leading-relaxed text-bone-dim">
         Moodboard değil — koleksiyonlarını besleyen tasarımcı, renk, form,
         doku, dönem ve zanaat referanslarının birbirine nasıl bağlandığını
-        gösteren bir harita.
+        gösteren bir harita. Bir düğümü sürükle — bağlı olduğu her şey
+        peşinden gelir.
       </p>
 
       <div className="mb-6 flex flex-wrap gap-1.5">
@@ -232,8 +296,8 @@ export function DnaMapView() {
               className="h-auto w-full lg:h-[460px] lg:w-[620px]"
             >
               {DNA_EDGES.map((e, i) => {
-                const a = byId.get(e.from);
-                const b = byId.get(e.to);
+                const a = initialById.get(e.from);
+                const b = initialById.get(e.to);
                 if (!a || !b) return null;
                 const dim =
                   (activeCategory &&
@@ -243,6 +307,9 @@ export function DnaMapView() {
                 return (
                   <line
                     key={i}
+                    ref={(el) => {
+                      if (el) lineRefs.current.set(i, el);
+                    }}
                     data-edge
                     x1={a.x}
                     y1={a.y}
@@ -258,12 +325,12 @@ export function DnaMapView() {
                 );
               })}
 
-              {positioned.map((n) => {
+              {initialLaidOut.map((n) => {
                 const meta = DNA_CATEGORY_META[n.category];
                 const dim =
                   (activeCategory && n.category !== activeCategory) ||
                   (connectedIds && !connectedIds.has(n.id));
-                const r = n.category === "collection" ? 10 : 6 + degreeOf(n.id) * 0.7;
+                const r = radiusOf(n);
                 return (
                   <g
                     key={n.id}
@@ -276,6 +343,9 @@ export function DnaMapView() {
                     style={{ transformOrigin: `${n.x}px ${n.y}px` }}
                   >
                     <circle
+                      ref={(el) => {
+                        if (el) hitRefs.current.set(n.id, el);
+                      }}
                       cx={n.x}
                       cy={n.y}
                       r={r + 9}
@@ -283,6 +353,9 @@ export function DnaMapView() {
                       style={{ pointerEvents: "all" }}
                     />
                     <circle
+                      ref={(el) => {
+                        if (el) circleRefs.current.set(n.id, el);
+                      }}
                       cx={n.x}
                       cy={n.y}
                       r={r}
@@ -291,6 +364,9 @@ export function DnaMapView() {
                       style={{ transition: "opacity 0.3s ease", pointerEvents: "none" }}
                     />
                     <text
+                      ref={(el) => {
+                        if (el) textRefs.current.set(n.id, el);
+                      }}
                       x={n.x}
                       y={n.y - r - 8}
                       textAnchor="middle"
@@ -339,7 +415,7 @@ export function DnaMapView() {
                   (e) => e.from === selectedNode.id || e.to === selectedNode.id
                 ).map((e, i) => {
                   const otherId = e.from === selectedNode.id ? e.to : e.from;
-                  const other = byId.get(otherId);
+                  const other = nodeById.get(otherId);
                   if (!other) return null;
                   return (
                     <button

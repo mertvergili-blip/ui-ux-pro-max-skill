@@ -5,12 +5,16 @@ export interface LaidOutNode extends DnaNode {
   y: number;
 }
 
+export interface SimNode extends LaidOutNode {
+  vx: number;
+  vy: number;
+}
+
 /**
  * Minimal force-directed layout: mutual repulsion between all nodes, spring
  * attraction along edges, mild centering pull. Run for a fixed number of
- * iterations up front (not animated frame-by-frame) — this is a one-time
- * settle on mount, not a live physics sim, so a hand-rolled version is
- * plenty and avoids pulling in d3-force for a graph this size (~24 nodes).
+ * iterations up front — this only produces the *starting* arrangement; the
+ * live simulation (see stepDnaSimulation below) takes over once mounted.
  */
 export function layoutDnaGraph(
   nodes: DnaNode[],
@@ -32,12 +36,6 @@ export function layoutDnaGraph(
   });
 
   const byId = new Map(positioned.map((n) => [n.id, n]));
-  // Tuned to fill the 900×560 viewBox — the earlier 2600/140 settle left
-  // the whole graph huddled in the middle with tiny unreadable labels.
-  const REPULSION = 4400;
-  const SPRING = 0.02;
-  const SPRING_LENGTH = 170;
-  const CENTER_PULL = 0.008;
 
   for (let iter = 0; iter < 220; iter++) {
     const forces = new Map(positioned.map((n) => [n.id, { fx: 0, fy: 0 }]));
@@ -90,4 +88,106 @@ export function layoutDnaGraph(
   }
 
   return positioned;
+}
+
+// Tuned to fill the 900×560 viewBox — the earlier 2600/140 settle left the
+// whole graph huddled in the middle with tiny unreadable labels. Shared by
+// both the one-shot initial settle above and the live simulation below so
+// the graph doesn't visibly "jump" the moment physics takes over.
+const REPULSION = 4400;
+const SPRING = 0.02;
+const SPRING_LENGTH = 170;
+const CENTER_PULL = 0.008;
+
+// Live-sim-only tuning — a continuous sim needs momentum + damping (an
+// object in motion carries velocity between frames) rather than the
+// snap-to-new-position-every-iteration approach the one-shot settle above
+// uses, or dragging would feel stiff/laggy instead of springy.
+const DAMPING = 0.82;
+const MAX_SPEED = 26;
+const BOUNDS_MARGIN = 24;
+
+export function createSimNodes(laidOut: LaidOutNode[]): Map<string, SimNode> {
+  return new Map(laidOut.map((n) => [n.id, { ...n, vx: 0, vy: 0 }]));
+}
+
+/**
+ * Advances the graph by one frame, in place — an always-on Obsidian-style
+ * force simulation. `draggedId`, if set, is treated as kinematic: it's
+ * pinned to wherever the pointer put it (handled by the caller before this
+ * runs) rather than pushed around by forces, but it still radiates
+ * repulsion/spring forces onto everything else — so dragging one node
+ * visibly tugs its connected neighbors along, and unrelated nodes drift out
+ * of its way.
+ */
+export function stepDnaSimulation(
+  nodes: Map<string, SimNode>,
+  edges: DnaEdge[],
+  width: number,
+  height: number,
+  draggedId: string | null
+): void {
+  const cx = width / 2;
+  const cy = height / 2;
+  const list = Array.from(nodes.values());
+  const forces = new Map(list.map((n) => [n.id, { fx: 0, fy: 0 }]));
+
+  for (let i = 0; i < list.length; i++) {
+    for (let j = i + 1; j < list.length; j++) {
+      const a = list[i];
+      const b = list[j];
+      let dx = a.x - b.x;
+      let dy = a.y - b.y;
+      let distSq = dx * dx + dy * dy;
+      if (distSq < 1) distSq = 1;
+      const dist = Math.sqrt(distSq);
+      const force = REPULSION / distSq;
+      dx = (dx / dist) * force;
+      dy = (dy / dist) * force;
+      forces.get(a.id)!.fx += dx;
+      forces.get(a.id)!.fy += dy;
+      forces.get(b.id)!.fx -= dx;
+      forces.get(b.id)!.fy -= dy;
+    }
+  }
+
+  for (const edge of edges) {
+    const a = nodes.get(edge.from);
+    const b = nodes.get(edge.to);
+    if (!a || !b) continue;
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const dist = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
+    const stretch = dist - SPRING_LENGTH;
+    const force = stretch * SPRING;
+    const fx = (dx / dist) * force;
+    const fy = (dy / dist) * force;
+    forces.get(a.id)!.fx += fx;
+    forces.get(a.id)!.fy += fy;
+    forces.get(b.id)!.fx -= fx;
+    forces.get(b.id)!.fy -= fy;
+  }
+
+  for (const n of list) {
+    if (n.id === draggedId) {
+      // Kinematic — position already set by the pointer handler this frame.
+      n.vx = 0;
+      n.vy = 0;
+      continue;
+    }
+    const f = forces.get(n.id)!;
+    f.fx += (cx - n.x) * CENTER_PULL;
+    f.fy += (cy - n.y) * CENTER_PULL;
+
+    n.vx = (n.vx + f.fx) * DAMPING;
+    n.vy = (n.vy + f.fy) * DAMPING;
+    const speed = Math.hypot(n.vx, n.vy);
+    if (speed > MAX_SPEED) {
+      n.vx = (n.vx / speed) * MAX_SPEED;
+      n.vy = (n.vy / speed) * MAX_SPEED;
+    }
+
+    n.x = Math.max(BOUNDS_MARGIN, Math.min(width - BOUNDS_MARGIN, n.x + n.vx));
+    n.y = Math.max(BOUNDS_MARGIN, Math.min(height - BOUNDS_MARGIN, n.y + n.vy));
+  }
 }
