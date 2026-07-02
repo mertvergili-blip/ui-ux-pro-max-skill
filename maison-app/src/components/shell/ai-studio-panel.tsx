@@ -14,14 +14,18 @@ const TYPE_LABELS: Record<SuggestionType, string> = {
   calendar: "Calendar Block",
 };
 
+// Gold is reserved for urgency (deadlines) — every other type gets its own
+// quiet identity so the panel doesn't read as one big yellow moment.
 const TYPE_COLORS: Record<SuggestionType, string> = {
-  task: "var(--color-gold)",
+  task: "var(--color-bone-dim)",
   idea: "var(--color-blue)",
   note: "var(--color-muted)",
   mood: "var(--color-rose)",
-  deadline: "var(--color-wine)",
+  deadline: "var(--color-gold)",
   calendar: "var(--color-sage)",
 };
+
+const EASE = [0.32, 0.72, 0, 1] as const;
 
 export function AiStudioPanel() {
   const {
@@ -69,44 +73,51 @@ export function AiStudioPanel() {
     <>
       {/* Trigger — bottom-left, mirrors the old Finance Pulse corner so it never
           collides with the image panel's caption on the right */}
-      <button
+      <motion.button
         onClick={toggleAiPanel}
-        className="fixed bottom-[22px] left-[22px] z-50 flex items-center gap-3 rounded-[3px] border border-line bg-ink/80 px-4 py-3 text-[10.5px] uppercase tracking-[2.5px] text-muted backdrop-blur-sm transition-colors hover:text-bone"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.25, ease: EASE }}
+        className="fixed bottom-[22px] left-[22px] z-50 flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] py-2 pl-2 pr-4 text-[10.5px] uppercase tracking-[2px] text-muted backdrop-blur-xl transition-colors hover:text-bone"
       >
-        <span className="h-1.5 w-1.5 animate-[pulse-glow_2.4s_infinite] rounded-full bg-gold" />
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06]">
+          <span className="h-1.5 w-1.5 animate-[pulse-glow_2.4s_infinite] rounded-full bg-gold" />
+        </span>
         Talk to your Studio
-      </button>
+      </motion.button>
 
       <AnimatePresence>
         {aiPanelOpen && (
           <motion.div
-            className="fixed inset-0 z-[95] flex items-center justify-center bg-ink/90 backdrop-blur-md"
+            className="fixed inset-0 z-[95] flex items-center justify-center bg-ink/85 backdrop-blur-2xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.35 }}
+            transition={{ duration: 0.4, ease: EASE }}
             onClick={(e) => {
               if (e.target === e.currentTarget) handleClose();
             }}
           >
-            <button
+            <motion.button
               onClick={handleClose}
-              className="absolute right-8 top-8 text-muted transition-colors hover:text-bone"
+              whileHover={{ scale: 1.08, rotate: 90 }}
+              transition={{ duration: 0.3, ease: EASE }}
+              className="absolute right-8 top-8 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-muted hover:text-bone"
             >
               ✕
-            </button>
+            </motion.button>
 
             <motion.div
               className="flex w-full max-w-[480px] flex-col items-center px-8"
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.98 }}
-              transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
+              initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+              transition={{ duration: 0.55, ease: EASE }}
             >
-              <p className="mb-2 text-[10px] uppercase tracking-[3px] text-gold">
+              <p className="mb-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[9.5px] uppercase tracking-[2.5px] text-bone-dim">
                 Studio Assistant
               </p>
-              <p className="mb-10 max-w-[360px] text-center text-[13px] leading-relaxed text-bone-dim">
+              <p className="mb-10 mt-3 max-w-[360px] text-center text-[13px] leading-relaxed text-bone-dim">
                 Bugünü, bir fikri ya da bir deadline&apos;ı anlat — ben türünü
                 belirleyip önereceğim. Onaylamadan hiçbir şey eklenmez.
               </p>
@@ -122,49 +133,61 @@ export function AiStudioPanel() {
                 {pendingSuggestion && (
                   <motion.div
                     key="suggestion"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    className="mt-8 w-full rounded-[3px] border border-line p-5"
+                    initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
+                    transition={{ duration: 0.4, ease: EASE }}
+                    className="mt-8 w-full rounded-[1.5rem] bg-white/[0.02] p-1.5 ring-1 ring-white/[0.06]"
                   >
-                    <p
-                      className="mb-2.5 text-center text-[9.5px] uppercase tracking-[2.5px]"
-                      style={{ color: TYPE_COLORS[pendingSuggestion.type] }}
-                    >
-                      {TYPE_LABELS[pendingSuggestion.type]} olarak algıladım
-                    </p>
-                    {editing ? (
-                      <textarea
-                        value={pendingSuggestion.content}
-                        onChange={(e) => updatePendingContent(e.target.value)}
-                        className="mb-3 w-full resize-none rounded-[3px] border border-line bg-transparent p-2.5 text-center text-[13px] text-bone outline-none"
-                        rows={2}
-                        autoFocus
-                      />
-                    ) : (
-                      <p className="mb-3 text-center text-[13.5px] leading-relaxed text-bone">
-                        {pendingSuggestion.content}
+                    <div className="rounded-[1.15rem] bg-black/20 px-5 py-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)]">
+                      <p
+                        className="mb-2.5 text-center text-[9.5px] uppercase tracking-[2.5px]"
+                        style={{ color: TYPE_COLORS[pendingSuggestion.type] }}
+                      >
+                        {TYPE_LABELS[pendingSuggestion.type]} olarak algıladım
                       </p>
-                    )}
-                    <div className="flex justify-center gap-2 text-[10.5px] uppercase tracking-[1.5px]">
-                      <button
-                        onClick={handleConfirm}
-                        className="rounded-[3px] border border-gold px-3.5 py-2 text-gold transition-colors hover:bg-gold hover:text-ink"
-                      >
-                        Confirm
-                      </button>
-                      <button
-                        onClick={() => setEditing(!editing)}
-                        className="rounded-[3px] border border-line px-3.5 py-2 text-bone-dim transition-colors hover:border-bone-dim"
-                      >
-                        {editing ? "Done" : "Edit"}
-                      </button>
-                      <button
-                        onClick={handleCancel}
-                        className="rounded-[3px] border border-line px-3.5 py-2 text-muted transition-colors hover:border-muted"
-                      >
-                        Cancel
-                      </button>
+                      {editing ? (
+                        <textarea
+                          value={pendingSuggestion.content}
+                          onChange={(e) => updatePendingContent(e.target.value)}
+                          className="mb-4 w-full resize-none rounded-[3px] border border-line bg-transparent p-2.5 text-center text-[13px] text-bone outline-none"
+                          rows={2}
+                          autoFocus
+                        />
+                      ) : (
+                        <p className="mb-4 text-center text-[13.5px] leading-relaxed text-bone">
+                          {pendingSuggestion.content}
+                        </p>
+                      )}
+                      <div className="flex justify-center gap-2 text-[10.5px] uppercase tracking-[1.5px]">
+                        <motion.button
+                          onClick={handleConfirm}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          transition={{ duration: 0.2, ease: EASE }}
+                          className="rounded-full bg-gold px-4 py-2 text-ink"
+                        >
+                          Confirm
+                        </motion.button>
+                        <motion.button
+                          onClick={() => setEditing(!editing)}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          transition={{ duration: 0.2, ease: EASE }}
+                          className="rounded-full border border-white/10 px-4 py-2 text-bone-dim hover:border-white/25"
+                        >
+                          {editing ? "Done" : "Edit"}
+                        </motion.button>
+                        <motion.button
+                          onClick={handleCancel}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          transition={{ duration: 0.2, ease: EASE }}
+                          className="rounded-full border border-white/10 px-4 py-2 text-muted hover:border-white/25"
+                        >
+                          Cancel
+                        </motion.button>
+                      </div>
                     </div>
                   </motion.div>
                 )}

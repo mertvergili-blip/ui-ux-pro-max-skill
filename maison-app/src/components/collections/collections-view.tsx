@@ -237,8 +237,11 @@ function ProjectDetail({
       >
         ← Collections
       </span>
-      <p className="mb-[18px] mt-5 flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3px] text-gold">
-        <span className="h-px w-7 bg-gold" />
+      <p
+        className="mb-[18px] mt-5 flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3px]"
+        style={{ color: folder.accent }}
+      >
+        <span className="h-px w-7" style={{ background: folder.accent }} />
         {folder.status}
       </p>
       <h1 className="mb-6 font-heading text-[32px] font-normal leading-[1.12] text-[#f7f2e6]">
@@ -247,15 +250,20 @@ function ProjectDetail({
       <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
         Notlarım
       </p>
-      <textarea
-        className="mb-5 min-h-[140px] w-full rounded-[3px] border border-line bg-transparent p-5 text-sm leading-relaxed text-bone-dim outline-none placeholder:text-muted"
-        placeholder="Bu proje için fikrini yaz — AI kategorize etsin…"
-        value={notes}
-        onChange={(e) => handleNoteInput(e.target.value)}
-      />
+      <div className="mb-5 rounded-[1.25rem] bg-white/[0.02] p-1.5 ring-1 ring-white/[0.06]">
+        <textarea
+          className="min-h-[136px] w-full resize-none rounded-[1rem] border-none bg-black/20 p-[18px] text-sm leading-relaxed text-bone-dim shadow-[inset_0_1px_1px_rgba(255,255,255,0.04)] outline-none placeholder:text-muted"
+          placeholder="Bu proje için fikrini yaz — AI kategorize etsin…"
+          value={notes}
+          onChange={(e) => handleNoteInput(e.target.value)}
+        />
+      </div>
       {aiText && (
         <div className="flex items-start gap-3 border-t border-line pt-4 text-[13px] leading-relaxed text-bone-dim">
-          <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 animate-[pulse-glow_2.4s_infinite] rounded-full bg-gold" />
+          <span
+            className="mt-1 h-1.5 w-1.5 flex-shrink-0 animate-[pulse-glow_2.4s_infinite] rounded-full"
+            style={{ background: folder.accent }}
+          />
           <span>{aiText}</span>
         </div>
       )}
@@ -288,8 +296,8 @@ export function CollectionsView() {
             exit={{ opacity: 0, scale: 0.97 }}
             transition={{ duration: 0.4 }}
           >
-            <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3px] text-gold">
-              <span className="h-px w-7 bg-gold" />
+            <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
+              <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
               Collections
             </p>
             <h1 className="mb-7 font-heading text-[34px] font-normal leading-[1.12] text-[#f7f2e6]">

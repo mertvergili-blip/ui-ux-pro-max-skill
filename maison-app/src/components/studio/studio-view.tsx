@@ -55,7 +55,7 @@ function TaskItem({
       <span className="w-3.5 font-serif text-xs italic text-muted">{idx}</span>
       <span
         className={`relative flex h-[15px] w-[15px] flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200 group-hover:scale-[1.15] ${
-          done ? "border-gold bg-gold" : "border-gold bg-transparent"
+          done ? "border-bone bg-bone" : "border-bone-dim/40 bg-transparent"
         }`}
       >
         <svg viewBox="0 0 16 16" className="h-full w-full">
@@ -100,8 +100,8 @@ export function StudioView() {
       transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
       className="pr-14"
     >
-      <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3px] text-gold">
-        <span className="h-px w-7 bg-gold" />
+      <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
+        <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
         From the Studio Assistant
       </p>
 
@@ -156,7 +156,7 @@ export function StudioView() {
             <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
               Creative Energy
             </p>
-            <p className="font-serif text-lg italic text-gold">{creativeEnergy}</p>
+            <p className="font-serif text-lg italic text-bone">{creativeEnergy}</p>
           </div>
           <div>
             <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">

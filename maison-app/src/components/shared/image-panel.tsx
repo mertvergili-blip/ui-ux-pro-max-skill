@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import { useStore, type ViewName } from "@/lib/store";
 
 const VIEW_CAPTIONS: Record<ViewName, [string, string]> = {
@@ -35,12 +36,20 @@ export function ImagePanel() {
       />
       <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-r from-ink to-transparent to-[14%]" />
       <div className="pointer-events-none absolute bottom-11 right-14 z-5 text-right">
-        <p className="mb-1.5 text-[10px] uppercase tracking-[3px] text-gold transition-all duration-400">
-          {eyebrow}
-        </p>
-        <p className="font-serif text-xl italic transition-all duration-400">
-          {title}
-        </p>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentView}
+            initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
+            transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+          >
+            <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[9.5px] uppercase tracking-[2.5px] text-bone-dim backdrop-blur-sm">
+              {eyebrow}
+            </p>
+            <p className="font-serif text-xl italic text-bone">{title}</p>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

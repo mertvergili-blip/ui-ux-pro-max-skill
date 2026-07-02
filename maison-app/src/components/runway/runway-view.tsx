@@ -96,8 +96,8 @@ export function RunwayView() {
       transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
       className="pr-14"
     >
-      <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3px] text-gold">
-        <span className="h-px w-7 bg-gold" />
+      <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
+        <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
         Runway Intel
       </p>
       <h1 className="mb-1.5 font-heading text-[34px] font-normal leading-[1.12] text-[#f7f2e6]">

@@ -40,12 +40,16 @@ export function JournalView() {
 
   const rhythm = useMemo(() => {
     const last7 = journalEntries.slice(-7);
+    const moodColor = (key: MoodKey) =>
+      MOODS.find((m) => m.key === key)?.color ?? "var(--color-bone-dim)";
     if (last7.length === 0) {
-      return Array.from({ length: 7 }, () => 0.5);
+      return Array.from({ length: 7 }, () => ({ h: 0.3, color: "var(--color-line)" }));
     }
     return Array.from({ length: 7 }, (_, i) => {
       const e = last7[i];
-      return e?.mood ? MOOD_HEIGHT[e.mood] : 0.3;
+      return e?.mood
+        ? { h: MOOD_HEIGHT[e.mood], color: moodColor(e.mood) }
+        : { h: 0.18, color: "var(--color-line)" };
     });
   }, [journalEntries]);
 
@@ -68,8 +72,8 @@ export function JournalView() {
       transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
       className="pr-14"
     >
-      <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3px] text-gold">
-        <span className="h-px w-7 bg-gold" />
+      <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
+        <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
         Journal
       </p>
       <h1 className="mb-2 font-heading text-[34px] font-normal leading-[1.12] text-[#f7f2e6]">
@@ -114,11 +118,11 @@ export function JournalView() {
             Energy Rhythm
           </p>
           <div className="flex h-16 items-end gap-1.5">
-            {rhythm.map((h, i) => (
+            {rhythm.map((bar, i) => (
               <div
                 key={i}
-                className="flex-1 rounded-t-[1px] bg-gold/60 transition-all duration-500"
-                style={{ height: `${h * 100}%` }}
+                className="flex-1 rounded-t-[1px] opacity-70 transition-all duration-500"
+                style={{ height: `${bar.h * 100}%`, background: bar.color }}
               />
             ))}
           </div>
@@ -135,7 +139,7 @@ export function JournalView() {
                 style={{
                   background:
                     intensity > 0
-                      ? `color-mix(in srgb, var(--color-gold) ${intensity}%, var(--color-line))`
+                      ? `color-mix(in srgb, var(--color-bone-dim) ${intensity}%, var(--color-line))`
                       : "var(--color-line)",
                 }}
               />
