@@ -1,19 +1,15 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useMemo } from "react";
+import { motion } from "framer-motion";
+import { useStore } from "@/lib/store";
 
 const DAYS_OF_WEEK = ["PZT", "SAL", "ÇAR", "PER", "CUM", "CMT", "PAZ"];
 
-const TASKS_BY_DAY: Record<number, string[]> = {
-  1: ["Brief · Croquis taslakları", "Ritual · Sabah incelemesi"],
-  4: ["Deadline · Koleksiyon III"],
-  9: ["Creative Challenge"],
-  14: ["Fitting · Prova günü"],
-};
-
 export function CalendarView() {
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const selectedDay = useStore((s) => s.selectedCalendarDay);
+  const setSelectedDay = useStore((s) => s.setSelectedCalendarDay);
+  const calendarEvents = useStore((s) => s.calendarEvents);
 
   const days = useMemo(() => {
     const blanks = 2;
@@ -21,6 +17,11 @@ export function CalendarView() {
     for (let d = 1; d <= 31; d++) result.push(d);
     return result;
   }, []);
+
+  const daysWithEvents = useMemo(
+    () => new Set(calendarEvents.map((e) => e.day)),
+    [calendarEvents]
+  );
 
   return (
     <motion.div
@@ -52,47 +53,22 @@ export function CalendarView() {
             <div
               key={d}
               className={`relative flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-[3px] border text-[12.5px] transition-all duration-250 hover:-translate-y-0.5 hover:border-gold ${
-                d === 1
+                d === selectedDay
                   ? "border-gold bg-gold/[0.14] text-bone"
+                  : d === 1
+                  ? "border-gold/40 text-bone-dim"
                   : "border-line text-bone-dim"
               }`}
               onClick={() => setSelectedDay(selectedDay === d ? null : d)}
             >
               <span>{d}</span>
-              {TASKS_BY_DAY[d] && (
+              {daysWithEvents.has(d) && (
                 <span className="absolute bottom-[7px] h-1 w-1 rounded-full bg-gold" />
               )}
             </div>
           )
         )}
       </div>
-
-      <AnimatePresence>
-        {selectedDay && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="mt-6 overflow-hidden rounded-[3px] border border-line"
-          >
-            <div className="p-5">
-              <p className="mb-2 font-heading text-base">
-                1 Temmuz + {selectedDay - 1} gün
-              </p>
-              {(
-                TASKS_BY_DAY[selectedDay] || [
-                  "Bu gün için bir şey planlanmadı.",
-                ]
-              ).map((t, i) => (
-                <p key={i} className="text-[13px] text-bone-dim">
-                  · {t}
-                </p>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }

@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStore, selectUrgency, type ViewName } from "@/lib/store";
+import { CalendarRightPanel } from "@/components/calendar/calendar-right-panel";
+import { RunwayLookCarousel } from "@/components/runway/runway-look-carousel";
 
 const VIEW_CAPTIONS: Record<ViewName, [string, string]> = {
   studio: ["Collection III", "Moodboard — Terre & Or"],
@@ -30,6 +32,14 @@ export function ImagePanel() {
   const blueAlpha = 0.42 - urgency * 0.28;
   const wineAlpha = 0.34 + urgency * 0.24;
 
+  if (currentView === "runway") {
+    return (
+      <div className="fixed right-0 top-0 z-0 h-screen w-[40%] overflow-hidden">
+        <RunwayLookCarousel />
+      </div>
+    );
+  }
+
   return (
     <div className="fixed right-0 top-0 z-0 h-screen w-[40%] overflow-hidden">
       <div
@@ -46,20 +56,25 @@ export function ImagePanel() {
         }}
       />
       <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-r from-ink to-transparent to-[14%]" />
-      <div className="pointer-events-none absolute bottom-11 right-14 z-5 text-right">
+      <div className="absolute bottom-11 right-14 z-5 text-right">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={currentView}
-            initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
-            transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
-          >
-            <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[9.5px] uppercase tracking-[2.5px] text-bone-dim backdrop-blur-sm">
-              {eyebrow}
-            </p>
-            <p className="font-serif text-xl italic text-bone">{title}</p>
-          </motion.div>
+          {currentView === "calendar" ? (
+            <CalendarRightPanel key="calendar-panel" />
+          ) : (
+            <motion.div
+              key={currentView}
+              initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
+              transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+              className="pointer-events-none"
+            >
+              <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[9.5px] uppercase tracking-[2.5px] text-bone-dim backdrop-blur-sm">
+                {eyebrow}
+              </p>
+              <p className="font-serif text-xl italic text-bone">{title}</p>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </div>

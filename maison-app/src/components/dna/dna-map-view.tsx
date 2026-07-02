@@ -18,6 +18,20 @@ function degreeOf(nodeId: string): number {
   return DNA_EDGES.filter((e) => e.from === nodeId || e.to === nodeId).length;
 }
 
+// Client coords -> SVG viewBox coords, accounting for the element's current
+// scaled/rendered size vs its viewBox.
+function toSvgPoint(svg: SVGSVGElement, clientX: number, clientY: number) {
+  const pt = svg.createSVGPoint();
+  pt.x = clientX;
+  pt.y = clientY;
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return { x: 0, y: 0 };
+  const p = pt.matrixTransform(ctm.inverse());
+  return { x: p.x, y: p.y };
+}
+
+const DRAG_THRESHOLD = 4;
+
 export function DnaMapView() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [activeCategory, setActiveCategory] = useState<DnaCategory | null>(null);
@@ -27,7 +41,77 @@ export function DnaMapView() {
     () => layoutDnaGraph(DNA_NODES, DNA_EDGES, WIDTH, HEIGHT),
     []
   );
-  const byId = useMemo(() => new Map(laidOut.map((n) => [n.id, n])), [laidOut]);
+
+  // Positions start from the force-directed settle, then become freely
+  // draggable — an Obsidian-style graph you can rearrange by hand.
+  const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>(
+    () => Object.fromEntries(laidOut.map((n) => [n.id, { x: n.x, y: n.y }]))
+  );
+  const dragState = useRef<{
+    id: string;
+    offsetX: number;
+    offsetY: number;
+    moved: boolean;
+  } | null>(null);
+
+  const positioned = useMemo<LaidOutNode[]>(
+    () =>
+      laidOut.map((n) => ({
+        ...n,
+        x: positions[n.id]?.x ?? n.x,
+        y: positions[n.id]?.y ?? n.y,
+      })),
+    [laidOut, positions]
+  );
+  const byId = useMemo(() => new Map(positioned.map((n) => [n.id, n])), [positioned]);
+
+  const handlePointerDown = (e: React.PointerEvent<SVGGElement>, nodeId: string) => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const svgPt = toSvgPoint(svg, e.clientX, e.clientY);
+    const node = byId.get(nodeId);
+    if (!node) return;
+    dragState.current = {
+      id: nodeId,
+      offsetX: svgPt.x - node.x,
+      offsetY: svgPt.y - node.y,
+      moved: false,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<SVGGElement>) => {
+    const drag = dragState.current;
+    const svg = svgRef.current;
+    if (!drag || !svg) return;
+    const svgPt = toSvgPoint(svg, e.clientX, e.clientY);
+    const nx = svgPt.x - drag.offsetX;
+    const ny = svgPt.y - drag.offsetY;
+    if (!drag.moved) {
+      const node = byId.get(drag.id);
+      if (node && Math.hypot(nx - node.x, ny - node.y) > DRAG_THRESHOLD) {
+        drag.moved = true;
+      }
+    }
+    if (drag.moved) {
+      setPositions((prev) => ({
+        ...prev,
+        [drag.id]: {
+          x: Math.max(24, Math.min(WIDTH - 24, nx)),
+          y: Math.max(24, Math.min(HEIGHT - 24, ny)),
+        },
+      }));
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<SVGGElement>, nodeId: string) => {
+    const drag = dragState.current;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    if (drag && !drag.moved) {
+      setSelectedId((cur) => (cur === nodeId ? null : nodeId));
+    }
+    dragState.current = null;
+  };
 
   const connectedIds = useMemo(() => {
     if (!selectedId) return null;
@@ -146,7 +230,7 @@ export function DnaMapView() {
                 );
               })}
 
-              {laidOut.map((n) => {
+              {positioned.map((n) => {
                 const meta = DNA_CATEGORY_META[n.category];
                 const dim =
                   (activeCategory && n.category !== activeCategory) ||
@@ -156,19 +240,27 @@ export function DnaMapView() {
                   <g
                     key={n.id}
                     data-node
-                    className="cursor-pointer"
-                    onClick={() =>
-                      setSelectedId((cur) => (cur === n.id ? null : n.id))
-                    }
+                    className="cursor-grab touch-none active:cursor-grabbing"
+                    onPointerDown={(e) => handlePointerDown(e, n.id)}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={(e) => handlePointerUp(e, n.id)}
+                    onPointerCancel={(e) => handlePointerUp(e, n.id)}
                     style={{ transformOrigin: `${n.x}px ${n.y}px` }}
                   >
+                    <circle
+                      cx={n.x}
+                      cy={n.y}
+                      r={r + 9}
+                      fill="transparent"
+                      style={{ pointerEvents: "all" }}
+                    />
                     <circle
                       cx={n.x}
                       cy={n.y}
                       r={r}
                       fill={meta.color}
                       opacity={dim ? 0.18 : selectedId === n.id ? 1 : 0.75}
-                      style={{ transition: "opacity 0.3s ease" }}
+                      style={{ transition: "opacity 0.3s ease", pointerEvents: "none" }}
                     />
                     <text
                       x={n.x}

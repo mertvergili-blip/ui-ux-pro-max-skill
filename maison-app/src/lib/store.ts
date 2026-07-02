@@ -62,6 +62,21 @@ export interface IterationEntry {
   createdAt: number;
 }
 
+export interface CollectionFolder {
+  id: string;
+  name: string;
+  status: string;
+  accent: string;
+  count: number;
+  sub: string;
+}
+
+export interface CalendarEvent {
+  id: string;
+  day: number;
+  text: string;
+}
+
 const MOOD_ENERGY: Record<MoodKey, string> = {
   flowing: "Flowing",
   calm: "Calm",
@@ -124,6 +139,19 @@ interface MaisonStore {
   // Capsule Day Challenge — tracks which day-challenges were marked done
   completedCapsuleIds: string[];
   toggleCapsuleComplete: (id: string) => void;
+
+  // Collections — projects/folders, user-extensible beyond the seeded three
+  collections: CollectionFolder[];
+  addCollection: (c: Omit<CollectionFolder, "id" | "count">) => void;
+  removeCollection: (id: string) => void;
+
+  // Calendar — day-keyed events plus which day is currently open in the
+  // right-panel detail view (shared between the grid and ImagePanel)
+  calendarEvents: CalendarEvent[];
+  selectedCalendarDay: number | null;
+  setSelectedCalendarDay: (day: number | null) => void;
+  addCalendarEvent: (day: number, text: string) => void;
+  removeCalendarEvent: (id: string) => void;
 
   // AI Studio panel
   aiPanelOpen: boolean;
@@ -234,6 +262,60 @@ export const useStore = create<MaisonStore>()(
             : [...s.completedCapsuleIds, id],
         })),
 
+      collections: [
+        {
+          id: "terre-or",
+          name: "Koleksiyon III — Terre & Or",
+          status: "In Progress",
+          accent: "var(--color-gold)",
+          count: 12,
+          sub: "6 gün kaldı",
+        },
+        {
+          id: "verre-bleu",
+          name: "Koleksiyon II — Verre Bleu",
+          status: "Archived",
+          accent: "var(--color-blue)",
+          count: 9,
+          sub: "Mart 2026",
+        },
+        {
+          id: "rose-poudre",
+          name: "Koleksiyon I — Rosé Poudré",
+          status: "Archived",
+          accent: "var(--color-rose)",
+          count: 7,
+          sub: "Okul projesi",
+        },
+      ],
+      addCollection: (c) =>
+        set((s) => ({
+          collections: [...s.collections, { ...c, id: `col${Date.now()}`, count: 0 }],
+        })),
+      removeCollection: (id) =>
+        set((s) => ({ collections: s.collections.filter((c) => c.id !== id) })),
+
+      calendarEvents: [
+        { id: "ce1", day: 1, text: "Brief · Croquis taslakları" },
+        { id: "ce2", day: 1, text: "Ritual · Sabah incelemesi" },
+        { id: "ce3", day: 4, text: "Deadline · Koleksiyon III" },
+        { id: "ce4", day: 9, text: "Creative Challenge" },
+        { id: "ce5", day: 14, text: "Fitting · Prova günü" },
+      ],
+      selectedCalendarDay: null,
+      setSelectedCalendarDay: (day) => set({ selectedCalendarDay: day }),
+      addCalendarEvent: (day, text) =>
+        set((s) => ({
+          calendarEvents: [
+            ...s.calendarEvents,
+            { id: `ce${Date.now()}`, day, text },
+          ],
+        })),
+      removeCalendarEvent: (id) =>
+        set((s) => ({
+          calendarEvents: s.calendarEvents.filter((e) => e.id !== id),
+        })),
+
       aiPanelOpen: false,
       toggleAiPanel: () => set((s) => ({ aiPanelOpen: !s.aiPanelOpen })),
       pendingSuggestion: null,
@@ -341,6 +423,8 @@ export const useStore = create<MaisonStore>()(
         materials: s.materials,
         iterationLogs: s.iterationLogs,
         completedCapsuleIds: s.completedCapsuleIds,
+        collections: s.collections,
+        calendarEvents: s.calendarEvents,
       }),
     }
   )

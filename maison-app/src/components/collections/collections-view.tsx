@@ -3,47 +3,18 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { localNoteInsight } from "@/lib/note-insight";
-import { useStore } from "@/lib/store";
+import { useStore, type CollectionFolder as FolderData } from "@/lib/store";
 import {
   STUDIO_TEAM,
   localStudioTeamFeedback,
   type PersonaFeedback,
 } from "@/lib/studio-team";
 
-interface FolderData {
-  id: string;
-  name: string;
-  status: string;
-  accent: string;
-  count: number;
-  sub: string;
-}
-
-const FOLDERS: FolderData[] = [
-  {
-    id: "terre-or",
-    name: "Koleksiyon III — Terre & Or",
-    status: "In Progress",
-    accent: "var(--color-gold)",
-    count: 12,
-    sub: "6 gün kaldı",
-  },
-  {
-    id: "verre-bleu",
-    name: "Koleksiyon II — Verre Bleu",
-    status: "Archived",
-    accent: "var(--color-blue)",
-    count: 9,
-    sub: "Mart 2026",
-  },
-  {
-    id: "rose-poudre",
-    name: "Koleksiyon I — Rosé Poudré",
-    status: "Archived",
-    accent: "var(--color-rose)",
-    count: 7,
-    sub: "Okul projesi",
-  },
+const ACCENT_PRESETS = [
+  "var(--color-gold)",
+  "var(--color-blue)",
+  "var(--color-rose)",
+  "var(--color-sage)",
 ];
 
 const PIECE_POS_STYLES = {
@@ -128,9 +99,11 @@ function Piece({
 function Folder({
   data,
   onOpenProject,
+  onRemove,
 }: {
   data: FolderData;
   onOpenProject: (folder: FolderData) => void;
+  onRemove: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -176,12 +149,23 @@ function Folder({
       </div>
 
       <div className="mt-4">
-        <p
-          className="mb-1 text-[9.5px] uppercase tracking-[2.5px]"
-          style={{ color: data.accent }}
-        >
-          {data.status}
-        </p>
+        <div className="mb-1 flex items-center justify-between">
+          <p
+            className="text-[9.5px] uppercase tracking-[2.5px]"
+            style={{ color: data.accent }}
+          >
+            {data.status}
+          </p>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            className="text-[9.5px] uppercase tracking-[1.5px] text-muted opacity-0 transition-opacity duration-200 hover:text-rose group-hover:opacity-100"
+          >
+            Kaldır
+          </button>
+        </div>
         <p className="font-heading text-[17px]">{data.name}</p>
         <p className="mt-0.5 text-xs text-muted">{data.sub}</p>
         <span
@@ -196,6 +180,94 @@ function Folder({
         </span>
       </div>
     </div>
+  );
+}
+
+function AddFolderCard({
+  onAdd,
+}: {
+  onAdd: (f: Omit<FolderData, "id" | "count">) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [sub, setSub] = useState("");
+  const [accent, setAccent] = useState(ACCENT_PRESETS[0]);
+
+  const reset = () => {
+    setName("");
+    setSub("");
+    setAccent(ACCENT_PRESETS[0]);
+    setOpen(false);
+  };
+
+  const handleSave = () => {
+    if (!name.trim()) return;
+    onAdd({
+      name: name.trim(),
+      status: "In Progress",
+      accent,
+      sub: sub.trim() || "Yeni proje",
+    });
+    reset();
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="flex h-[118px] flex-col items-center justify-center gap-2 self-start rounded-[4px_8px_8px_4px] border border-dashed border-line text-muted transition-colors hover:border-gold/40 hover:text-gold"
+      >
+        <span className="text-2xl font-light">+</span>
+        <span className="text-[10px] uppercase tracking-[1.5px]">
+          Yeni Proje
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col gap-2.5 rounded-[4px_8px_8px_4px] border border-gold/20 bg-white/[0.02] p-4"
+    >
+      <div className="mb-0.5 flex gap-1.5">
+        {ACCENT_PRESETS.map((c) => (
+          <button
+            key={c}
+            onClick={() => setAccent(c)}
+            className={`h-5 w-5 rounded-full ring-2 transition-transform hover:scale-110 ${
+              accent === c ? "ring-bone" : "ring-transparent"
+            }`}
+            style={{ background: c }}
+          />
+        ))}
+      </div>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Koleksiyon adı"
+        autoFocus
+        className="border-b border-line bg-transparent pb-1.5 text-[13px] text-bone outline-none placeholder:text-muted focus:border-gold/50"
+      />
+      <input
+        value={sub}
+        onChange={(e) => setSub(e.target.value)}
+        placeholder="Not (örn. Okul projesi)"
+        className="border-b border-line bg-transparent pb-1.5 text-[11.5px] text-bone-dim outline-none placeholder:text-muted focus:border-gold/50"
+      />
+      <div className="mt-1 flex gap-2 text-[10px] uppercase tracking-[1.5px]">
+        <button onClick={handleSave} className="rounded-full bg-gold px-3.5 py-1.5 text-ink">
+          Kaydet
+        </button>
+        <button
+          onClick={reset}
+          className="rounded-full border border-white/10 px-3.5 py-1.5 text-muted hover:border-white/25"
+        >
+          Vazgeç
+        </button>
+      </div>
+    </motion.div>
   );
 }
 
@@ -482,6 +554,9 @@ function IterationLog({ collectionId }: { collectionId: string }) {
 
 export function CollectionsView() {
   const [openProject, setOpenProject] = useState<FolderData | null>(null);
+  const collections = useStore((s) => s.collections);
+  const addCollection = useStore((s) => s.addCollection);
+  const removeCollection = useStore((s) => s.removeCollection);
 
   return (
     <motion.div
@@ -513,13 +588,15 @@ export function CollectionsView() {
               Klasörü aç, içindeki parçaları gör.
             </h1>
             <div className="mt-[90px] grid grid-cols-3 gap-x-[26px] gap-y-[34px]">
-              {FOLDERS.map((f) => (
+              {collections.map((f) => (
                 <Folder
-                  key={f.name}
+                  key={f.id}
                   data={f}
                   onOpenProject={setOpenProject}
+                  onRemove={() => removeCollection(f.id)}
                 />
               ))}
+              <AddFolderCard onAdd={addCollection} />
             </div>
           </motion.div>
         )}
