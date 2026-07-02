@@ -23,6 +23,7 @@ function NewsCard({
   // hotlink rules) — fall back to the editorial placeholder, never a
   // broken-image icon.
   const [imgFailed, setImgFailed] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
   return (
     <Wrapper
       {...(link ? { href: link, target: "_blank", rel: "noopener noreferrer" } : {})}
@@ -37,15 +38,22 @@ function NewsCard({
     >
       <div className="relative" style={{ height: large ? 200 : 120 }}>
         {image && !imgFailed ? (
-          // Real og:image from the article's own page (see src/lib/og-image.ts).
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={image}
-            alt={title}
-            referrerPolicy="no-referrer"
-            onError={() => setImgFailed(true)}
-            className="h-full w-full object-cover"
-          />
+          <>
+            {!imgLoaded && <div className="skeleton-block absolute inset-0" />}
+            {/* Real og:image from the article's own page (see src/lib/og-image.ts).
+                Crossfades in once decoded instead of popping in abruptly. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={image}
+              alt={title}
+              referrerPolicy="no-referrer"
+              onError={() => setImgFailed(true)}
+              onLoad={() => setImgLoaded(true)}
+              className={`h-full w-full object-cover transition-opacity duration-700 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          </>
         ) : (
           <EditorialPlaceholder
             palette={[color, "#100d09"]}
@@ -75,6 +83,21 @@ function NewsCard({
       {sub && <p className="mx-4 mb-4 text-xs text-muted">{sub}</p>}
       {!sub && <div className="mb-4" />}
     </Wrapper>
+  );
+}
+
+function NewsCardSkeleton({ large }: { large?: boolean }) {
+  return (
+    <div
+      className={`overflow-hidden rounded border border-line ${large ? "sm:col-span-2" : ""}`}
+    >
+      <div className="skeleton-block" style={{ height: large ? 200 : 120 }} />
+      <div className="mx-4 mt-3.5 mb-1.5 h-2.5 w-16 rounded-sm bg-white/[0.04]" />
+      <div
+        className={`mx-4 mb-1.5 rounded-sm bg-white/[0.05] ${large ? "h-5 w-3/4" : "h-4 w-full"}`}
+      />
+      <div className="mx-4 mb-4 h-3 w-1/2 rounded-sm bg-white/[0.03]" />
+    </div>
   );
 }
 
@@ -222,7 +245,7 @@ function RunwayGallery() {
 }
 
 export function RunwayView() {
-  const [news, setNews] = useState<RunwayNewsItem[]>(LOCAL_RUNWAY_NEWS);
+  const [news, setNews] = useState<RunwayNewsItem[] | null>(null);
   const [newsSource, setNewsSource] = useState<"gemini" | "rss" | "local">("local");
 
   useEffect(() => {
@@ -231,14 +254,18 @@ export function RunwayView() {
     const fetchNews = async () => {
       try {
         const res = await fetch("/api/runway-news");
-        if (!res.ok) return;
+        if (!res.ok) throw new Error("bad status");
         const data = await res.json();
-        if (!cancelled && Array.isArray(data.items) && data.items.length > 0) {
-          setNews(data.items);
-          setNewsSource(data.source ?? "local");
+        if (!cancelled) {
+          if (Array.isArray(data.items) && data.items.length > 0) {
+            setNews(data.items);
+            setNewsSource(data.source ?? "local");
+          } else {
+            setNews(LOCAL_RUNWAY_NEWS);
+          }
         }
       } catch {
-        // local fallback already showing
+        if (!cancelled) setNews(LOCAL_RUNWAY_NEWS);
       }
     };
 
@@ -248,7 +275,7 @@ export function RunwayView() {
     };
   }, []);
 
-  const radar = useMemo(() => rankTrendRadar(news), [news]);
+  const radar = useMemo(() => rankTrendRadar(news ?? []), [news]);
   const matchedByTitle = useMemo(
     () => new Map(radar.map((r) => [r.item.title, r.matchedLabels])),
     [radar]
@@ -269,11 +296,12 @@ export function RunwayView() {
         Bugünün moda özeti.
       </h1>
       <p className="mb-7 max-w-[380px] text-[13.5px] leading-relaxed text-bone-dim">
-        {newsSource === "gemini" &&
+        {news === null && "Bugünün haberleri getiriliyor…"}
+        {news !== null && newsSource === "gemini" &&
           "WWD'den gerçek zamanlı haberler, AI tarafından Türkçe'ye çevrilip özetlendi."}
-        {newsSource === "rss" &&
+        {news !== null && newsSource === "rss" &&
           "WWD'den gerçek zamanlı haberler — AI özeti şu an kullanılamıyor, orijinal başlıklar gösteriliyor."}
-        {newsSource === "local" && "Bağlantı kurulamadı — örnek içerik gösteriliyor."}
+        {news !== null && newsSource === "local" && "Bağlantı kurulamadı — örnek içerik gösteriliyor."}
       </p>
 
       {radar.length > 0 && (
@@ -293,9 +321,13 @@ export function RunwayView() {
       )}
 
       <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2 lg:mr-5">
-        {news.map((n, i) => (
-          <NewsCard key={i} {...n} matchedLabels={matchedByTitle.get(n.title)} />
-        ))}
+        {news === null
+          ? Array.from({ length: 4 }, (_, i) => (
+              <NewsCardSkeleton key={i} large={i === 0} />
+            ))
+          : news.map((n, i) => (
+              <NewsCard key={i} {...n} matchedLabels={matchedByTitle.get(n.title)} />
+            ))}
       </div>
 
       <RunwayGallery />

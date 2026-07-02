@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { localNoteInsight } from "@/lib/note-insight";
 import { localPortfolioPitch } from "@/lib/portfolio-pitch";
+import { useTypewriter } from "@/lib/use-typewriter";
 import { useStore, type CollectionFolder as FolderData } from "@/lib/store";
 import {
   STUDIO_TEAM,
@@ -111,9 +112,10 @@ function Folder({
   pitchLoading?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const pitchDisplay = useTypewriter(pitch ?? "");
 
   return (
-    <div className="group cursor-pointer">
+    <div className="group folder-hover-zoom cursor-pointer transition-transform duration-300 lg:hover:-translate-y-0.5 lg:hover:scale-[1.015]">
       <div
         className="relative h-[118px]"
         style={{ perspective: "800px" }}
@@ -175,7 +177,7 @@ function Folder({
         <p className="mt-0.5 text-xs text-muted">{data.sub}</p>
         {(pitch || pitchLoading) && (
           <p className="mt-2 font-serif text-[12.5px] italic leading-relaxed text-bone-dim">
-            {pitchLoading ? "Pitch hazırlanıyor…" : pitch}
+            {pitchLoading ? "Pitch hazırlanıyor…" : pitchDisplay}
           </p>
         )}
         <span
@@ -380,6 +382,36 @@ function ProjectDetail({
   );
 }
 
+function PersonaMessage({
+  persona,
+  message,
+  delay,
+}: {
+  persona: (typeof STUDIO_TEAM)[number];
+  message: string;
+  delay: number;
+}) {
+  const display = useTypewriter(message);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay }}
+      className="flex items-start gap-3"
+    >
+      <span
+        className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
+        style={{ background: persona.accent }}
+      />
+      <p className="text-[13px] leading-relaxed text-bone-dim">
+        <span className="text-bone">{persona.name}</span>
+        <span className="text-muted"> · {persona.role} — </span>
+        {display}
+      </p>
+    </motion.div>
+  );
+}
+
 function StudioTeam({ notes, accent }: { notes: string; accent: string }) {
   const [feedback, setFeedback] = useState<PersonaFeedback[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -436,25 +468,7 @@ function StudioTeam({ notes, accent }: { notes: string; accent: string }) {
             {STUDIO_TEAM.map((p, i) => {
               const f = feedback.find((x) => x.personaId === p.id);
               if (!f) return null;
-              return (
-                <motion.div
-                  key={p.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, delay: i * 0.06 }}
-                  className="flex items-start gap-3"
-                >
-                  <span
-                    className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
-                    style={{ background: p.accent }}
-                  />
-                  <p className="text-[13px] leading-relaxed text-bone-dim">
-                    <span className="text-bone">{p.name}</span>
-                    <span className="text-muted"> · {p.role} — </span>
-                    {f.message}
-                  </p>
-                </motion.div>
-              );
+              return <PersonaMessage key={p.id} persona={p} message={f.message} delay={i * 0.06} />;
             })}
           </motion.div>
         )}

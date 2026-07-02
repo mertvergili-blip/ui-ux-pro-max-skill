@@ -11,6 +11,7 @@ import {
 } from "@/lib/dna-data";
 import { layoutDnaGraph, type LaidOutNode } from "@/lib/dna-layout";
 import { localWhatWouldTheyDo } from "@/lib/what-would-they-do";
+import { useTypewriter } from "@/lib/use-typewriter";
 
 const WIDTH = 900;
 const HEIGHT = 560;
@@ -127,6 +128,7 @@ export function DnaMapView() {
   const selectedNode = selectedId ? byId.get(selectedId) : null;
 
   const [wwtd, setWwtd] = useState<{ id: string; text: string } | null>(null);
+  const wwtdDisplay = useTypewriter(wwtd?.text ?? "");
   const [wwtdLoading, setWwtdLoading] = useState(false);
 
   const askWhatWouldTheyDo = async (nodeId: string, designerName: string) => {
@@ -358,7 +360,7 @@ export function DnaMapView() {
                       animate={{ opacity: 1, y: 0 }}
                       className="font-serif text-[13.5px] italic leading-relaxed text-bone-dim"
                     >
-                      {wwtd.text}
+                      {wwtdDisplay}
                     </motion.p>
                   ) : (
                     <button

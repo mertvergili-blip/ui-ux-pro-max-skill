@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useStore, selectTodayEntry, type MoodKey, type JournalDay } from "@/lib/store";
 import { localEditorLetter } from "@/lib/journal-letter";
 import { computeQuarterlyStats, localQuarterlyReview } from "@/lib/quarterly-review";
+import { useTypewriter } from "@/lib/use-typewriter";
 
 const MOODS: { key: MoodKey; label: string; gradient: string; color: string }[] = [
   { key: "flowing", label: "Flowing", gradient: "radial-gradient(circle at 35% 30%, #e7c98f, #7a5a24)", color: "#c4a469" },
@@ -33,6 +34,7 @@ export function JournalView() {
   const quarterlyReviewGeneratedAt = useStore((s) => s.quarterlyReviewGeneratedAt);
   const setQuarterlyReview = useStore((s) => s.setQuarterlyReview);
   const [reviewLoading, setReviewLoading] = useState(false);
+  const quarterlyReviewDisplay = useTypewriter(quarterlyReviewText ?? "");
 
   const generateQuarterlyReview = async () => {
     setReviewLoading(true);
@@ -93,6 +95,7 @@ export function JournalView() {
   const [geminiLetter, setGeminiLetter] = useState<{ key: string; text: string } | null>(null);
   const editorLetter =
     geminiLetter && geminiLetter.key === last7Key ? geminiLetter.text : localLetter;
+  const editorLetterDisplay = useTypewriter(editorLetter);
 
   useEffect(() => {
     const key = last7Key;
@@ -208,7 +211,7 @@ export function JournalView() {
           Weekly Editor Letter
         </p>
         <p className="font-serif text-[17px] italic leading-relaxed text-bone-dim">
-          {editorLetter}
+          {editorLetterDisplay}
         </p>
       </div>
 
@@ -232,7 +235,7 @@ export function JournalView() {
         {quarterlyReviewText ? (
           <>
             <p className="font-serif text-[17px] italic leading-relaxed text-bone-dim">
-              {quarterlyReviewText}
+              {quarterlyReviewDisplay}
             </p>
             {quarterlyReviewGeneratedAt && (
               <p className="mt-2.5 text-[10.5px] text-muted">

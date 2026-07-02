@@ -28,6 +28,7 @@ export function RunwayLookCarousel() {
   // Fetched URLs can still fail at render time — drop to the editorial
   // placeholder instead of a broken image.
   const [failedIds, setFailedIds] = useState<Set<string>>(new Set());
+  const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -126,18 +127,28 @@ export function RunwayLookCarousel() {
             className="absolute inset-0"
           >
             {slide.image ? (
-              // Real og:image fetched from the show's own WWD review page —
-              // not a scraped gallery. See src/lib/og-image.ts.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={slide.image}
-                alt={`${slide.designer} ${slide.season}`}
-                referrerPolicy="no-referrer"
-                onError={() =>
-                  setFailedIds((prev) => new Set(prev).add(slide.id))
-                }
-                className="h-full w-full object-cover"
-              />
+              <>
+                {!loadedIds.has(slide.id) && (
+                  <div className="skeleton-block absolute inset-0" />
+                )}
+                {/* Real og:image fetched from the show's own WWD review page —
+                    not a scraped gallery. See src/lib/og-image.ts. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={slide.image}
+                  alt={`${slide.designer} ${slide.season}`}
+                  referrerPolicy="no-referrer"
+                  onError={() =>
+                    setFailedIds((prev) => new Set(prev).add(slide.id))
+                  }
+                  onLoad={() =>
+                    setLoadedIds((prev) => new Set(prev).add(slide.id))
+                  }
+                  className={`h-full w-full object-cover transition-opacity duration-700 ${
+                    loadedIds.has(slide.id) ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              </>
             ) : (
               <EditorialPlaceholder
                 palette={slide.palette}
