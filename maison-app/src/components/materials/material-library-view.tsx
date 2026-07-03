@@ -520,6 +520,13 @@ export function MaterialLibraryView() {
         {materials.length === 0 &&
           GHOST_EXAMPLES.map((g) => <GhostMaterialCard key={g.name} {...g} />)}
       </div>
+      {materials.length === 0 && (
+        <p className="mt-4 max-w-[420px] text-[11.5px] leading-relaxed text-muted">
+          Örnek kartlar sadece nasıl görüneceğini gösteriyor — kaydedilmiyor,
+          aramada çıkmıyor. Kendi kumaşını eklemek için yukarıdaki{" "}
+          <span className="text-bone-dim">Kumaş Ekle</span>&apos;yi kullan.
+        </p>
+      )}
     </motion.div>
   );
 }

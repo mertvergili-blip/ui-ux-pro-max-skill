@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useStore, type SuggestionType } from "@/lib/store";
 import { OrbInput } from "./orb-input";
 import { HoverBorderGradient } from "@/components/vendor/hover-border-gradient";
+import { useUndoStore } from "@/lib/undo-toast";
 
 const TYPE_LABELS: Record<SuggestionType, string> = {
   task: "Görev",
@@ -38,6 +39,9 @@ export function AiStudioPanel() {
   const confirmSuggestion = useStore((s) => s.confirmSuggestion);
   const cancelSuggestion = useStore((s) => s.cancelSuggestion);
 
+  const removeTask = useStore((s) => s.removeTask);
+  const showUndo = useUndoStore((s) => s.show);
+
   const [input, setInput] = useState("");
   const [editing, setEditing] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -50,6 +54,24 @@ export function AiStudioPanel() {
     }, 900);
     return () => clearTimeout(debounceRef.current);
   }, [input, proposeSuggestion]);
+
+  // A task is the lowest-stakes, most common thing said here — reviewing a
+  // card just to confirm what you already typed added friction without
+  // adding safety. Everything else (mood, deadline, calendar block) still
+  // gets the review card since misreading those is more disruptive to undo
+  // by hand than deleting one task line.
+  useEffect(() => {
+    if (pendingSuggestion?.type !== "task") return;
+    confirmSuggestion();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setInput("");
+    toggleAiPanel();
+    const tasks = useStore.getState().tasks;
+    const added = tasks[tasks.length - 1];
+    if (added) {
+      showUndo(`"${added.text}" eklendi`, () => removeTask(added.id));
+    }
+  }, [pendingSuggestion, confirmSuggestion, toggleAiPanel, removeTask, showUndo]);
 
   const handleConfirm = () => {
     confirmSuggestion();

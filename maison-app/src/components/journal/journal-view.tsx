@@ -245,6 +245,11 @@ export function JournalView() {
               );
             })}
           </div>
+          {journalEntries.length === 0 && (
+            <p className="mt-2 text-[10.5px] italic text-muted">
+              Her gün bir ruh hali seç, burada bir ritme dönüşsün.
+            </p>
+          )}
           <AnimatePresence mode="wait">
             {selectedHistoryEntry && (
               <motion.div
