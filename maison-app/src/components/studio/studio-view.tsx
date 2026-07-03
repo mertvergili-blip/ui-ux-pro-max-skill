@@ -216,7 +216,20 @@ export function StudioView() {
   const lastOpenedCollectionId = useStore((s) => s.lastOpenedCollectionId);
   const collections = useStore((s) => s.collections);
   const setView = useStore((s) => s.setView);
+  const setLastOpenedCollection = useStore((s) => s.setLastOpenedCollection);
   const resumeCollection = collections.find((c) => c.id === lastOpenedCollectionId);
+
+  // The deadline card names a collection by label ("Koleksiyon III") rather
+  // than id, so resolve it the same loose way a person would read it —
+  // the one still actively "In Progress" — falling back to whichever
+  // collection is currently open if none matches.
+  const deadlineCollection =
+    collections.find((c) => c.status === "In Progress") ?? resumeCollection ?? collections[0];
+  const openDeadlineCollection = () => {
+    if (!deadlineCollection) return;
+    setLastOpenedCollection(deadlineCollection.id);
+    setView("collections");
+  };
 
   // The single next actionable thing, not a summary — one undone task
   // beats a paragraph of options when starting is the hard part.
@@ -280,7 +293,10 @@ export function StudioView() {
           )}
         </div>
 
-        <div className="bento-tile bento-violet p-5 lg:col-span-2">
+        <button
+          onClick={() => setView("journal")}
+          className="bento-tile bento-violet w-full p-5 text-left transition-transform duration-200 hover:-translate-y-0.5 lg:col-span-2"
+        >
           <div className="bento-orb" style={{ width: 110, height: 110, bottom: -40, left: -30 }} />
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
             Streak
@@ -292,15 +308,18 @@ export function StudioView() {
           {bestStreak > 0 && (
             <p className="mt-1 text-[10.5px] text-white/45">en iyi: {bestStreak} gün</p>
           )}
-        </div>
+        </button>
 
-        <div className="bento-tile bento-teal p-5 lg:col-span-2">
+        <button
+          onClick={() => setView("journal")}
+          className="bento-tile bento-teal w-full p-5 text-left transition-transform duration-200 hover:-translate-y-0.5 lg:col-span-2"
+        >
           <div className="bento-orb" style={{ width: 120, height: 120, top: -40, right: -35 }} />
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
             Creative Energy
           </p>
           <p className="font-serif text-lg italic text-[#d3fff2]">{creativeEnergy}</p>
-        </div>
+        </button>
 
         <div className="bento-tile bento-graphite p-5 lg:col-span-2">
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
@@ -309,7 +328,11 @@ export function StudioView() {
           <FinancePulse />
         </div>
 
-        <div className="bento-tile bento-blue p-5 lg:col-span-2">
+        <button
+          onClick={openDeadlineCollection}
+          disabled={!deadlineCollection}
+          className="bento-tile bento-blue w-full p-5 text-left transition-transform duration-200 hover:-translate-y-0.5 disabled:pointer-events-none lg:col-span-2"
+        >
           <div className="bento-orb" style={{ width: 100, height: 100, bottom: -35, right: -30 }} />
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
             Next Deadline
@@ -329,7 +352,7 @@ export function StudioView() {
               </>
             )}
           </p>
-        </div>
+        </button>
       </div>
 
       <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">

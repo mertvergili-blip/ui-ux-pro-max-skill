@@ -183,12 +183,14 @@ function MaterialCard({
                 >
                   {uploading ? "…" : "Değiştir"}
                 </button>
-                <button
-                  onClick={onRemove}
-                  className="rounded-full bg-ink/70 px-2.5 py-1 text-[9px] uppercase tracking-[1px] text-bone backdrop-blur-sm hover:text-rose"
-                >
-                  Kaldır
-                </button>
+                {!swipe.touch && (
+                  <button
+                    onClick={onRemove}
+                    className="rounded-full bg-ink/70 px-2.5 py-1 text-[9px] uppercase tracking-[1px] text-bone backdrop-blur-sm hover:text-rose"
+                  >
+                    Kaldır
+                  </button>
+                )}
               </div>
             </div>
             {fileInput}
@@ -232,12 +234,14 @@ function MaterialCard({
               </span>
             </button>
             {fileInput}
-            <button
-              onClick={onRemove}
-              className="text-[10px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity duration-200 hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
-            >
-              Kaldır
-            </button>
+            {!swipe.touch && (
+              <button
+                onClick={onRemove}
+                className="text-[10px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity duration-200 hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
+              >
+                Kaldır
+              </button>
+            )}
           </div>
           {details}
         </Tilt>

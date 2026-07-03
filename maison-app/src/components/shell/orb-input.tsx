@@ -25,6 +25,15 @@ export function OrbInput({ value, onChange, placeholder, active, loading }: OrbI
     el.style.height = `${Math.min(el.scrollHeight, 132)}px`;
   }, [value]);
 
+  // This component only mounts while the panel is open (AnimatePresence
+  // unmounts it on close), so a mount-only focus fires exactly once per
+  // open — the whole point of a "just start typing" quick-capture flow is
+  // that the keystrokes actually land somewhere without an extra click.
+  useEffect(() => {
+    const id = setTimeout(() => textareaRef.current?.focus(), 120);
+    return () => clearTimeout(id);
+  }, []);
+
   const handleOrbClick = () => {
     if (listening) stop();
     else start(value);

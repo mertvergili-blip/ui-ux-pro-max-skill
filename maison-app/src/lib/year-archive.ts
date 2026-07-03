@@ -28,7 +28,7 @@ export function compileYearArchive(input: YearArchiveInput): string {
     "=".repeat(32),
     "",
     "KOLEKSİYONLAR",
-    ...collections.map((c) => `  · ${c.name} — ${c.status} (${c.count} parça)`),
+    ...collections.map((c) => `  · ${c.name} — ${c.status} (${c.images?.length ?? 0} parça)`),
     "",
     "ÖZET",
     `  Tamamlanan koleksiyon: ${archived.length}`,

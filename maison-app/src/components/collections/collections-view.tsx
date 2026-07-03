@@ -169,9 +169,16 @@ function Folder({
             transition: "transform 0.55s cubic-bezier(.2,.9,.25,1.1)",
           }}
         >
-          <span className="absolute bottom-2.5 right-3.5 text-[11px] text-white/75">
-            {data.count}
-          </span>
+          {/* The old `count` field was a fixed seed number that never
+              changed as images were actually added or removed — this reads
+              the real gallery length instead, so the badge never claims
+              content that isn't there. Hidden at 0 rather than showing a
+              bare "0" on the cover. */}
+          {(data.images?.length ?? 0) > 0 && (
+            <span className="absolute bottom-2.5 right-3.5 text-[11px] text-white/75">
+              {data.images!.length}
+            </span>
+          )}
         </div>
       </div>
 
@@ -185,12 +192,14 @@ function Folder({
             >
               {data.status}
             </p>
-            <button
-              onClick={onRemove}
-              className="text-[9.5px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity duration-200 hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
-            >
-              Kaldır
-            </button>
+            {!swipe.touch && (
+              <button
+                onClick={onRemove}
+                className="text-[9.5px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity duration-200 hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
+              >
+                Kaldır
+              </button>
+            )}
           </div>
           <p className={large ? "font-heading text-[20px]" : "font-heading text-[17px]"}>{data.name}</p>
           <p className={large ? "mt-1 text-[13px] text-muted" : "mt-0.5 text-xs text-muted"}>{data.sub}</p>

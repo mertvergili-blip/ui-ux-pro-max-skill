@@ -115,7 +115,7 @@ function PanelInsight({ view }: { view: ViewName }) {
 
   if (view === "collections") {
     const inProgress = collections.find((c) => c.status !== "Archived");
-    const pieces = collections.reduce((sum, c) => sum + c.count, 0);
+    const pieces = collections.reduce((sum, c) => sum + (c.images?.length ?? 0), 0);
     return (
       <div className="mb-7">
         <p className="font-serif text-[30px] italic leading-tight text-bone">

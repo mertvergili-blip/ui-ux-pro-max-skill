@@ -31,7 +31,10 @@ function useCoarsePointer(): boolean {
  * the backdrop must reveal itself only as the card actually slides away).
  * `props` spreads onto the draggable motion element; it's empty on a mouse
  * pointer, leaving the element undraggable without an extra null-check at
- * every call site.
+ * every call site. `touch` is also returned directly — callers use it to
+ * pick a single primary delete affordance instead of showing both the
+ * swipe gesture AND an always-visible "Kaldır" text at once, which read as
+ * two competing ways to do the same thing.
  */
 export function useSwipeDelete(onDelete: () => void) {
   const touch = useCoarsePointer();
@@ -51,5 +54,5 @@ export function useSwipeDelete(onDelete: () => void) {
       }
     : {};
 
-  return { x, props };
+  return { x, props, touch };
 }
