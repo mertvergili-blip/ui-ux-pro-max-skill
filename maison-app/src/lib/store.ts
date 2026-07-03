@@ -5,6 +5,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { localClassify, type SuggestionType } from "./classify";
 import { dbStorage } from "./db-storage";
 import { selectDaysRemaining, selectUrgency, todayKey } from "./deadline";
+import { selectCurrentStreak, selectBestStreak } from "./streak";
 
 export { selectDaysRemaining, selectUrgency };
 
@@ -128,13 +129,22 @@ interface MaisonStore {
   tasks: Task[];
   toggleTask: (id: string) => void;
   addTask: (text: string) => void;
+  removeTask: (id: string) => void;
+  restoreTask: (task: Task, index: number) => void;
   setTaskEstimate: (id: string, minutes: number | undefined) => void;
   setTaskSubtasks: (id: string, subtasks: Subtask[]) => void;
   toggleSubtask: (taskId: string, subtaskId: string) => void;
 
   // The task currently held in a Focus session (single-task mode) — not
   // persisted, resets on reload, since it's a "right now" concept.
+  // Persisted (not just in-memory) — a countdown expressed as an absolute
+  // end timestamp survives a reload/tab-close naturally: reopening the app
+  // just re-derives "time left" from now vs. that timestamp, instead of
+  // the whole session silently vanishing the moment the tab closes.
   focusTaskId: string | null;
+  focusEndsAt: number | null;
+  startFocusTask: (id: string, minutes: number) => void;
+  extendFocusTimer: (minutes: number) => void;
   setFocusTask: (id: string | null) => void;
 
   streak: number;
@@ -268,6 +278,14 @@ export const useStore = create<MaisonStore>()(
             },
           ],
         })),
+      removeTask: (id) =>
+        set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
+      restoreTask: (task, index) =>
+        set((s) => {
+          const next = [...s.tasks];
+          next.splice(Math.min(index, next.length), 0, task);
+          return { tasks: next };
+        }),
       setTaskEstimate: (id, minutes) =>
         set((s) => ({
           tasks: s.tasks.map((t) => (t.id === id ? { ...t, estimatedMinutes: minutes } : t)),
@@ -291,7 +309,14 @@ export const useStore = create<MaisonStore>()(
         })),
 
       focusTaskId: null,
-      setFocusTask: (id) => set({ focusTaskId: id }),
+      focusEndsAt: null,
+      startFocusTask: (id, minutes) =>
+        set({ focusTaskId: id, focusEndsAt: Date.now() + minutes * 60000 }),
+      extendFocusTimer: (minutes) =>
+        set((s) => ({
+          focusEndsAt: Math.max(Date.now(), s.focusEndsAt ?? Date.now()) + minutes * 60000,
+        })),
+      setFocusTask: (id) => set({ focusTaskId: id, focusEndsAt: id ? Date.now() + 15 * 60000 : null }),
 
       streak: 12,
       bestStreak: 12,
@@ -532,33 +557,26 @@ export const useStore = create<MaisonStore>()(
         set((s) => {
           const key = todayKey();
           const existing = s.journalEntries.find((e) => e.date === key);
-          if (existing) {
-            return {
-              journalEntries: s.journalEntries.map((e) =>
-                e.date === key ? { ...e, mood } : e
-              ),
-            };
-          }
+          const journalEntries = existing
+            ? s.journalEntries.map((e) => (e.date === key ? { ...e, mood } : e))
+            : [...s.journalEntries, { date: key, mood, reflection: "" }];
           return {
-            journalEntries: [...s.journalEntries, { date: key, mood, reflection: "" }],
+            journalEntries,
+            streak: selectCurrentStreak(journalEntries),
+            bestStreak: selectBestStreak(journalEntries, s.bestStreak),
           };
         }),
       setTodayReflection: (text) =>
         set((s) => {
           const key = todayKey();
           const existing = s.journalEntries.find((e) => e.date === key);
-          if (existing) {
-            return {
-              journalEntries: s.journalEntries.map((e) =>
-                e.date === key ? { ...e, reflection: text } : e
-              ),
-            };
-          }
+          const journalEntries = existing
+            ? s.journalEntries.map((e) => (e.date === key ? { ...e, reflection: text } : e))
+            : [...s.journalEntries, { date: key, mood: null, reflection: text }];
           return {
-            journalEntries: [
-              ...s.journalEntries,
-              { date: key, mood: null, reflection: text },
-            ],
+            journalEntries,
+            streak: selectCurrentStreak(journalEntries),
+            bestStreak: selectBestStreak(journalEntries, s.bestStreak),
           };
         }),
 
@@ -585,6 +603,8 @@ export const useStore = create<MaisonStore>()(
         calendarEvents: s.calendarEvents,
         runwayPhotos: s.runwayPhotos,
         lastOpenedCollectionId: s.lastOpenedCollectionId,
+        focusTaskId: s.focusTaskId,
+        focusEndsAt: s.focusEndsAt,
       }),
     }
   )

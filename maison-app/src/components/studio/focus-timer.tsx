@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/lib/store";
 
@@ -14,42 +14,30 @@ function formatClock(seconds: number): string {
 
 // A single-task countdown, not a full pomodoro suite — the point is
 // lowering the barrier to "just start", not managing a whole session.
-// Defaults to the task's own estimate (or 15 minutes) since a number
-// already picked beats one more decision to make before starting.
+// Driven by an absolute end timestamp (not a local interval-decremented
+// counter) so a reload or a backgrounded tab picks up exactly where real
+// time says it should, instead of the whole session quietly resetting.
 export function FocusTimer({
   taskText,
-  initialMinutes,
+  endsAt,
   onExit,
   onComplete,
 }: {
   taskText: string;
-  initialMinutes: number;
+  endsAt: number;
   onExit: () => void;
   onComplete: () => void;
 }) {
-  const [minutes, setMinutes] = useState(initialMinutes);
-  const [secondsLeft, setSecondsLeft] = useState(initialMinutes * 60);
-  const [running, setRunning] = useState(true);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
+  const extendFocusTimer = useStore((s) => s.extendFocusTimer);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (!running) return;
-    intervalRef.current = setInterval(() => {
-      setSecondsLeft((s) => Math.max(0, s - 1));
-    }, 1000);
-    return () => clearInterval(intervalRef.current);
-  }, [running]);
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const adjust = (delta: number) => {
-    const next = Math.max(5, minutes + delta);
-    setMinutes(next);
-    setSecondsLeft(next * 60);
-    setRunning(true);
-  };
-
+  const secondsLeft = Math.max(0, Math.round((endsAt - now) / 1000));
   const done = secondsLeft === 0;
-  const total = minutes * 60;
-  const progress = total > 0 ? 1 - secondsLeft / total : 0;
 
   return (
     <motion.div
@@ -59,10 +47,6 @@ export function FocusTimer({
       transition={{ duration: 0.35, ease: EASE }}
       className="fixed bottom-[max(1.25rem,calc(env(safe-area-inset-bottom)+0.75rem))] right-[max(1.25rem,env(safe-area-inset-right))] z-[80] w-[280px] overflow-hidden rounded-[1.25rem] border border-white/[0.08] bg-[#100d09]/95 p-5 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.85)] backdrop-blur-xl"
     >
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gold transition-[width] duration-1000 ease-linear"
-        style={{ width: `${progress * 100}%` }}
-      />
       <p className="mb-1 text-[9.5px] uppercase tracking-[2.5px] text-muted">
         {done ? "Süre doldu" : "Odak Seansı"}
       </p>
@@ -87,7 +71,7 @@ export function FocusTimer({
                 Görevi Bitir
               </button>
               <button
-                onClick={() => adjust(5)}
+                onClick={() => extendFocusTimer(5)}
                 className="rounded-full border border-white/10 px-3 py-2 text-muted hover:border-white/25"
               >
                 +5 dk
@@ -101,14 +85,8 @@ export function FocusTimer({
             </p>
             <div className="flex items-center gap-2 text-[10px] uppercase tracking-[1.5px]">
               <button
-                onClick={() => setRunning((r) => !r)}
+                onClick={() => extendFocusTimer(5)}
                 className="rounded-full border border-white/10 px-3.5 py-2 text-bone-dim hover:border-white/25"
-              >
-                {running ? "Duraklat" : "Devam Et"}
-              </button>
-              <button
-                onClick={() => adjust(5)}
-                className="rounded-full border border-white/10 px-3 py-2 text-muted hover:border-white/25"
               >
                 +5 dk
               </button>
@@ -117,7 +95,7 @@ export function FocusTimer({
                 className="ml-auto text-muted hover:text-gold"
                 title="Görevi bitti işaretle"
               >
-                ✓
+                ✓ Bitti
               </button>
             </div>
           </motion.div>
@@ -137,20 +115,21 @@ export function FocusTimer({
 
 export function FocusTimerHost() {
   const focusTaskId = useStore((s) => s.focusTaskId);
+  const focusEndsAt = useStore((s) => s.focusEndsAt);
   const setFocusTask = useStore((s) => s.setFocusTask);
   const tasks = useStore((s) => s.tasks);
   const toggleTask = useStore((s) => s.toggleTask);
 
   const task = tasks.find((t) => t.id === focusTaskId);
 
-  if (!task || task.done) return null;
+  if (!task || task.done || !focusEndsAt) return null;
 
   return (
     <AnimatePresence>
       <FocusTimer
         key={task.id}
         taskText={task.text}
-        initialMinutes={task.estimatedMinutes ?? 15}
+        endsAt={focusEndsAt}
         onExit={() => setFocusTask(null)}
         onComplete={() => {
           toggleTask(task.id);

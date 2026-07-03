@@ -6,6 +6,7 @@ import { useStore, selectCreativeEnergy, selectDaysRemaining } from "@/lib/store
 import { FinancePulse } from "@/components/shared/finance-pulse";
 import { CapsuleDayCard } from "@/components/studio/capsule-day-card";
 import { AnimateDigits } from "@/components/unlumen-ui/animate-digits";
+import { useUndoStore } from "@/lib/undo-toast";
 
 function HeadlineReveal() {
   const words = "Bugün sakin bir gün. Bir teslim tarihi *yaklaşıyor.*".split(" ");
@@ -43,6 +44,7 @@ function TaskItem({
   done,
   estimatedMinutes,
   subtasks,
+  onRemove,
 }: {
   id: string;
   idx: string;
@@ -50,12 +52,13 @@ function TaskItem({
   done: boolean;
   estimatedMinutes?: number;
   subtasks?: { id: string; text: string; done: boolean }[];
+  onRemove: () => void;
 }) {
   const toggleTask = useStore((s) => s.toggleTask);
   const setTaskSubtasks = useStore((s) => s.setTaskSubtasks);
   const setTaskEstimate = useStore((s) => s.setTaskEstimate);
   const toggleSubtask = useStore((s) => s.toggleSubtask);
-  const setFocusTask = useStore((s) => s.setFocusTask);
+  const startFocusTask = useStore((s) => s.startFocusTask);
   const [breakingDown, setBreakingDown] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
@@ -140,10 +143,13 @@ function TaskItem({
               </button>
             )}
             <button
-              onClick={() => setFocusTask(id)}
+              onClick={() => startFocusTask(id, estimatedMinutes ?? 15)}
               className="text-gold hover:text-bone"
             >
               Odaklan
+            </button>
+            <button onClick={onRemove} className="text-muted hover:text-rose">
+              Sil
             </button>
           </div>
         )}
@@ -195,7 +201,17 @@ export function StudioView() {
   const deadlineLabel = useStore((s) => s.deadlineLabel);
   const deadlineDate = useStore((s) => s.deadlineDate);
   const daysRemaining = useMemo(() => selectDaysRemaining(deadlineDate), [deadlineDate]);
-  const setFocusTask = useStore((s) => s.setFocusTask);
+  const startFocusTask = useStore((s) => s.startFocusTask);
+  const removeTask = useStore((s) => s.removeTask);
+  const restoreTask = useStore((s) => s.restoreTask);
+  const showUndo = useUndoStore((s) => s.show);
+
+  const handleRemoveTask = (id: string) => {
+    const index = tasks.findIndex((t) => t.id === id);
+    const task = tasks[index];
+    removeTask(id);
+    if (task) showUndo(`"${task.text}" kaldırıldı`, () => restoreTask(task, index));
+  };
 
   const lastOpenedCollectionId = useStore((s) => s.lastOpenedCollectionId);
   const collections = useStore((s) => s.collections);
@@ -244,7 +260,7 @@ export function StudioView() {
               </p>
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => setFocusTask(nextTask.id)}
+                  onClick={() => startFocusTask(nextTask.id, nextTask.estimatedMinutes ?? 15)}
                   className="rounded-full bg-[#e4c98f] px-4 py-2 text-[10.5px] uppercase tracking-[1.5px] text-ink transition-opacity hover:opacity-90"
                 >
                   Şimdi Başla
@@ -321,7 +337,7 @@ export function StudioView() {
       </p>
       <div className="flex flex-col gap-3.5">
         {tasks.map((t) => (
-          <TaskItem key={t.id} {...t} />
+          <TaskItem key={t.id} {...t} onRemove={() => handleRemoveTask(t.id)} />
         ))}
       </div>
 

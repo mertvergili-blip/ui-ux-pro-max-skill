@@ -20,7 +20,7 @@ export async function GET() {
       >
         <svg width="58%" height="58%" viewBox="0 0 72 72" fill="none">
           <path
-            d="M8 60 L8 12 L26 42 L44 12 L44 60 M52 12 L64 12 M58 12 L58 60"
+            d="M18 60 L18 12 L36 42 L54 12 L54 60"
             stroke="#c4a469"
             strokeWidth={4.5}
             strokeLinecap="round"
