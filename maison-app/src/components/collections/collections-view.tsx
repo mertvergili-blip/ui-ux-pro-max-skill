@@ -7,6 +7,7 @@ import { localPortfolioPitch } from "@/lib/portfolio-pitch";
 import { useTypewriter } from "@/lib/use-typewriter";
 import { useSpeechRecognition } from "@/lib/use-speech-recognition";
 import { useStore, type CollectionFolder as FolderData } from "@/lib/store";
+import { resizeImageFile } from "@/lib/image-resize";
 import {
   STUDIO_TEAM,
   localStudioTeamFeedback,
@@ -416,10 +417,151 @@ function ProjectDetail({
         </div>
       )}
 
+      <ProjectMoodboard folder={folder} />
+
       <StudioTeam notes={notes} accent={folder.accent} />
 
       <IterationLog collectionId={folder.id} />
     </motion.div>
+  );
+}
+
+function MoodboardImage({
+  folderId,
+  image,
+  projectName,
+}: {
+  folderId: string;
+  image: NonNullable<FolderData["images"]>[number];
+  projectName: string;
+}) {
+  const removeProjectImage = useStore((s) => s.removeProjectImage);
+  const setProjectImageInsight = useStore((s) => s.setProjectImageInsight);
+  const [analyzing, setAnalyzing] = useState(false);
+
+  const handleAnalyze = async () => {
+    setAnalyzing(true);
+    try {
+      const res = await fetch("/api/image-insight", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dataUrl: image.dataUrl, projectName }),
+      });
+      const data = await res.json();
+      setProjectImageInsight(folderId, image.id, data.insight ?? "İnceleme başarısız oldu.");
+    } catch {
+      setProjectImageInsight(folderId, image.id, "İnceleme başarısız oldu, tekrar dener misin?");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  return (
+    <div className="group relative overflow-hidden rounded-[0.85rem] bg-black/20">
+      {/* User-uploaded data URL, not a remote asset. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={image.dataUrl} alt="" className="aspect-square w-full object-cover" />
+      <button
+        onClick={() => removeProjectImage(folderId, image.id)}
+        className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-ink/70 text-[11px] text-bone-dim opacity-0 transition-opacity group-hover:opacity-100"
+        aria-label="Görseli kaldır"
+      >
+        ✕
+      </button>
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 to-transparent p-2 pt-6">
+        {image.insight ? (
+          <p className="text-[10.5px] leading-relaxed text-bone-dim">{image.insight}</p>
+        ) : (
+          <button
+            onClick={handleAnalyze}
+            disabled={analyzing}
+            className="text-[9.5px] uppercase tracking-[1.5px] text-gold transition-colors hover:text-bone disabled:opacity-40"
+          >
+            {analyzing ? "İnceleniyor…" : "AI ile incele"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProjectMoodboard({ folder }: { folder: FolderData }) {
+  const addProjectImage = useStore((s) => s.addProjectImage);
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    try {
+      const dataUrl = await resizeImageFile(file);
+      addProjectImage(folder.id, dataUrl);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const images = folder.images ?? [];
+
+  return (
+    <div className="mb-8 border-t border-line pt-6">
+      <div className="mb-3.5 flex items-center justify-between">
+        <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
+          Moodboard &amp; Referanslar
+        </p>
+        <div className="flex gap-3 text-[10px] uppercase tracking-[1.5px]">
+          <button
+            onClick={() => cameraRef.current?.click()}
+            disabled={uploading}
+            className="text-muted transition-colors hover:text-gold disabled:opacity-40"
+          >
+            Fotoğraf Çek
+          </button>
+          <button
+            onClick={() => uploadRef.current?.click()}
+            disabled={uploading}
+            className="text-gold transition-colors hover:text-bone disabled:opacity-40"
+          >
+            {uploading ? "Yükleniyor…" : "Yükle"}
+          </button>
+        </div>
+        <input
+          ref={uploadRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFile}
+          className="hidden"
+        />
+        <input
+          ref={cameraRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFile}
+          className="hidden"
+        />
+      </div>
+      {images.length > 0 ? (
+        <div className="grid grid-cols-3 gap-2.5">
+          {images.map((img) => (
+            <MoodboardImage
+              key={img.id}
+              folderId={folder.id}
+              image={img}
+              projectName={folder.name}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="text-[12.5px] leading-relaxed text-muted">
+          Moodboard, bir manipülasyon denemesi ya da ilham aldığın bir nesnenin
+          fotoğrafını ekle — AI görsele bakıp yorumlayabilir.
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -618,10 +760,14 @@ function IterationLog({ collectionId }: { collectionId: string }) {
 }
 
 export function CollectionsView() {
-  const [openProject, setOpenProject] = useState<FolderData | null>(null);
+  const [openProjectId, setOpenProjectId] = useState<string | null>(null);
   const collections = useStore((s) => s.collections);
   const addCollection = useStore((s) => s.addCollection);
   const removeCollection = useStore((s) => s.removeCollection);
+  // Look the open folder up live from the store each render, rather than
+  // holding a snapshot object — otherwise mutations like addProjectImage
+  // never show up because the held snapshot never updates.
+  const openProject = collections.find((c) => c.id === openProjectId) ?? null;
 
   // Portfolio Autopilot — generates a one-line pitch per collection on
   // demand, always reading live from the collections list, so a project
@@ -675,7 +821,7 @@ export function CollectionsView() {
           <ProjectDetail
             key="detail"
             folder={openProject}
-            onClose={() => setOpenProject(null)}
+            onClose={() => setOpenProjectId(null)}
           />
         ) : (
           <motion.div
@@ -707,7 +853,7 @@ export function CollectionsView() {
                 <Folder
                   key={f.id}
                   data={f}
-                  onOpenProject={setOpenProject}
+                  onOpenProject={(folder) => setOpenProjectId(folder.id)}
                   onRemove={() => removeCollection(f.id)}
                   pitch={portfolioMode ? pitches[f.id] : undefined}
                   pitchLoading={portfolioMode && pitchLoadingIds.has(f.id)}

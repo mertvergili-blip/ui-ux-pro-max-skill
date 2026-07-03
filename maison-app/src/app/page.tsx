@@ -30,12 +30,12 @@ const VIEW_MAP = {
   materials: MaterialLibraryView,
 } as const;
 
-// These three are grids/timelines that were visibly cramped fighting the
-// panel for room, and don't have a natural "atmosphere" reason to keep
-// it the way Studio/Journal's mood-driven panel does — so they get the
-// full width instead. Calendar/Runway/DNA keep their own panel content
-// (CalendarRightPanel, RunwayLookCarousel) unchanged.
-const FULL_WIDTH_VIEWS = new Set(["collections", "materials", "path"]);
+// Grids that were visibly cramped fighting the panel for room, and don't
+// have a natural "atmosphere" reason to keep it the way Studio/Journal's
+// mood-driven panel does — so they get the full width instead. Path is a
+// linear timeline, not a grid, and reads better narrower, so it keeps the
+// panel. Calendar/Runway/DNA keep their own panel content unchanged.
+const FULL_WIDTH_VIEWS = new Set(["collections", "materials"]);
 
 export default function Home() {
   // Selectors, not a full-store destructure — this component (and everything
@@ -70,13 +70,14 @@ export default function Home() {
       {!introVisible && (
         <>
           {!fullWidth && <ImagePanel />}
-          <div
-            className={`relative z-5 min-h-screen w-full px-5 pb-24 sm:px-9 lg:px-0 lg:pl-[72px] ${
-              fullWidth ? "lg:w-full" : "lg:w-[60%]"
-            }`}
-          >
+          {/* Topbar always lives in the full-width shell, regardless of
+              whether the content below narrows for the side panel — it
+              used to be inside the width-toggling container, which made
+              the whole nav bar visibly jump sideways switching between a
+              panel view and a full-width one. */}
+          <div className="relative z-5 min-h-screen w-full px-5 pb-24 sm:px-9 lg:px-0 lg:pl-[72px]">
             <Topbar />
-            <div className="pt-[38px]">
+            <div className={`pt-[38px] ${fullWidth ? "" : "lg:w-[60%]"}`}>
               <ActiveView />
             </div>
           </div>

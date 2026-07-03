@@ -55,6 +55,7 @@ export interface Material {
   costNote: string;
   sampleNote: string;
   colorTag: string; // hex or css color, used as the swatch
+  imageUrl?: string; // real fabric photo, when uploaded — falls back to colorTag dot
   createdAt: number;
 }
 
@@ -66,6 +67,13 @@ export interface IterationEntry {
   createdAt: number;
 }
 
+export interface ProjectImage {
+  id: string;
+  dataUrl: string;
+  insight?: string; // AI's read on the photo, once analyzed
+  createdAt: number;
+}
+
 export interface CollectionFolder {
   id: string;
   name: string;
@@ -73,6 +81,7 @@ export interface CollectionFolder {
   accent: string;
   count: number;
   sub: string;
+  images?: ProjectImage[]; // moodboard / manipulation / reference photos
 }
 
 export interface CalendarEvent {
@@ -125,6 +134,7 @@ interface MaisonStore {
   materials: Material[];
   addMaterial: (m: Omit<Material, "id" | "createdAt">) => void;
   removeMaterial: (id: string) => void;
+  setMaterialImage: (id: string, imageUrl: string) => void;
 
   // Mistake/iteration log — per collection
   iterationLogs: IterationEntry[];
@@ -139,6 +149,9 @@ interface MaisonStore {
   collections: CollectionFolder[];
   addCollection: (c: Omit<CollectionFolder, "id" | "count">) => void;
   removeCollection: (id: string) => void;
+  addProjectImage: (folderId: string, dataUrl: string) => void;
+  removeProjectImage: (folderId: string, imageId: string) => void;
+  setProjectImageInsight: (folderId: string, imageId: string, insight: string) => void;
 
   // Calendar — day-keyed events plus which day is currently open in the
   // right-panel detail view (shared between the grid and ImagePanel)
@@ -248,6 +261,10 @@ export const useStore = create<MaisonStore>()(
         })),
       removeMaterial: (id) =>
         set((s) => ({ materials: s.materials.filter((m) => m.id !== id) })),
+      setMaterialImage: (id, imageUrl) =>
+        set((s) => ({
+          materials: s.materials.map((m) => (m.id === id ? { ...m, imageUrl } : m)),
+        })),
 
       iterationLogs: [],
       addIterationEntry: (e) =>
@@ -302,6 +319,41 @@ export const useStore = create<MaisonStore>()(
         })),
       removeCollection: (id) =>
         set((s) => ({ collections: s.collections.filter((c) => c.id !== id) })),
+      addProjectImage: (folderId, dataUrl) =>
+        set((s) => ({
+          collections: s.collections.map((c) =>
+            c.id === folderId
+              ? {
+                  ...c,
+                  images: [
+                    ...(c.images ?? []),
+                    { id: `img${Date.now()}`, dataUrl, createdAt: Date.now() },
+                  ],
+                }
+              : c
+          ),
+        })),
+      removeProjectImage: (folderId, imageId) =>
+        set((s) => ({
+          collections: s.collections.map((c) =>
+            c.id === folderId
+              ? { ...c, images: (c.images ?? []).filter((img) => img.id !== imageId) }
+              : c
+          ),
+        })),
+      setProjectImageInsight: (folderId, imageId, insight) =>
+        set((s) => ({
+          collections: s.collections.map((c) =>
+            c.id === folderId
+              ? {
+                  ...c,
+                  images: (c.images ?? []).map((img) =>
+                    img.id === imageId ? { ...img, insight } : img
+                  ),
+                }
+              : c
+          ),
+        })),
 
       calendarEvents: [
         { id: "ce1", day: 1, text: "Brief · Croquis taslakları" },

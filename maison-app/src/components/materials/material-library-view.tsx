@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/lib/store";
 import { Tilt } from "@/components/unlumen-ui/tilt";
+import { resizeImageFile } from "@/lib/image-resize";
 
 const SWATCH_PRESETS = [
   "#c4a469", // gold
@@ -17,20 +18,41 @@ const SWATCH_PRESETS = [
 ];
 
 function MaterialCard({
+  id,
   name,
   supplier,
   costNote,
   sampleNote,
   colorTag,
+  imageUrl,
   onRemove,
 }: {
+  id: string;
   name: string;
   supplier: string;
   costNote: string;
   sampleNote: string;
   colorTag: string;
+  imageUrl?: string;
   onRemove: () => void;
 }) {
+  const setMaterialImage = useStore((s) => s.setMaterialImage);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    try {
+      const dataUrl = await resizeImageFile(file);
+      setMaterialImage(id, dataUrl);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <motion.div
       layout
@@ -46,9 +68,28 @@ function MaterialCard({
         className="p-5"
       >
         <div className="mb-4 flex items-center justify-between">
-          <div
-            className="h-10 w-10 rounded-full ring-1 ring-white/10"
-            style={{ background: colorTag }}
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="group/swatch relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-white/10"
+            style={imageUrl ? undefined : { background: colorTag }}
+            aria-label={imageUrl ? "Fotoğrafı değiştir" : "Kumaş fotoğrafı ekle"}
+            title={imageUrl ? "Fotoğrafı değiştir" : "Kumaş fotoğrafı ekle"}
+          >
+            {imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+            )}
+            <span className="absolute inset-0 flex items-center justify-center bg-ink/60 text-[9px] uppercase tracking-[1px] text-bone opacity-0 transition-opacity group-hover/swatch:opacity-100">
+              {uploading ? "…" : imageUrl ? "Değiştir" : "+ Foto"}
+            </span>
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFile}
+            className="hidden"
           />
           <button
             onClick={onRemove}
@@ -84,6 +125,10 @@ function AddMaterialCard() {
   const [costNote, setCostNote] = useState("");
   const [sampleNote, setSampleNote] = useState("");
   const [color, setColor] = useState(SWATCH_PRESETS[0]);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+  const [uploading, setUploading] = useState(false);
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const reset = () => {
     setName("");
@@ -91,7 +136,20 @@ function AddMaterialCard() {
     setCostNote("");
     setSampleNote("");
     setColor(SWATCH_PRESETS[0]);
+    setImageUrl(undefined);
     setOpen(false);
+  };
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    try {
+      setImageUrl(await resizeImageFile(file));
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSave = () => {
@@ -102,6 +160,7 @@ function AddMaterialCard() {
       costNote: costNote.trim(),
       sampleNote: sampleNote.trim(),
       colorTag: color,
+      imageUrl,
     });
     reset();
   };
@@ -125,18 +184,59 @@ function AddMaterialCard() {
       className="bento-tile bento-gold"
     >
       <div className="relative flex flex-col gap-2.5 p-5">
-        <div className="mb-1 flex gap-1.5">
-          {SWATCH_PRESETS.map((c) => (
-            <button
-              key={c}
-              onClick={() => setColor(c)}
-              className={`h-6 w-6 rounded-full ring-2 transition-transform hover:scale-110 ${
-                color === c ? "ring-bone" : "ring-transparent"
-              }`}
-              style={{ background: c }}
-            />
-          ))}
+        <div className="mb-1 flex items-center gap-3">
+          <button
+            onClick={() => uploadRef.current?.click()}
+            disabled={uploading}
+            className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-white/10"
+            style={imageUrl ? undefined : { background: color }}
+            aria-label="Kumaş fotoğrafı ekle"
+          >
+            {imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <span className="absolute inset-0 flex items-center justify-center text-[9px] uppercase tracking-[1px] text-ink/70">
+                {uploading ? "…" : "+ Foto"}
+              </span>
+            )}
+          </button>
+          <div className="flex gap-1.5">
+            {SWATCH_PRESETS.map((c) => (
+              <button
+                key={c}
+                onClick={() => setColor(c)}
+                className={`h-6 w-6 rounded-full ring-2 transition-transform hover:scale-110 ${
+                  color === c && !imageUrl ? "ring-bone" : "ring-transparent"
+                }`}
+                style={{ background: c }}
+              />
+            ))}
+          </div>
+          <input
+            ref={uploadRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFile}
+            className="hidden"
+          />
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFile}
+            className="hidden"
+          />
         </div>
+        {!imageUrl && (
+          <button
+            onClick={() => cameraRef.current?.click()}
+            className="-mt-1 self-start text-[9.5px] uppercase tracking-[1.5px] text-muted transition-colors hover:text-gold"
+          >
+            veya fotoğraf çek
+          </button>
+        )}
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
