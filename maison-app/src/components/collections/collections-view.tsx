@@ -9,6 +9,8 @@ import { useSpeechRecognition } from "@/lib/use-speech-recognition";
 import { useStore, type CollectionFolder as FolderData } from "@/lib/store";
 import { resizeImageFile } from "@/lib/image-resize";
 import { useUndoStore } from "@/lib/undo-toast";
+import { useSwipeDelete } from "@/lib/use-swipe-delete";
+import { SwipeDeleteBackdrop } from "@/components/shared/swipe-delete-backdrop";
 import {
   STUDIO_TEAM,
   localStudioTeamFeedback,
@@ -118,6 +120,7 @@ function Folder({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const pitchDisplay = useTypewriter(pitch ?? "");
+  const swipe = useSwipeDelete(onRemove);
 
   return (
     <div className="group folder-hover-zoom cursor-pointer transition-transform duration-300 lg:hover:-translate-y-0.5 lg:hover:scale-[1.015]">
@@ -172,41 +175,41 @@ function Folder({
         </div>
       </div>
 
-      <div className={large ? "mt-5" : "mt-4"}>
-        <div className="mb-1 flex items-center justify-between">
-          <p
-            className="text-[9.5px] uppercase tracking-[2.5px]"
+      <div className={`relative overflow-hidden rounded-lg lg:overflow-visible ${large ? "mt-5" : "mt-4"}`}>
+        <SwipeDeleteBackdrop x={swipe.x} />
+        <motion.div {...swipe.props}>
+          <div className="mb-1 flex items-center justify-between">
+            <p
+              className="text-[9.5px] uppercase tracking-[2.5px]"
+              style={{ color: data.accent }}
+            >
+              {data.status}
+            </p>
+            <button
+              onClick={onRemove}
+              className="text-[9.5px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity duration-200 hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
+            >
+              Kaldır
+            </button>
+          </div>
+          <p className={large ? "font-heading text-[20px]" : "font-heading text-[17px]"}>{data.name}</p>
+          <p className={large ? "mt-1 text-[13px] text-muted" : "mt-0.5 text-xs text-muted"}>{data.sub}</p>
+          {(pitch || pitchLoading) && (
+            <p className="mt-2 font-serif text-[12.5px] italic leading-relaxed text-bone-dim">
+              {pitchLoading ? "Pitch hazırlanıyor…" : pitchDisplay}
+            </p>
+          )}
+          <span
+            className="mt-2.5 inline-block text-[10.5px] uppercase tracking-[1.5px] transition-all duration-250 lg:translate-x-[-4px] lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100"
             style={{ color: data.accent }}
-          >
-            {data.status}
-          </p>
-          <button
             onClick={(e) => {
               e.stopPropagation();
-              onRemove();
+              onOpenProject(data);
             }}
-            className="text-[9.5px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity duration-200 hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
           >
-            Kaldır
-          </button>
-        </div>
-        <p className={large ? "font-heading text-[20px]" : "font-heading text-[17px]"}>{data.name}</p>
-        <p className={large ? "mt-1 text-[13px] text-muted" : "mt-0.5 text-xs text-muted"}>{data.sub}</p>
-        {(pitch || pitchLoading) && (
-          <p className="mt-2 font-serif text-[12.5px] italic leading-relaxed text-bone-dim">
-            {pitchLoading ? "Pitch hazırlanıyor…" : pitchDisplay}
-          </p>
-        )}
-        <span
-          className="mt-2.5 inline-block text-[10.5px] uppercase tracking-[1.5px] transition-all duration-250 lg:translate-x-[-4px] lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100"
-          style={{ color: data.accent }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenProject(data);
-          }}
-        >
-          Projeyi Aç →
-        </span>
+            Projeyi Aç →
+          </span>
+        </motion.div>
       </div>
     </div>
   );

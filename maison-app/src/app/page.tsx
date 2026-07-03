@@ -10,6 +10,8 @@ import { InstallPrompt } from "@/components/shared/install-prompt";
 import { UndoToast } from "@/components/shared/undo-toast";
 import { FocusTimerHost } from "@/components/studio/focus-timer";
 import { Topbar } from "@/components/shell/topbar";
+import { BottomNav } from "@/components/shell/bottom-nav";
+import { PullToRefresh } from "@/components/shell/pull-to-refresh";
 import { AiStudioPanel } from "@/components/shell/ai-studio-panel";
 import { StudioView } from "@/components/studio/studio-view";
 import { CollectionsView } from "@/components/collections/collections-view";
@@ -94,12 +96,14 @@ export default function Home() {
               used to be inside the width-toggling container, which made
               the whole nav bar visibly jump sideways switching between a
               panel view and a full-width one. */}
-          <div className="relative z-5 min-h-screen w-full px-[max(1.25rem,env(safe-area-inset-left))] pb-[max(6rem,calc(env(safe-area-inset-bottom)+4.5rem))] sm:px-[max(2.25rem,env(safe-area-inset-left))] lg:pl-[max(72px,calc(env(safe-area-inset-left)+72px))] lg:pr-[env(safe-area-inset-right)]">
+          <div className="relative z-5 min-h-screen w-full px-[max(1.25rem,env(safe-area-inset-left))] pb-[max(10.5rem,calc(env(safe-area-inset-bottom)+9rem))] sm:px-[max(2.25rem,env(safe-area-inset-left))] lg:pb-[max(6rem,calc(env(safe-area-inset-bottom)+4.5rem))] lg:pl-[max(72px,calc(env(safe-area-inset-left)+72px))] lg:pr-[env(safe-area-inset-right)]">
             <Topbar />
             <div className={`pt-[38px] ${fullWidth ? "" : "lg:w-[60%]"}`}>
               <ActiveView />
             </div>
           </div>
+          <BottomNav />
+          <PullToRefresh />
           <AiStudioPanel />
           <InstallPrompt />
           <UndoToast />

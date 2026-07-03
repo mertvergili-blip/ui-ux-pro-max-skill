@@ -6,6 +6,8 @@ import { useStore } from "@/lib/store";
 import { Tilt } from "@/components/unlumen-ui/tilt";
 import { resizeImageFile } from "@/lib/image-resize";
 import { useUndoStore } from "@/lib/undo-toast";
+import { useSwipeDelete } from "@/lib/use-swipe-delete";
+import { SwipeDeleteBackdrop } from "@/components/shared/swipe-delete-backdrop";
 
 // Shared by every MaterialCard — lets a fabric be tagged with which
 // project(s) it's actually used in, so Collections can show "kumaşlar
@@ -112,6 +114,7 @@ function MaterialCard({
   const setMaterialImage = useStore((s) => s.setMaterialImage);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const swipe = useSwipeDelete(onRemove);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -156,82 +159,90 @@ function MaterialCard({
   // material recognizable down to a small circular avatar.
   if (imageUrl) {
     return (
+      <div className="relative overflow-hidden rounded-[var(--bento-radius,1.6rem)] lg:overflow-visible">
+        <SwipeDeleteBackdrop x={swipe.x} />
+        <motion.div
+          layout
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+          {...swipe.props}
+          className="group bento-tile bento-graphite relative overflow-hidden"
+        >
+          <Tilt rotationFactor={4} springOptions={{ stiffness: 200, damping: 22 }}>
+            <div className={`relative w-full overflow-hidden ${large ? "h-60" : "h-40"}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
+              <div className="absolute right-2 top-2 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="rounded-full bg-ink/70 px-2.5 py-1 text-[9px] uppercase tracking-[1px] text-bone backdrop-blur-sm hover:text-gold"
+                >
+                  {uploading ? "…" : "Değiştir"}
+                </button>
+                <button
+                  onClick={onRemove}
+                  className="rounded-full bg-ink/70 px-2.5 py-1 text-[9px] uppercase tracking-[1px] text-bone backdrop-blur-sm hover:text-rose"
+                >
+                  Kaldır
+                </button>
+              </div>
+            </div>
+            {fileInput}
+            <div className={large ? "p-7 pt-5" : "p-5 pt-4"}>{details}</div>
+          </Tilt>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative overflow-hidden rounded-[var(--bento-radius,1.6rem)] lg:overflow-visible">
+      <SwipeDeleteBackdrop x={swipe.x} />
       <motion.div
         layout
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-        className="group bento-tile bento-graphite relative overflow-hidden"
+        {...swipe.props}
+        className="group bento-tile bento-graphite relative"
       >
-        <Tilt rotationFactor={4} springOptions={{ stiffness: 200, damping: 22 }}>
-          <div className={`relative w-full overflow-hidden ${large ? "h-60" : "h-40"}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imageUrl} alt="" className="h-full w-full object-cover" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
-            <div className="absolute right-2 top-2 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
-              <button
-                onClick={() => fileRef.current?.click()}
-                disabled={uploading}
-                className="rounded-full bg-ink/70 px-2.5 py-1 text-[9px] uppercase tracking-[1px] text-bone backdrop-blur-sm hover:text-gold"
-              >
-                {uploading ? "…" : "Değiştir"}
-              </button>
-              <button
-                onClick={onRemove}
-                className="rounded-full bg-ink/70 px-2.5 py-1 text-[9px] uppercase tracking-[1px] text-bone backdrop-blur-sm hover:text-rose"
-              >
-                Kaldır
-              </button>
-            </div>
+        <Tilt
+          rotationFactor={5}
+          springOptions={{ stiffness: 200, damping: 22 }}
+          className={large ? "p-7" : "p-5"}
+        >
+          <div className={large ? "mb-5 flex items-center justify-between" : "mb-4 flex items-center justify-between"}>
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className={`group/swatch relative flex-shrink-0 overflow-hidden rounded-full ring-1 ring-white/10 ${
+                large ? "h-14 w-14" : "h-10 w-10"
+              }`}
+              style={{ background: colorTag }}
+              aria-label="Kumaş fotoğrafı ekle"
+              title="Kumaş fotoğrafı ekle"
+            >
+              <span className="absolute inset-0 flex items-center justify-center bg-ink/60 text-[9px] uppercase tracking-[1px] text-bone opacity-0 transition-opacity group-hover/swatch:opacity-100">
+                {uploading ? "…" : "+ Foto"}
+              </span>
+            </button>
+            {fileInput}
+            <button
+              onClick={onRemove}
+              className="text-[10px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity duration-200 hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
+            >
+              Kaldır
+            </button>
           </div>
-          {fileInput}
-          <div className={large ? "p-7 pt-5" : "p-5 pt-4"}>{details}</div>
+          {details}
         </Tilt>
       </motion.div>
-    );
-  }
-
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-      className="group bento-tile bento-graphite relative"
-    >
-      <Tilt
-        rotationFactor={5}
-        springOptions={{ stiffness: 200, damping: 22 }}
-        className={large ? "p-7" : "p-5"}
-      >
-        <div className={large ? "mb-5 flex items-center justify-between" : "mb-4 flex items-center justify-between"}>
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className={`group/swatch relative flex-shrink-0 overflow-hidden rounded-full ring-1 ring-white/10 ${
-              large ? "h-14 w-14" : "h-10 w-10"
-            }`}
-            style={{ background: colorTag }}
-            aria-label="Kumaş fotoğrafı ekle"
-            title="Kumaş fotoğrafı ekle"
-          >
-            <span className="absolute inset-0 flex items-center justify-center bg-ink/60 text-[9px] uppercase tracking-[1px] text-bone opacity-0 transition-opacity group-hover/swatch:opacity-100">
-              {uploading ? "…" : "+ Foto"}
-            </span>
-          </button>
-          {fileInput}
-          <button
-            onClick={onRemove}
-            className="text-[10px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity duration-200 hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
-          >
-            Kaldır
-          </button>
-        </div>
-        {details}
-      </Tilt>
-    </motion.div>
+    </div>
   );
 }
 
