@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LOCAL_RUNWAY_NEWS, RUNWAY_TAG_COLOR, type RunwayNewsItem } from "@/lib/runway-news";
 import { useStore } from "@/lib/store";
 import { resizeImageFile } from "@/lib/image-resize";
-import { rankTrendRadar } from "@/lib/trend-radar";
+import { rankTrendRadar, dnaTasteLabels } from "@/lib/trend-radar";
+import { buildDnaGraph } from "@/lib/dna-data";
 import { useUndoStore } from "@/lib/undo-toast";
 import { EditorialPlaceholder } from "@/components/shared/editorial-placeholder";
 
@@ -260,6 +261,9 @@ function RunwayGallery() {
 export function RunwayView() {
   const [news, setNews] = useState<RunwayNewsItem[] | null>(null);
   const [newsSource, setNewsSource] = useState<"gemini" | "rss" | "local">("local");
+  const collections = useStore((s) => s.collections);
+  const materials = useStore((s) => s.materials);
+  const journalEntries = useStore((s) => s.journalEntries);
 
   useEffect(() => {
     let cancelled = false;
@@ -288,7 +292,11 @@ export function RunwayView() {
     };
   }, []);
 
-  const radar = useMemo(() => rankTrendRadar(news ?? []), [news]);
+  const tasteLabels = useMemo(
+    () => dnaTasteLabels(buildDnaGraph(collections, materials, journalEntries).nodes),
+    [collections, materials, journalEntries]
+  );
+  const radar = useMemo(() => rankTrendRadar(news ?? [], tasteLabels), [news, tasteLabels]);
   const matchedByTitle = useMemo(
     () => new Map(radar.map((r) => [r.item.title, r.matchedLabels])),
     [radar]

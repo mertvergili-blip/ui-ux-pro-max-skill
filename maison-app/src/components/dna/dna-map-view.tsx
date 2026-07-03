@@ -4,12 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { animate, stagger } from "animejs";
-import {
-  DNA_CATEGORY_META,
-  DNA_EDGES,
-  DNA_NODES,
-  type DnaCategory,
-} from "@/lib/dna-data";
+import { useStore } from "@/lib/store";
+import { DNA_CATEGORY_META, buildDnaGraph, type DnaCategory, type DnaEdge } from "@/lib/dna-data";
 import {
   layoutDnaGraph,
   createSimNodes,
@@ -17,23 +13,9 @@ import {
   resolveLabelCollisions,
   type SimNode,
 } from "@/lib/dna-layout";
-import { localWhatWouldTheyDo } from "@/lib/what-would-they-do";
-import { useTypewriter } from "@/lib/use-typewriter";
 
 const WIDTH = 900;
 const HEIGHT = 560;
-
-function degreeOf(nodeId: string): number {
-  return DNA_EDGES.filter((e) => e.from === nodeId || e.to === nodeId).length;
-}
-
-function radiusOf(node: { id: string; category: DnaCategory }): number {
-  return node.category === "collection" ? 10 : 6 + degreeOf(node.id) * 0.7;
-}
-
-function fontSizeOf(node: { category: DnaCategory }): number {
-  return node.category === "collection" ? 15 : 12.5;
-}
 
 // Client coords -> SVG viewBox coords, accounting for the element's current
 // scaled/rendered size vs its viewBox.
@@ -50,21 +32,43 @@ function toSvgPoint(svg: SVGSVGElement, clientX: number, clientY: number) {
 const DRAG_THRESHOLD = 4;
 
 export function DnaMapView() {
+  const collections = useStore((s) => s.collections);
+  const materials = useStore((s) => s.materials);
+  const journalEntries = useStore((s) => s.journalEntries);
+
+  // Built from the real archive instead of a fixed demo set — a node per
+  // collection, a node per material actually linked to one, and (closing
+  // the loop with Journal) a mood node connected to whatever's active.
+  // Recomputes whenever any of those change, so the map is never stale.
+  const graph = useMemo(
+    () => buildDnaGraph(collections, materials, journalEntries),
+    [collections, materials, journalEntries]
+  );
+
   const svgRef = useRef<SVGSVGElement>(null);
   const [activeCategory, setActiveCategory] = useState<DnaCategory | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
 
-  // Metadata-only lookup (label/category/note) — never touched by physics.
-  const nodeById = useMemo(() => new Map(DNA_NODES.map((n) => [n.id, n])), []);
+  const degreeOf = (nodeId: string, edges: DnaEdge[]): number =>
+    edges.filter((e) => e.from === nodeId || e.to === nodeId).length;
 
-  // The one-shot settle, computed once for the very first paint only — a
-  // plain memoized value (not a ref) so it's safe to read during render.
-  // Positions after that live entirely in simNodesRef below, which the
-  // physics effect creates/owns and never gets read during render.
+  const radiusOf = (node: { id: string; category: DnaCategory }): number =>
+    node.category === "collection" ? 10 : 6 + degreeOf(node.id, graph.edges) * 0.7;
+
+  const fontSizeOf = (node: { category: DnaCategory }): number =>
+    node.category === "collection" ? 15 : 12.5;
+
+  // Metadata-only lookup (label/category/note) — never touched by physics.
+  const nodeById = useMemo(() => new Map(graph.nodes.map((n) => [n.id, n])), [graph]);
+
+  // The one-shot settle, computed once per graph shape — a plain memoized
+  // value (not a ref) so it's safe to read during render. Positions after
+  // that live entirely in simNodesRef below, which the physics effect
+  // creates/owns and never gets read during render.
   const initialLaidOut = useMemo(
-    () => layoutDnaGraph(DNA_NODES, DNA_EDGES, WIDTH, HEIGHT),
-    []
+    () => layoutDnaGraph(graph.nodes, graph.edges, WIDTH, HEIGHT),
+    [graph]
   );
   const initialById = useMemo(
     () => new Map(initialLaidOut.map((n) => [n.id, n])),
@@ -78,11 +82,10 @@ export function DnaMapView() {
   const simNodesRef = useRef<Map<string, SimNode> | null>(null);
 
   // Per-node label (ox, oy) nudge, resolved every frame by
-  // resolveLabelCollisions — kept in its own ref for the same reason
+  // resolveLabelCollisions — rebuilt alongside simNodesRef whenever the
+  // graph's node set changes, kept in its own ref for the same reason
   // simNodesRef is: mutated every animation frame, never read during render.
-  const labelOffsetsRef = useRef<Map<string, { ox: number; oy: number }>>(
-    new Map(DNA_NODES.map((n) => [n.id, { ox: 0, oy: 0 }]))
-  );
+  const labelOffsetsRef = useRef<Map<string, { ox: number; oy: number }>>(new Map());
 
   const circleRefs = useRef(new Map<string, SVGCircleElement>());
   const hitRefs = useRef(new Map<string, SVGCircleElement>());
@@ -102,11 +105,12 @@ export function DnaMapView() {
   useEffect(() => {
     const nodes = createSimNodes(initialLaidOut);
     simNodesRef.current = nodes;
+    labelOffsetsRef.current = new Map(initialLaidOut.map((n) => [n.id, { ox: 0, oy: 0 }]));
     let raf: number;
 
     const tick = () => {
       const draggedId = dragState.current?.moved ? dragState.current.id : null;
-      stepDnaSimulation(nodes, DNA_EDGES, WIDTH, HEIGHT, draggedId);
+      stepDnaSimulation(nodes, graph.edges, WIDTH, HEIGHT, draggedId);
 
       const nodeList = Array.from(nodes.values());
       resolveLabelCollisions(nodeList, labelOffsetsRef.current, radiusOf, fontSizeOf);
@@ -130,7 +134,7 @@ export function DnaMapView() {
         }
       }
 
-      DNA_EDGES.forEach((e, i) => {
+      graph.edges.forEach((e, i) => {
         const line = lineRefs.current.get(i);
         const a = nodes.get(e.from);
         const b = nodes.get(e.to);
@@ -147,6 +151,7 @@ export function DnaMapView() {
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialLaidOut]);
 
   const handlePointerDown = (e: React.PointerEvent<SVGGElement>, nodeId: string) => {
@@ -199,12 +204,12 @@ export function DnaMapView() {
   const connectedIds = useMemo(() => {
     if (!selectedId) return null;
     const ids = new Set<string>([selectedId]);
-    for (const e of DNA_EDGES) {
+    for (const e of graph.edges) {
       if (e.from === selectedId) ids.add(e.to);
       if (e.to === selectedId) ids.add(e.from);
     }
     return ids;
-  }, [selectedId]);
+  }, [selectedId, graph]);
 
   // Focus/zoom transition — panning + scaling the viewBox toward the
   // selected node and its neighbors (like the label offsets above, driven
@@ -270,31 +275,6 @@ export function DnaMapView() {
 
   const selectedNode = selectedId ? nodeById.get(selectedId) : null;
 
-  const [wwtd, setWwtd] = useState<{ id: string; text: string } | null>(null);
-  const wwtdDisplay = useTypewriter(wwtd?.text ?? "");
-  const [wwtdLoading, setWwtdLoading] = useState(false);
-
-  const askWhatWouldTheyDo = async (nodeId: string, designerName: string) => {
-    setWwtdLoading(true);
-    setWwtd(null);
-    let text = localWhatWouldTheyDo(designerName);
-    try {
-      const res = await fetch("/api/what-would-they-do", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ designerName }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.perspective) text = data.perspective;
-      }
-    } catch {
-      // local perspective already set above
-    }
-    setWwtd({ id: nodeId, text });
-    setWwtdLoading(false);
-  };
-
   useEffect(() => {
     if (!svgRef.current) return;
     const nodeEls = svgRef.current.querySelectorAll("[data-node]");
@@ -315,7 +295,7 @@ export function DnaMapView() {
       delay: stagger(18, { start: 300 }),
       ease: "outElastic(1, .6)",
     });
-  }, []);
+  }, [graph]);
 
   return (
     <motion.div
@@ -332,10 +312,9 @@ export function DnaMapView() {
         Yaratıcı kimliğini zaman içinde gör.
       </h1>
       <p className="mb-7 max-w-[460px] text-[13.5px] leading-relaxed text-bone-dim">
-        Moodboard değil — koleksiyonlarını besleyen tasarımcı, renk, form,
-        doku, dönem ve zanaat referanslarının birbirine nasıl bağlandığını
-        gösteren bir harita. Bir düğümü sürükle — bağlı olduğu her şey
-        peşinden gelir.
+        Koleksiyonların, onlara bağladığın kumaşlar ve baskın ruh halin — hepsi
+        gerçek arşivinden. Koleksiyon ekledikçe, kumaş bağladıkça bu harita
+        büyür. Bir düğümü sürükle — bağlı olduğu her şey peşinden gelir.
       </p>
 
       <div className="mb-6 flex flex-wrap gap-1.5">
@@ -366,7 +345,19 @@ export function DnaMapView() {
         })}
       </div>
 
-      {(() => {
+      {graph.nodes.length === 0 ? (
+        <div className="bento-tile bento-blue flex min-h-[260px] flex-col items-center justify-center gap-2 p-10 text-center">
+          <p className="font-serif text-[17px] italic text-bone-dim">
+            Henüz bir ağ yok.
+          </p>
+          <p className="max-w-[320px] text-[12.5px] leading-relaxed text-muted">
+            Bir koleksiyon oluştur, ona kumaş bağla — kimlik haritan burada
+            kendiliğinden oluşmaya başlayacak.
+          </p>
+        </div>
+      ) : (
+        <>
+          {(() => {
         // Framer Motion leaves an inline `transform` on this component's
         // root motion.div even once its enter animation settles, which
         // creates a new CSS containing block — so a plain `fixed inset-0`
@@ -412,7 +403,7 @@ export function DnaMapView() {
                   : "h-auto w-full lg:h-[460px] lg:w-[620px]"
               }
             >
-              {DNA_EDGES.map((e, i) => {
+              {graph.edges.map((e, i) => {
                 const a = initialById.get(e.from);
                 const b = initialById.get(e.to);
                 if (!a || !b) return null;
@@ -444,6 +435,7 @@ export function DnaMapView() {
 
               {initialLaidOut.map((n) => {
                 const meta = DNA_CATEGORY_META[n.category];
+                const color = n.color ?? meta.color;
                 const dim =
                   (activeCategory && n.category !== activeCategory) ||
                   (connectedIds && !connectedIds.has(n.id));
@@ -476,7 +468,7 @@ export function DnaMapView() {
                       cx={n.x}
                       cy={n.y}
                       r={r}
-                      fill={meta.color}
+                      fill={color}
                       opacity={dim ? 0.18 : selectedId === n.id ? 1 : 0.75}
                       style={{ transition: "opacity 0.3s ease", pointerEvents: "none" }}
                     />
@@ -514,7 +506,7 @@ export function DnaMapView() {
             >
               <p
                 className="mb-2 text-[9.5px] uppercase tracking-[2.5px]"
-                style={{ color: DNA_CATEGORY_META[selectedNode.category].color }}
+                style={{ color: selectedNode.color ?? DNA_CATEGORY_META[selectedNode.category].color }}
               >
                 {DNA_CATEGORY_META[selectedNode.category].label}
               </p>
@@ -528,47 +520,30 @@ export function DnaMapView() {
                 Bağlantılar
               </p>
               <div className="flex flex-col gap-1.5">
-                {DNA_EDGES.filter(
+                {graph.edges
+                  .filter((e) => e.from === selectedNode.id || e.to === selectedNode.id)
+                  .map((e, i) => {
+                    const otherId = e.from === selectedNode.id ? e.to : e.from;
+                    const other = nodeById.get(otherId);
+                    if (!other) return null;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedId(other.id)}
+                        className="text-left text-[12.5px] text-bone-dim transition-colors hover:text-bone"
+                      >
+                        {other.label}
+                      </button>
+                    );
+                  })}
+                {graph.edges.filter(
                   (e) => e.from === selectedNode.id || e.to === selectedNode.id
-                ).map((e, i) => {
-                  const otherId = e.from === selectedNode.id ? e.to : e.from;
-                  const other = nodeById.get(otherId);
-                  if (!other) return null;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedId(other.id)}
-                      className="text-left text-[12.5px] text-bone-dim transition-colors hover:text-bone"
-                    >
-                      {other.label}
-                    </button>
-                  );
-                })}
+                ).length === 0 && (
+                  <p className="text-[12px] text-muted">
+                    Henüz bağlantısı yok.
+                  </p>
+                )}
               </div>
-
-              {selectedNode.category === "designer" && (
-                <div className="mt-6 border-t border-dashed border-line pt-5">
-                  {wwtd && wwtd.id === selectedNode.id ? (
-                    <motion.p
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="font-serif text-[13.5px] italic leading-relaxed text-bone-dim"
-                    >
-                      {wwtdDisplay}
-                    </motion.p>
-                  ) : (
-                    <button
-                      onClick={() => askWhatWouldTheyDo(selectedNode.id, selectedNode.label)}
-                      disabled={wwtdLoading}
-                      className="text-left text-[11px] uppercase tracking-[1.5px] text-muted transition-colors hover:text-gold disabled:opacity-40"
-                    >
-                      {wwtdLoading
-                        ? "Düşünüyor…"
-                        : `${selectedNode.label} olsa ne yapardı?`}
-                    </button>
-                  )}
-                </div>
-              )}
             </motion.div>
           ) : (
             <p className="text-[12.5px] leading-relaxed text-muted">
@@ -583,7 +558,9 @@ export function DnaMapView() {
         return expanded && typeof document !== "undefined"
           ? createPortal(mapPanel, document.body)
           : mapPanel;
-      })()}
+          })()}
+        </>
+      )}
     </motion.div>
   );
 }

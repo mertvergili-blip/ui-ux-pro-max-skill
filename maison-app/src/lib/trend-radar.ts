@@ -1,11 +1,13 @@
 import type { RunwayNewsItem } from "./runway-news";
-import { DNA_NODES } from "./dna-data";
+import type { DnaNode } from "./dna-data";
 
 // Every DNA label except the collection hubs themselves — those are outputs,
-// not taste signals, so they'd just noise up the match.
-export const DNA_TASTE_LABELS = DNA_NODES.filter((n) => n.category !== "collection").map(
-  (n) => n.label
-);
+// not taste signals, so they'd just noise up the match. Takes the live
+// graph (built from the user's real collections/materials) rather than a
+// fixed list, since there's no static taste profile anymore.
+export function dnaTasteLabels(nodes: DnaNode[]): string[] {
+  return nodes.filter((n) => n.category !== "collection").map((n) => n.label);
+}
 
 export interface TrendMatch {
   item: RunwayNewsItem;
@@ -33,10 +35,7 @@ function matchLabels(item: RunwayNewsItem, labels: string[]): string[] {
 // Ranks the current news set by overlap with the user's own DNA Map —
 // this is the "radar" part: no separate feed, just the existing Runway
 // Intel re-read through the designer's own taste profile.
-export function rankTrendRadar(
-  items: RunwayNewsItem[],
-  labels: string[] = DNA_TASTE_LABELS
-): TrendMatch[] {
+export function rankTrendRadar(items: RunwayNewsItem[], labels: string[]): TrendMatch[] {
   return items
     .map((item) => ({ item, matchedLabels: matchLabels(item, labels) }))
     .filter((m) => m.matchedLabels.length > 0)
