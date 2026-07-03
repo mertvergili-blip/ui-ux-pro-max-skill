@@ -537,9 +537,18 @@ function ProjectGallery({ folder }: { folder: FolderData }) {
             disabled={uploading}
             aria-label="Fotoğraf çek"
             title="Fotoğraf çek"
-            className="flex h-6 w-6 items-center justify-center rounded-full border border-line text-[11px] leading-none text-muted transition-colors hover:border-gold/50 hover:text-gold disabled:opacity-40"
+            className="flex h-6 w-6 items-center justify-center rounded-full border border-line text-muted transition-colors hover:border-gold/50 hover:text-gold disabled:opacity-40"
           >
-            📷
+            <svg viewBox="0 0 24 24" className="h-[13px] w-[13px]" fill="none">
+              <path
+                d="M4 8h3l1.5-2h7L17 8h3a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle cx="12" cy="13" r="3.1" stroke="currentColor" strokeWidth="1.6" />
+            </svg>
           </button>
           <button
             onClick={() => uploadRef.current?.click()}
@@ -582,7 +591,17 @@ function ProjectGallery({ folder }: { folder: FolderData }) {
           onClick={() => uploadRef.current?.click()}
           className="flex min-h-[180px] w-full flex-col items-center justify-center gap-2 rounded-[1rem] border border-dashed border-line px-6 text-center text-muted transition-colors hover:border-gold/40 hover:text-gold"
         >
-          <span className="text-lg">🖼️</span>
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
+            <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx="8.5" cy="9.5" r="1.4" stroke="currentColor" strokeWidth="1.5" />
+            <path
+              d="M21 15.5l-5-5-4 4-3-3-6 6"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
           <span className="max-w-[220px] text-[11.5px] leading-relaxed">
             Moodboard, bir manipülasyon denemesi ya da ilham aldığın bir nesnenin
             fotoğrafını ekle — AI görsele bakıp yorumlayabilir.

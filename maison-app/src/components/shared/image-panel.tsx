@@ -94,7 +94,7 @@ function PanelInsight({ view }: { view: ViewName }) {
     return (
       <div className="mb-7">
         <p className="font-serif text-[30px] italic leading-tight text-bone">
-          {today.mood ? MOOD_WORD[today.mood] : "Henüz seçilmedi"}
+          {today.mood ? MOOD_WORD[today.mood] : "Bir ruh hali seç"}
         </p>
         {last7.length > 0 && (
           <div className="mt-4 flex justify-end gap-1.5">
@@ -155,7 +155,11 @@ function PanelInsight({ view }: { view: ViewName }) {
 export function ImagePanel() {
   const { currentView, mousePos } = useStore();
   const deadlineDate = useStore((s) => s.deadlineDate);
-  const [eyebrow, title] = VIEW_CAPTIONS[currentView];
+  const calendarViewMonth = useStore((s) => s.calendarViewMonth);
+  const [eyebrow, staticTitle] = VIEW_CAPTIONS[currentView];
+  // Calendar's caption tracks whichever month is currently being browsed,
+  // rather than a title fixed to the originally-seeded month.
+  const title = currentView === "calendar" ? `${TR_MONTHS[calendarViewMonth]} akışı` : staticTitle;
 
   const nx = mousePos.x - 0.5;
   const ny = mousePos.y - 0.5;

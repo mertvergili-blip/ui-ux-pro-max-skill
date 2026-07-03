@@ -6,6 +6,10 @@ import { useStore } from "@/lib/store";
 import { useUndoStore } from "@/lib/undo-toast";
 
 const EASE = [0.32, 0.72, 0, 1] as const;
+const MONTH_NAMES = [
+  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık",
+];
 
 export function CalendarRightPanel() {
   const selectedDay = useStore((s) => s.selectedCalendarDay);
@@ -14,6 +18,8 @@ export function CalendarRightPanel() {
   const removeCalendarEvent = useStore((s) => s.removeCalendarEvent);
   const restoreCalendarEvent = useStore((s) => s.restoreCalendarEvent);
   const showUndo = useUndoStore((s) => s.show);
+  const viewMonth = useStore((s) => s.calendarViewMonth);
+  const viewYear = useStore((s) => s.calendarViewYear);
 
   const [draft, setDraft] = useState("");
   const [adding, setAdding] = useState(false);
@@ -38,11 +44,13 @@ export function CalendarRightPanel() {
     );
   }
 
-  const dayEvents = events.filter((e) => e.day === selectedDay);
+  const dayEvents = events.filter(
+    (e) => e.day === selectedDay && e.month === viewMonth && e.year === viewYear
+  );
 
   const handleAdd = () => {
     if (!draft.trim()) return;
-    addCalendarEvent(selectedDay, draft.trim());
+    addCalendarEvent(selectedDay, viewMonth, viewYear, draft.trim());
     setDraft("");
     setAdding(false);
   };
@@ -63,7 +71,7 @@ export function CalendarRightPanel() {
       className="w-[280px] text-right"
     >
       <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[9.5px] uppercase tracking-[2.5px] text-bone-dim backdrop-blur-sm">
-        Temmuz {selectedDay}
+        {MONTH_NAMES[viewMonth]} {selectedDay}
       </p>
 
       <div className="flex flex-col items-end gap-2.5">

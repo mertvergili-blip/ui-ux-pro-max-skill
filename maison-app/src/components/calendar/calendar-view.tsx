@@ -6,15 +6,26 @@ import { useStore } from "@/lib/store";
 import { useUndoStore } from "@/lib/undo-toast";
 
 const DAYS_OF_WEEK = ["PZT", "SAL", "ÇAR", "PER", "CUM", "CMT", "PAZ"];
+const MONTH_NAMES = [
+  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık",
+];
 
-// The seeded month — July 2026. Only highlight "today" while the real
-// calendar actually is in this month.
-const MONTH_YEAR = 2026;
-const MONTH_INDEX = 6;
+function daysInMonth(month: number, year: number): number {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+// JS getDay() is Sunday-first (0-6) — this app's week starts Monday, so
+// shift it into a 0(Mon)-6(Sun) index to know how many blank cells lead
+// the grid.
+function leadingBlanks(month: number, year: number): number {
+  const jsDay = new Date(year, month, 1).getDay();
+  return (jsDay + 6) % 7;
+}
 
 // Below lg the ImagePanel (and the day-detail panel that lives in it) is
 // hidden, so the same select-a-day flow renders inline under the grid.
-function MobileDayPanel({ day }: { day: number }) {
+function MobileDayPanel({ day, month, year, monthLabel }: { day: number; month: number; year: number; monthLabel: string }) {
   const events = useStore((s) => s.calendarEvents);
   const addCalendarEvent = useStore((s) => s.addCalendarEvent);
   const removeCalendarEvent = useStore((s) => s.removeCalendarEvent);
@@ -23,7 +34,7 @@ function MobileDayPanel({ day }: { day: number }) {
   const [draft, setDraft] = useState("");
   const [adding, setAdding] = useState(false);
 
-  const dayEvents = events.filter((e) => e.day === day);
+  const dayEvents = events.filter((e) => e.day === day && e.month === month && e.year === year);
 
   const handleRemove = (id: string) => {
     const event = events.find((e) => e.id === id);
@@ -33,7 +44,7 @@ function MobileDayPanel({ day }: { day: number }) {
 
   const handleAdd = () => {
     if (!draft.trim()) return;
-    addCalendarEvent(day, draft.trim());
+    addCalendarEvent(day, month, year, draft.trim());
     setDraft("");
     setAdding(false);
   };
@@ -49,7 +60,7 @@ function MobileDayPanel({ day }: { day: number }) {
       <div>
         <div className="relative mb-3.5 flex items-center justify-between">
           <p className="text-[9.5px] uppercase tracking-[2.5px] text-[#e4c98f]">
-            Temmuz {day}
+            {monthLabel} {day}
           </p>
           {!adding && (
             <button
@@ -132,28 +143,41 @@ export function CalendarView() {
   const selectedDay = useStore((s) => s.selectedCalendarDay);
   const setSelectedDay = useStore((s) => s.setSelectedCalendarDay);
   const calendarEvents = useStore((s) => s.calendarEvents);
+  const viewMonth = useStore((s) => s.calendarViewMonth);
+  const viewYear = useStore((s) => s.calendarViewYear);
+  const shiftCalendarMonth = useStore((s) => s.shiftCalendarMonth);
+
+  const monthLabel = `${MONTH_NAMES[viewMonth]} ${viewYear}`;
 
   const days = useMemo(() => {
-    const blanks = 2;
+    const blanks = leadingBlanks(viewMonth, viewYear);
     const result: (number | null)[] = Array(blanks).fill(null);
-    for (let d = 1; d <= 31; d++) result.push(d);
+    const total = daysInMonth(viewMonth, viewYear);
+    for (let d = 1; d <= total; d++) result.push(d);
     return result;
-  }, []);
+  }, [viewMonth, viewYear]);
+
+  const eventsThisMonth = useMemo(
+    () => calendarEvents.filter((e) => e.month === viewMonth && e.year === viewYear),
+    [calendarEvents, viewMonth, viewYear]
+  );
 
   const daysWithEvents = useMemo(
-    () => new Set(calendarEvents.map((e) => e.day)),
-    [calendarEvents]
+    () => new Set(eventsThisMonth.map((e) => e.day)),
+    [eventsThisMonth]
   );
 
   // Client-only — the server render can't know the viewer's actual date.
   const [today, setToday] = useState<number | null>(null);
   useEffect(() => {
     const now = new Date();
-    if (now.getFullYear() === MONTH_YEAR && now.getMonth() === MONTH_INDEX) {
+    if (now.getFullYear() === viewYear && now.getMonth() === viewMonth) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setToday(now.getDate());
+    } else {
+      setToday(null);
     }
-  }, []);
+  }, [viewMonth, viewYear]);
 
   return (
     <motion.div
@@ -163,11 +187,31 @@ export function CalendarView() {
       className="lg:pr-14"
     >
       <div className="mb-5 flex items-baseline justify-between">
-        <div>
-          <p className="font-serif text-2xl italic">Temmuz 2026</p>
-          <p className="mt-1 text-[11px] text-muted">
-            {calendarEvents.length} kayıt · {daysWithEvents.size} gün planlı
-          </p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => shiftCalendarMonth(-1)}
+            aria-label="Önceki ay"
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-line text-muted transition-colors hover:border-gold/40 hover:text-gold"
+          >
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none">
+              <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <div>
+            <p className="font-serif text-2xl italic">{monthLabel}</p>
+            <p className="mt-1 text-[11px] text-muted">
+              {eventsThisMonth.length} kayıt · {daysWithEvents.size} gün planlı
+            </p>
+          </div>
+          <button
+            onClick={() => shiftCalendarMonth(1)}
+            aria-label="Sonraki ay"
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-line text-muted transition-colors hover:border-gold/40 hover:text-gold"
+          >
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none">
+              <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
         </div>
         <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
           Rituals & Deadlines
@@ -211,7 +255,9 @@ export function CalendarView() {
       </div>
 
       <AnimatePresence>
-        {selectedDay && <MobileDayPanel key={selectedDay} day={selectedDay} />}
+        {selectedDay && (
+          <MobileDayPanel key={`${viewYear}-${viewMonth}-${selectedDay}`} day={selectedDay} month={viewMonth} year={viewYear} monthLabel={MONTH_NAMES[viewMonth]} />
+        )}
       </AnimatePresence>
     </motion.div>
   );

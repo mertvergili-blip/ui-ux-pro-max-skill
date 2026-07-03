@@ -6,6 +6,7 @@ import { useStore, type ViewName } from "@/lib/store";
 import { NotificationToggle } from "@/components/shell/notification-toggle";
 import { LogoutButton } from "@/components/shell/logout-button";
 import { SearchOverlay, useSearchShortcut } from "@/components/shell/search-overlay";
+import { OfflineIndicator } from "@/components/shared/offline-indicator";
 
 const TABS: { label: string; view: ViewName }[] = [
   { label: "Studio", view: "studio" },
@@ -43,6 +44,7 @@ export function Topbar() {
         </button>
         <NotificationToggle />
         <LogoutButton />
+        <OfflineIndicator />
       </div>
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
 

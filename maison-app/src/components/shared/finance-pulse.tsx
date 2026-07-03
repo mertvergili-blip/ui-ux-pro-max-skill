@@ -24,6 +24,10 @@ type Status = "loading" | "live" | "unavailable";
 export function FinancePulse() {
   const [prices, setPrices] = useState<PriceMap>({});
   const [status, setStatus] = useState<Status>("loading");
+  // Separate from `status` on purpose: once live, a later failed poll keeps
+  // showing the last-known prices (no flicker to "—") but should still tell
+  // the user those numbers stopped updating, instead of silently going stale.
+  const [stale, setStale] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,12 +40,14 @@ export function FinancePulse() {
         if (!cancelled && data.prices) {
           setPrices(data.prices);
           setStatus("live");
+          setStale(false);
         }
       } catch {
         // Keep whatever we last had; only mark unavailable if we never
         // got anything — a stuck "···" was the old failure mode.
         if (!cancelled) {
           setStatus((s) => (s === "live" ? s : "unavailable"));
+          setStale(true);
         }
       }
     };
@@ -87,6 +93,11 @@ export function FinancePulse() {
       {status === "unavailable" && (
         <p className="mt-2 text-[10px] italic text-muted">
           Piyasa verisine şu an ulaşılamıyor.
+        </p>
+      )}
+      {status === "live" && stale && (
+        <p className="mt-2 text-[10px] italic text-muted">
+          Fiyatlar güncellenemiyor — gösterilenler son bilinen değerler.
         </p>
       )}
     </div>

@@ -7,7 +7,6 @@ import { GrainOverlay } from "@/components/shared/grain-overlay";
 import { Spotlight } from "@/components/shared/spotlight";
 import { ImagePanel } from "@/components/shared/image-panel";
 import { InstallPrompt } from "@/components/shared/install-prompt";
-import { OfflineIndicator } from "@/components/shared/offline-indicator";
 import { UndoToast } from "@/components/shared/undo-toast";
 import { FocusTimerHost } from "@/components/studio/focus-timer";
 import { Topbar } from "@/components/shell/topbar";
@@ -86,7 +85,6 @@ export default function Home() {
       <GrainOverlay />
       <Spotlight />
       <IntroScreen />
-      <OfflineIndicator />
 
       {!introVisible && (
         <>
