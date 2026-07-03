@@ -126,6 +126,17 @@ function Folder({
         style={{ perspective: "800px" }}
         onClick={() => setIsOpen(!isOpen)}
       >
+        {/* Ambient glow — not clipped (the Pieces below need to pop up past
+            the folder's own bounds when it opens), so this lives as a soft
+            blurred backdrop rather than a proper .bento-orb, echoing the
+            same accent-glow language the rest of the app uses without
+            fighting that animation. */}
+        {large && (
+          <div
+            className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full opacity-40 blur-2xl"
+            style={{ background: data.accent }}
+          />
+        )}
         {/* Back */}
         <div
           className="absolute inset-0 rounded-[4px_8px_8px_4px] border border-line"
@@ -144,11 +155,12 @@ function Folder({
         <Piece pos="p1" accent={data.accent} isOpen={isOpen} onDragClose={() => setIsOpen(false)} />
         <Piece pos="p2" accent={data.accent} isOpen={isOpen} onDragClose={() => setIsOpen(false)} />
         <Piece pos="p3" accent={data.accent} isOpen={isOpen} onDragClose={() => setIsOpen(false)} />
-        {/* Lid */}
+        {/* Lid — a radial highlight layered over the base gradient, matching
+            the bento-tile system's glow language elsewhere in the app. */}
         <div
           className="absolute inset-0 rounded-[4px_8px_8px_4px] shadow-lg"
           style={{
-            background: `linear-gradient(150deg, color-mix(in srgb, ${data.accent} 62%, var(--color-ink)), color-mix(in srgb, ${data.accent} 30%, var(--color-ink)) 70%)`,
+            background: `radial-gradient(90% 90% at 100% -10%, color-mix(in srgb, ${data.accent} 55%, transparent), transparent 60%), linear-gradient(150deg, color-mix(in srgb, ${data.accent} 62%, var(--color-ink)), color-mix(in srgb, ${data.accent} 30%, var(--color-ink)) 70%)`,
             transformOrigin: "bottom",
             transform: isOpen ? "rotateX(-125deg)" : "rotateX(0deg)",
             transition: "transform 0.55s cubic-bezier(.2,.9,.25,1.1)",

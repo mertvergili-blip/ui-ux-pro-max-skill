@@ -13,6 +13,7 @@ import {
   layoutDnaGraph,
   createSimNodes,
   stepDnaSimulation,
+  resolveLabelCollisions,
   type SimNode,
 } from "@/lib/dna-layout";
 import { localWhatWouldTheyDo } from "@/lib/what-would-they-do";
@@ -27,6 +28,10 @@ function degreeOf(nodeId: string): number {
 
 function radiusOf(node: { id: string; category: DnaCategory }): number {
   return node.category === "collection" ? 10 : 6 + degreeOf(node.id) * 0.7;
+}
+
+function fontSizeOf(node: { category: DnaCategory }): number {
+  return node.category === "collection" ? 15 : 12.5;
 }
 
 // Client coords -> SVG viewBox coords, accounting for the element's current
@@ -71,6 +76,13 @@ export function DnaMapView() {
   // React's reconciliation if this were state driving JSX on every tick.
   const simNodesRef = useRef<Map<string, SimNode> | null>(null);
 
+  // Per-node label (ox, oy) nudge, resolved every frame by
+  // resolveLabelCollisions — kept in its own ref for the same reason
+  // simNodesRef is: mutated every animation frame, never read during render.
+  const labelOffsetsRef = useRef<Map<string, { ox: number; oy: number }>>(
+    new Map(DNA_NODES.map((n) => [n.id, { ox: 0, oy: 0 }]))
+  );
+
   const circleRefs = useRef(new Map<string, SVGCircleElement>());
   const hitRefs = useRef(new Map<string, SVGCircleElement>());
   const textRefs = useRef(new Map<string, SVGTextElement>());
@@ -95,6 +107,9 @@ export function DnaMapView() {
       const draggedId = dragState.current?.moved ? dragState.current.id : null;
       stepDnaSimulation(nodes, DNA_EDGES, WIDTH, HEIGHT, draggedId);
 
+      const nodeList = Array.from(nodes.values());
+      resolveLabelCollisions(nodeList, labelOffsetsRef.current, radiusOf, fontSizeOf);
+
       for (const [id, node] of nodes) {
         const c = circleRefs.current.get(id);
         const h = hitRefs.current.get(id);
@@ -108,8 +123,9 @@ export function DnaMapView() {
           h.setAttribute("cy", String(node.y));
         }
         if (t) {
-          t.setAttribute("x", String(node.x));
-          t.setAttribute("y", String(node.y - radiusOf(node) - 8));
+          const off = labelOffsetsRef.current.get(id) ?? { ox: 0, oy: 0 };
+          t.setAttribute("x", String(node.x + off.ox));
+          t.setAttribute("y", String(node.y - radiusOf(node) - 8 + off.oy));
         }
       }
 
@@ -188,6 +204,68 @@ export function DnaMapView() {
     }
     return ids;
   }, [selectedId]);
+
+  // Focus/zoom transition — panning + scaling the viewBox toward the
+  // selected node and its neighbors (like the label offsets above, driven
+  // straight onto the DOM attribute so it doesn't fight the always-on
+  // physics loop) and back out to the full graph on deselect.
+  const viewBoxStateRef = useRef({ x: 0, y: 0, w: WIDTH, h: HEIGHT });
+  useEffect(() => {
+    const svg = svgRef.current;
+    const nodes = simNodesRef.current;
+    if (!svg) return;
+
+    const aspect = WIDTH / HEIGHT;
+    let target = { x: 0, y: 0, w: WIDTH, h: HEIGHT };
+
+    if (selectedId && connectedIds && nodes) {
+      const pts = Array.from(connectedIds)
+        .map((id) => nodes.get(id))
+        .filter((n): n is SimNode => !!n);
+      if (pts.length) {
+        const pad = 90;
+        let minX = Math.min(...pts.map((p) => p.x)) - pad;
+        const maxX = Math.max(...pts.map((p) => p.x)) + pad;
+        let minY = Math.min(...pts.map((p) => p.y)) - pad;
+        const maxY = Math.max(...pts.map((p) => p.y)) + pad;
+        let w = maxX - minX;
+        let h = maxY - minY;
+
+        if (w / h > aspect) {
+          const targetH = w / aspect;
+          const cy = (minY + maxY) / 2;
+          minY = cy - targetH / 2;
+          h = targetH;
+        } else {
+          const targetW = h * aspect;
+          const cx = (minX + maxX) / 2;
+          minX = cx - targetW / 2;
+          w = targetW;
+        }
+
+        w = Math.max(w, WIDTH * 0.35);
+        h = w / aspect;
+        target = { x: minX, y: minY, w, h };
+      }
+    }
+
+    const from = viewBoxStateRef.current;
+    const anim = animate(from, {
+      x: target.x,
+      y: target.y,
+      w: target.w,
+      h: target.h,
+      duration: 700,
+      ease: "outQuint",
+      onUpdate: () => {
+        svg.setAttribute("viewBox", `${from.x} ${from.y} ${from.w} ${from.h}`);
+      },
+    });
+
+    return () => {
+      anim.pause();
+    };
+  }, [selectedId, connectedIds]);
 
   const selectedNode = selectedId ? nodeById.get(selectedId) : null;
 

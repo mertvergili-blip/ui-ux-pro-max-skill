@@ -113,6 +113,74 @@ export function createSimNodes(laidOut: LaidOutNode[]): Map<string, SimNode> {
   return new Map(laidOut.map((n) => [n.id, { ...n, vx: 0, vy: 0 }]));
 }
 
+// Label collision-avoidance — the node repulsion above spaces out the dots
+// themselves, but two dots can still be close enough that their labels
+// (which float above each node, sized by label text length) overlap. This
+// runs a small separate pass over estimated label bounding boxes and nudges
+// each label's own (ox, oy) offset away from anything it overlaps, then lets
+// that offset decay back toward zero once the crowding clears — so labels
+// only drift from their default "directly above the node" position when
+// they actually need to.
+const LABEL_ITERATIONS = 6;
+const LABEL_PUSH = 0.5;
+const LABEL_DECAY = 0.9;
+
+function estimateLabelWidth(label: string, fontSize: number): number {
+  return label.length * fontSize * 0.56 + 8;
+}
+
+export function resolveLabelCollisions(
+  nodes: SimNode[],
+  offsets: Map<string, { ox: number; oy: number }>,
+  radiusOf: (n: SimNode) => number,
+  fontSizeOf: (n: SimNode) => number
+): void {
+  for (const off of offsets.values()) {
+    off.ox *= LABEL_DECAY;
+    off.oy *= LABEL_DECAY;
+  }
+
+  for (let iter = 0; iter < LABEL_ITERATIONS; iter++) {
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i];
+        const b = nodes[j];
+        const oa = offsets.get(a.id);
+        const ob = offsets.get(b.id);
+        if (!oa || !ob) continue;
+
+        const aFs = fontSizeOf(a);
+        const bFs = fontSizeOf(b);
+        const aw = estimateLabelWidth(a.label, aFs);
+        const bw = estimateLabelWidth(b.label, bFs);
+        const ah = aFs + 4;
+        const bh = bFs + 4;
+        const ax = a.x + oa.ox;
+        const ay = a.y - radiusOf(a) - 8 + oa.oy;
+        const bx = b.x + ob.ox;
+        const by = b.y - radiusOf(b) - 8 + ob.oy;
+
+        const dx = ax - bx;
+        const dy = ay - by;
+        const overlapX = aw / 2 + bw / 2 - Math.abs(dx);
+        const overlapY = ah / 2 + bh / 2 - Math.abs(dy);
+
+        if (overlapX > 0 && overlapY > 0) {
+          const pushY = overlapY * LABEL_PUSH;
+          const dir = dy < 0 ? -1 : 1;
+          oa.oy += dir * (pushY / 2);
+          ob.oy -= dir * (pushY / 2);
+
+          const pushX = overlapX * LABEL_PUSH * 0.3;
+          const dirX = dx < 0 ? -1 : 1;
+          oa.ox += dirX * (pushX / 2);
+          ob.ox -= dirX * (pushX / 2);
+        }
+      }
+    }
+  }
+}
+
 /**
  * Advances the graph by one frame, in place — an always-on Obsidian-style
  * force simulation. `draggedId`, if set, is treated as kinematic: it's
