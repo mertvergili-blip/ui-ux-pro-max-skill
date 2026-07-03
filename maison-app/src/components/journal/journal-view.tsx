@@ -32,6 +32,85 @@ const MOOD_HEIGHT: Record<MoodKey, number> = {
   stressed: 0.25,
 };
 
+const WAVE_W = 140;
+const WAVE_H = 56;
+
+// Catmull-Rom → cubic Bezier — turns the week's discrete mood heights into
+// one continuous curve instead of disconnected bars, closer to how a
+// rhythm actually reads (an ongoing wave, not seven isolated events).
+function smoothPath(points: { x: number; y: number }[]): string {
+  if (points.length < 2) return "";
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i - 1] ?? points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2] ?? p2;
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
+
+// The one generative visual in Journal — a week's worth of real mood data
+// as a single glowing wave, in the same soft-blur/glow language as the DNA
+// Map, instead of a flat bar chart.
+function CreativeRhythmWave({ rhythm }: { rhythm: { h: number; color: string }[] }) {
+  const points = rhythm.map((bar, i) => ({
+    x: (i / Math.max(1, rhythm.length - 1)) * WAVE_W,
+    y: WAVE_H - bar.h * (WAVE_H - 6) - 3,
+  }));
+  const path = smoothPath(points);
+  const gradientId = "creative-rhythm-gradient";
+
+  return (
+    <svg
+      viewBox={`0 0 ${WAVE_W} ${WAVE_H}`}
+      className="h-16 w-full max-w-[260px]"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
+          {rhythm.map((bar, i) => (
+            <stop
+              key={i}
+              offset={`${(i / Math.max(1, rhythm.length - 1)) * 100}%`}
+              stopColor={bar.color}
+            />
+          ))}
+        </linearGradient>
+      </defs>
+      {/* Soft blurred duplicate underneath — the same glow-orb language as
+          DNA Map's nodes, rather than a flat crisp line alone. */}
+      <path
+        d={path}
+        fill="none"
+        stroke={`url(#${gradientId})`}
+        strokeWidth={7}
+        strokeLinecap="round"
+        opacity={0.35}
+        style={{ filter: "blur(5px)" }}
+      />
+      <motion.path
+        d={path}
+        fill="none"
+        stroke={`url(#${gradientId})`}
+        strokeWidth={2}
+        strokeLinecap="round"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 1 }}
+        transition={{ duration: 1.1, ease: [0.2, 0.8, 0.2, 1] }}
+      />
+      {points.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r={rhythm[i].h > 0.1 ? 1.6 : 0} fill={rhythm[i].color} />
+      ))}
+    </svg>
+  );
+}
+
 // Real calendar days, most-recent last — a fixed noise pattern used to
 // live here, decorating the page with fake activity instead of reflecting
 // what the user actually wrote, which is exactly the "just for show"
@@ -203,15 +282,7 @@ export function JournalView() {
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
             Energy Rhythm
           </p>
-          <div className="flex h-16 items-end gap-1.5">
-            {rhythm.map((bar, i) => (
-              <div
-                key={i}
-                className="flex-1 rounded-t-[1px] opacity-70 transition-all duration-500"
-                style={{ height: `${bar.h * 100}%`, background: bar.color }}
-              />
-            ))}
-          </div>
+          <CreativeRhythmWave rhythm={rhythm} />
           {journalEntries.length === 0 && (
             <p className="mt-2 text-[10.5px] italic text-muted">
               Mood seçtikçe burada birikecek.
