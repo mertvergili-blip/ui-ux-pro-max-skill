@@ -12,6 +12,7 @@ import {
 } from "@/lib/store";
 import { CalendarRightPanel } from "@/components/calendar/calendar-right-panel";
 import { RunwayLookCarousel } from "@/components/runway/runway-look-carousel";
+import { DNA_NODES, DNA_CATEGORY_META, type DnaCategory } from "@/lib/dna-data";
 
 const VIEW_CAPTIONS: Record<ViewName, [string, string]> = {
   studio: ["Collection III", "Moodboard — Terre & Or"],
@@ -47,10 +48,31 @@ const TR_MONTHS = [
 
 function InsightRow({ label, value }: { label: string; value: string }) {
   return (
-    <p className="text-[11.5px] leading-relaxed text-bone-dim">
-      <span className="text-muted">{label} · </span>
+    <p className="relative text-[11.5px] leading-relaxed text-bone-dim">
+      <span className="text-white/50">{label} · </span>
       {value}
     </p>
+  );
+}
+
+// Wraps each view's stat block in the same glowing bento-tile language as
+// the rest of the app (see globals.css) — this panel used to just float
+// two lines of text over an ambient gradient, which read as unfinished
+// real estate rather than a designed part of the page.
+function PanelTile({
+  accent,
+  children,
+}: {
+  accent: "gold" | "violet" | "teal" | "blue" | "coral" | "graphite";
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`bento-tile bento-${accent} pointer-events-auto ml-auto max-w-[300px] px-6 py-6 text-right`}
+    >
+      <div className="bento-orb" style={{ width: 140, height: 140, top: -40, left: -40 }} />
+      {children}
+    </div>
   );
 }
 
@@ -65,26 +87,27 @@ function PanelInsight({ view }: { view: ViewName }) {
   const journalEntries = useStore((s) => s.journalEntries);
   const collections = useStore((s) => s.collections);
   const materials = useStore((s) => s.materials);
+  const streak = useStore((s) => s.streak);
 
   if (view === "studio") {
     const now = new Date();
     const done = tasks.filter((t) => t.done).length;
     const daysLeft = selectDaysRemaining(deadlineDate);
     return (
-      <div className="mb-7">
-        <p className="font-serif text-[52px] italic leading-none text-bone">
+      <PanelTile accent="gold">
+        <p className="relative font-serif text-[52px] italic leading-none text-[#e4c98f]">
           {now.getDate()}
         </p>
-        <p className="mt-1 text-[10px] uppercase tracking-[2.5px] text-muted">
+        <p className="relative mt-1 text-[10px] uppercase tracking-[2.5px] text-white/50">
           {TR_MONTHS[now.getMonth()]}
         </p>
-        <div className="my-4 ml-auto h-px w-10 bg-white/10" />
+        <div className="relative my-4 ml-auto h-px w-10 bg-white/10" />
         <InsightRow label="Bugün" value={`${done}/${tasks.length} görev tamam`} />
         <InsightRow
           label={deadlineLabel}
           value={daysLeft === 0 ? "bugün teslim" : `${daysLeft} gün kaldı`}
         />
-      </div>
+      </PanelTile>
     );
   }
 
@@ -92,12 +115,15 @@ function PanelInsight({ view }: { view: ViewName }) {
     const today = selectTodayEntry(journalEntries);
     const last7 = journalEntries.slice(-7);
     return (
-      <div className="mb-7">
-        <p className="font-serif text-[30px] italic leading-tight text-bone">
+      <PanelTile accent="violet">
+        <p className="relative font-serif text-[30px] italic leading-tight text-[#e7e1fb]">
           {today.mood ? MOOD_WORD[today.mood] : "Henüz seçilmedi"}
         </p>
+        <p className="relative mt-1 text-[10px] uppercase tracking-[2.5px] text-white/50">
+          Bugünkü ruh hali
+        </p>
         {last7.length > 0 && (
-          <div className="mt-4 flex justify-end gap-1.5">
+          <div className="relative mt-4 flex justify-end gap-1.5">
             {last7.map((e, i) => (
               <span
                 key={i}
@@ -109,7 +135,7 @@ function PanelInsight({ view }: { view: ViewName }) {
             ))}
           </div>
         )}
-      </div>
+      </PanelTile>
     );
   }
 
@@ -117,25 +143,25 @@ function PanelInsight({ view }: { view: ViewName }) {
     const inProgress = collections.find((c) => c.status !== "Archived");
     const pieces = collections.reduce((sum, c) => sum + c.count, 0);
     return (
-      <div className="mb-7">
-        <p className="font-serif text-[30px] italic leading-tight text-bone">
+      <PanelTile accent="teal">
+        <p className="relative font-serif text-[30px] italic leading-tight text-[#d3fff2]">
           {collections.length} koleksiyon
         </p>
-        <div className="my-4 ml-auto h-px w-10 bg-white/10" />
+        <div className="relative my-4 ml-auto h-px w-10 bg-white/10" />
         <InsightRow label="Toplam" value={`${pieces} parça`} />
         {inProgress && <InsightRow label="Aktif" value={inProgress.name} />}
-      </div>
+      </PanelTile>
     );
   }
 
   if (view === "materials") {
     return (
-      <div className="mb-7">
-        <p className="font-serif text-[30px] italic leading-tight text-bone">
+      <PanelTile accent="graphite">
+        <p className="relative font-serif text-[30px] italic leading-tight text-bone">
           {materials.length === 0 ? "Arşiv boş" : `${materials.length} kumaş`}
         </p>
         {materials.length > 0 && (
-          <div className="mt-4 flex justify-end gap-1.5">
+          <div className="relative mt-4 flex flex-wrap justify-end gap-1.5">
             {materials.slice(0, 8).map((m) => (
               <span
                 key={m.id}
@@ -145,7 +171,42 @@ function PanelInsight({ view }: { view: ViewName }) {
             ))}
           </div>
         )}
-      </div>
+      </PanelTile>
+    );
+  }
+
+  if (view === "path") {
+    const doneCollections = collections.filter((c) => c.status === "Archived").length;
+    return (
+      <PanelTile accent="blue">
+        <p className="relative font-serif text-[52px] italic leading-none text-[#e2f0ff]">
+          {streak}
+        </p>
+        <p className="relative mt-1 text-[10px] uppercase tracking-[2.5px] text-white/50">
+          günlük seri
+        </p>
+        <div className="relative my-4 ml-auto h-px w-10 bg-white/10" />
+        <InsightRow label="Tamamlanan" value={`${doneCollections} koleksiyon`} />
+        <InsightRow label="Hedef" value="Creative Director" />
+      </PanelTile>
+    );
+  }
+
+  if (view === "dna") {
+    const designerCount = DNA_NODES.filter((n) => n.category === "designer").length;
+    const topCategory = (Object.keys(DNA_CATEGORY_META) as DnaCategory[])[0];
+    return (
+      <PanelTile accent="blue">
+        <p className="relative font-serif text-[52px] italic leading-none text-[#e2f0ff]">
+          {DNA_NODES.length}
+        </p>
+        <p className="relative mt-1 text-[10px] uppercase tracking-[2.5px] text-white/50">
+          referans düğümü
+        </p>
+        <div className="relative my-4 ml-auto h-px w-10 bg-white/10" />
+        <InsightRow label="Tasarımcı" value={`${designerCount} referans`} />
+        <InsightRow label={DNA_CATEGORY_META[topCategory].label} value="öncelikli kategori" />
+      </PanelTile>
     );
   }
 
@@ -207,7 +268,9 @@ export function ImagePanel() {
               transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
               className="pointer-events-none"
             >
-              <PanelInsight view={currentView} />
+              <div className="mb-7">
+                <PanelInsight view={currentView} />
+              </div>
               <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[9.5px] uppercase tracking-[2.5px] text-bone-dim backdrop-blur-sm">
                 {eyebrow}
               </p>
