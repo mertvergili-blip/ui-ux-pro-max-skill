@@ -12,6 +12,7 @@ import { useUndoStore } from "@/lib/undo-toast";
 import { useSwipeDelete } from "@/lib/use-swipe-delete";
 import { SwipeDeleteBackdrop } from "@/components/shared/swipe-delete-backdrop";
 import { AiSourceTag } from "@/components/shared/ai-source-tag";
+import { CollectionPoster } from "./collection-poster";
 import {
   STUDIO_TEAM,
   localStudioTeamFeedback,
@@ -341,6 +342,7 @@ function ProjectDetail({
   const [notes, setNotes] = useState("");
   const [aiText, setAiText] = useState("");
   const [aiSource, setAiSource] = useState<"ai" | "local">("local");
+  const [posterOpen, setPosterOpen] = useState(false);
   const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const typeText = (str: string) => {
@@ -398,12 +400,20 @@ function ProjectDetail({
       className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-14"
     >
       <div className="max-w-[520px] lg:flex-shrink-0">
-        <span
-          className="cursor-pointer text-[10.5px] uppercase tracking-[2px] text-muted hover:text-bone"
-          onClick={onClose}
-        >
-          ← Collections
-        </span>
+        <div className="flex items-center justify-between">
+          <span
+            className="cursor-pointer text-[10.5px] uppercase tracking-[2px] text-muted hover:text-bone"
+            onClick={onClose}
+          >
+            ← Collections
+          </span>
+          <button
+            onClick={() => setPosterOpen(true)}
+            className="text-[10.5px] uppercase tracking-[2px] text-muted transition-colors hover:text-gold"
+          >
+            Poster Oluştur ✦
+          </button>
+        </div>
         <p
           className="mb-[18px] mt-5 flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3px]"
           style={{ color: folder.accent }}
@@ -414,6 +424,9 @@ function ProjectDetail({
         <h1 className="mb-6 font-heading text-[32px] font-normal leading-[1.12] text-[#f7f2e6]">
           {folder.name}
         </h1>
+        {posterOpen && (
+          <CollectionPoster folder={folder} onClose={() => setPosterOpen(false)} />
+        )}
         <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
           Notlarım
         </p>
