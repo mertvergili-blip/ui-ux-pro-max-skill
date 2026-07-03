@@ -30,6 +30,13 @@ const VIEW_MAP = {
   materials: MaterialLibraryView,
 } as const;
 
+// These three are grids/timelines that were visibly cramped fighting the
+// panel for room, and don't have a natural "atmosphere" reason to keep
+// it the way Studio/Journal's mood-driven panel does — so they get the
+// full width instead. Calendar/Runway/DNA keep their own panel content
+// (CalendarRightPanel, RunwayLookCarousel) unchanged.
+const FULL_WIDTH_VIEWS = new Set(["collections", "materials", "path"]);
+
 export default function Home() {
   // Selectors, not a full-store destructure — this component (and everything
   // it renders, including IntroScreen) must not re-render on every mousemove
@@ -51,6 +58,7 @@ export default function Home() {
   }, [handleMouseMove]);
 
   const ActiveView = VIEW_MAP[currentView as keyof typeof VIEW_MAP] ?? StudioView;
+  const fullWidth = FULL_WIDTH_VIEWS.has(currentView);
 
   return (
     <>
@@ -61,8 +69,12 @@ export default function Home() {
 
       {!introVisible && (
         <>
-          <ImagePanel />
-          <div className="relative z-5 min-h-screen w-full px-5 pb-24 sm:px-9 lg:w-[60%] lg:px-0 lg:pl-[72px]">
+          {!fullWidth && <ImagePanel />}
+          <div
+            className={`relative z-5 min-h-screen w-full px-5 pb-24 sm:px-9 lg:px-0 lg:pl-[72px] ${
+              fullWidth ? "lg:w-full" : "lg:w-[60%]"
+            }`}
+          >
             <Topbar />
             <div className="pt-[38px]">
               <ActiveView />

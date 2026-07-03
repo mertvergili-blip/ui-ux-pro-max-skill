@@ -702,7 +702,7 @@ export function CollectionsView() {
             <h1 className="mb-7 font-heading text-[28px] font-normal leading-[1.12] text-[#f7f2e6] lg:text-[34px]">
               Klasörü aç, içindeki parçaları gör.
             </h1>
-            <div className="mt-12 grid grid-cols-1 gap-x-[26px] gap-y-[34px] sm:grid-cols-2 lg:mt-[90px] lg:grid-cols-3">
+            <div className="mt-12 grid grid-cols-1 gap-x-[26px] gap-y-[34px] sm:grid-cols-2 lg:mt-[90px] lg:grid-cols-3 xl:grid-cols-4">
               {collections.map((f) => (
                 <Folder
                   key={f.id}
