@@ -67,59 +67,70 @@ const PRIMARY_TABS: { label: string; view: ViewName; icon: (active: boolean) => 
   },
 ];
 
-const MORE_TABS: { label: string; view: ViewName; icon: React.ReactNode }[] = [
+type MoreTab = { label: string; view: ViewName; icon: React.ReactNode };
+
+const DNA_ICON = (
+  <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none">
+    <path d="M6 17 11 8l3 5.5L18 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="6" cy="17" r="1.8" fill="currentColor" />
+    <circle cx="11" cy="8" r="1.8" fill="currentColor" />
+    <circle cx="14" cy="13.5" r="1.8" fill="currentColor" />
+    <circle cx="18" cy="6" r="1.8" fill="currentColor" />
+  </svg>
+);
+
+const MATERIALS_ICON = (
+  <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none">
+    <path
+      d="M4 6a2 2 0 0 1 2-2h9a5 5 0 0 1 5 5v9a2 2 0 0 1-2 2H9a5 5 0 0 1-5-5V6Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+    <path d="M15 4a5 5 0 0 0 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const PATH_ICON = (
+  <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none">
+    <circle cx="6" cy="5.5" r="1.9" stroke="currentColor" strokeWidth="1.5" />
+    <circle cx="6" cy="12" r="1.9" stroke="currentColor" strokeWidth="1.5" />
+    <circle cx="6" cy="18.5" r="1.9" fill="currentColor" />
+    <path d="M6 7.4v3.1M6 13.9v2.7M10 5.5h9M10 12h9M10 18.5h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const RUNWAY_ICON = (
+  <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none">
+    <rect x="3.5" y="4" width="17" height="16" rx="1.8" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M3.5 15.5 9 10l3.5 3.5L16 10l4.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="9" cy="8.3" r="1.3" fill="currentColor" />
+  </svg>
+);
+
+// Grouped the same way as the desktop rail (see topbar.tsx) — Studio,
+// Calendar, Collections and Journal already have their own primary slot
+// below, so only the remaining views need a home here, sorted under the
+// category they'd fall into on desktop.
+const MORE_GROUPS: { group: string; tabs: MoreTab[] }[] = [
   {
-    label: "DNA Map",
-    view: "dna",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none">
-        <path d="M6 17 11 8l3 5.5L18 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="6" cy="17" r="1.8" fill="currentColor" />
-        <circle cx="11" cy="8" r="1.8" fill="currentColor" />
-        <circle cx="14" cy="13.5" r="1.8" fill="currentColor" />
-        <circle cx="18" cy="6" r="1.8" fill="currentColor" />
-      </svg>
-    ),
+    group: "Arşiv",
+    tabs: [
+      { label: "Materials", view: "materials", icon: MATERIALS_ICON },
+      { label: "Path", view: "path", icon: PATH_ICON },
+    ],
   },
   {
-    label: "Materials",
-    view: "materials",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none">
-        <path
-          d="M4 6a2 2 0 0 1 2-2h9a5 5 0 0 1 5 5v9a2 2 0 0 1-2 2H9a5 5 0 0 1-5-5V6Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-        <path d="M15 4a5 5 0 0 0 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    ),
+    group: "Yansıma",
+    tabs: [{ label: "DNA Map", view: "dna", icon: DNA_ICON }],
   },
   {
-    label: "Path",
-    view: "path",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none">
-        <circle cx="6" cy="5.5" r="1.9" stroke="currentColor" strokeWidth="1.5" />
-        <circle cx="6" cy="12" r="1.9" stroke="currentColor" strokeWidth="1.5" />
-        <circle cx="6" cy="18.5" r="1.9" fill="currentColor" />
-        <path d="M6 7.4v3.1M6 13.9v2.7M10 5.5h9M10 12h9M10 18.5h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    label: "Runway",
-    view: "runway",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none">
-        <rect x="3.5" y="4" width="17" height="16" rx="1.8" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M3.5 15.5 9 10l3.5 3.5L16 10l4.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="9" cy="8.3" r="1.3" fill="currentColor" />
-      </svg>
-    ),
+    group: "İlham",
+    tabs: [{ label: "Runway", view: "runway", icon: RUNWAY_ICON }],
   },
 ];
+
+const MORE_TABS: MoreTab[] = MORE_GROUPS.flatMap((g) => g.tabs);
 
 function MoreIcon({ active }: { active: boolean }) {
   return (
@@ -185,21 +196,28 @@ export function BottomNav() {
               style={{ bottom: "var(--bottom-nav-h, 0px)" }}
               className="fixed inset-x-3 z-[36] mb-2 rounded-[1.4rem] border border-white/[0.08] bg-[#1a1611]/97 p-2 shadow-[0_-16px_48px_-16px_rgba(0,0,0,0.85)] backdrop-blur-xl lg:hidden"
             >
-              {MORE_TABS.map(({ label, view, icon }) => {
-                const active = currentView === view;
-                return (
-                  <button
-                    key={view}
-                    onClick={() => go(view)}
-                    className={`flex w-full items-center gap-3 rounded-[1rem] px-3.5 py-3 text-left transition-colors ${
-                      active ? "bg-white/[0.06] text-gold" : "text-bone-dim hover:bg-white/[0.03]"
-                    }`}
-                  >
-                    {icon}
-                    <span className="text-[12.5px] uppercase tracking-[1.5px]">{label}</span>
-                  </button>
-                );
-              })}
+              {MORE_GROUPS.map(({ group, tabs }) => (
+                <div key={group} className="mb-1 last:mb-0">
+                  <p className="px-3.5 pb-1 pt-2 text-[9px] uppercase tracking-[2px] text-muted/70">
+                    {group}
+                  </p>
+                  {tabs.map(({ label, view, icon }) => {
+                    const active = currentView === view;
+                    return (
+                      <button
+                        key={view}
+                        onClick={() => go(view)}
+                        className={`flex w-full items-center gap-3 rounded-[1rem] px-3.5 py-3 text-left transition-colors ${
+                          active ? "bg-white/[0.06] text-gold" : "text-bone-dim hover:bg-white/[0.03]"
+                        }`}
+                      >
+                        {icon}
+                        <span className="text-[12.5px] uppercase tracking-[1.5px]">{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
             </motion.div>
           </>
         )}
