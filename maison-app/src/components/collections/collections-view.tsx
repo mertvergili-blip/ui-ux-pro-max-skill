@@ -583,24 +583,53 @@ function ProjectGallery({ folder }: { folder: FolderData }) {
   const uploadRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
+  // A moodboard is rarely one photo — pinning a reference board a handful
+  // of images at a time used to mean repeating the picker one file at a
+  // time. Resizes/adds them one after another rather than in parallel so
+  // a slow one doesn't block the rest from landing in order.
+  const handleFiles = async (files: FileList | File[]) => {
+    const list = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (list.length === 0) return;
     setUploading(true);
     try {
-      const dataUrl = await resizeImageFile(file);
-      addProjectImage(folder.id, dataUrl);
+      for (const file of list) {
+        const dataUrl = await resizeImageFile(file);
+        addProjectImage(folder.id, dataUrl);
+      }
     } finally {
       setUploading(false);
     }
   };
 
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Copy out of the live FileList before resetting value — clearing
+    // e.target.value empties the same FileList object in place, since it's
+    // backed by the input rather than a snapshot.
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    e.target.value = "";
+    if (files.length) handleFiles(files);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragOver(false);
+    if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+  };
+
   const images = folder.images ?? [];
 
   return (
-    <div className="lg:min-w-0 lg:flex-1">
+    <div
+      className={`lg:min-w-0 lg:flex-1 ${dragOver ? "rounded-[1rem] outline outline-2 outline-dashed outline-gold/50" : ""}`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
+    >
       <div className="mb-3 flex items-center justify-between">
         <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
           Moodboard &amp; Referanslar
@@ -636,7 +665,8 @@ function ProjectGallery({ folder }: { folder: FolderData }) {
           ref={uploadRef}
           type="file"
           accept="image/*"
-          onChange={handleFile}
+          multiple
+          onChange={handleFileInput}
           className="hidden"
         />
         <input
@@ -644,7 +674,7 @@ function ProjectGallery({ folder }: { folder: FolderData }) {
           type="file"
           accept="image/*"
           capture="environment"
-          onChange={handleFile}
+          onChange={handleFileInput}
           className="hidden"
         />
       </div>
