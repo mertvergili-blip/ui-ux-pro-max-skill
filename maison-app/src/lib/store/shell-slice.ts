@@ -12,6 +12,13 @@ export interface ShellSlice {
 
   mousePos: { x: number; y: number };
   setMousePos: (x: number, y: number) => void;
+
+  // Any fixed-position bottom sheet (currently just BottomNav's "Diğer")
+  // that occupies the same bottom-left corner the mini composer bar lives
+  // in — the composer hides itself while this is true instead of the two
+  // fighting over z-index and the sheet's items becoming unclickable.
+  bottomSheetOpen: boolean;
+  setBottomSheetOpen: (open: boolean) => void;
 }
 
 export const createShellSlice: StateCreator<MaisonStore, [], [], ShellSlice> = (set) => ({
@@ -26,4 +33,7 @@ export const createShellSlice: StateCreator<MaisonStore, [], [], ShellSlice> = (
 
   mousePos: { x: 0.5, y: 0.5 },
   setMousePos: (x, y) => set({ mousePos: { x, y } }),
+
+  bottomSheetOpen: false,
+  setBottomSheetOpen: (open) => set({ bottomSheetOpen: open }),
 });

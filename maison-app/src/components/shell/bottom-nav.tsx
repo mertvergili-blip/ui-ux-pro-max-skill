@@ -146,9 +146,17 @@ function MoreIcon({ active }: { active: boolean }) {
 export function BottomNav() {
   const currentView = useStore((s) => s.currentView);
   const setView = useStore((s) => s.setView);
+  const setBottomSheetOpen = useStore((s) => s.setBottomSheetOpen);
   const navRef = useRef<HTMLElement>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreActive = MORE_TABS.some((t) => t.view === currentView);
+
+  // Published to the store so anything else fixed to the same bottom-left
+  // corner (the mini composer bar) knows to get out of the way instead of
+  // silently sitting on top of this sheet's items.
+  useEffect(() => {
+    setBottomSheetOpen(moreOpen);
+  }, [moreOpen, setBottomSheetOpen]);
 
   // Every other fixed-bottom element (AI panel trigger, undo toast, install
   // prompt, focus timer) needs to clear this bar's real rendered height —

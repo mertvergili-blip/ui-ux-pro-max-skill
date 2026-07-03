@@ -39,9 +39,16 @@ export function MiniComposer({ onExpand }: { onExpand: () => void }) {
   const updatePendingContent = useStore((s) => s.updatePendingContent);
   const confirmSuggestion = useStore((s) => s.confirmSuggestion);
   const cancelSuggestion = useStore((s) => s.cancelSuggestion);
+  const bottomSheetOpen = useStore((s) => s.bottomSheetOpen);
 
   const [value, setValue] = useState("");
   const [editing, setEditing] = useState(false);
+
+  // BottomNav's "Diğer" sheet occupies the exact same bottom-left corner on
+  // mobile — without this, the composer's higher z-index (needed to sit
+  // above ordinary page content) sat on top of that sheet's last item and
+  // silently ate its taps instead of showing a broken-looking overlap.
+  if (bottomSheetOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
