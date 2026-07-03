@@ -380,7 +380,7 @@ export function DnaMapView() {
           <div
             className={
               expanded
-                ? "fixed inset-0 z-[90] flex flex-col items-center gap-8 overflow-y-auto bg-ink/95 p-6 py-10 backdrop-blur-xl lg:flex-row lg:justify-center lg:overflow-visible lg:p-12"
+                ? "fixed inset-0 z-[90] flex flex-col items-center gap-8 overflow-y-auto bg-ink/95 px-6 pb-10 backdrop-blur-xl lg:flex-row lg:justify-center lg:overflow-visible lg:px-12 lg:py-12 pt-[max(2.5rem,calc(env(safe-area-inset-top)+1.25rem))] lg:pt-[max(3rem,calc(env(safe-area-inset-top)+1.25rem))]"
                 : "flex flex-col gap-8 lg:flex-row"
             }
           >
