@@ -6,6 +6,7 @@ export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 interface SaveStatusStore {
   status: SaveStatus;
+  lastSavedAt: number | null;
   setStatus: (status: SaveStatus) => void;
 }
 
@@ -13,5 +14,10 @@ interface SaveStatusStore {
 // writes, not something to remember across reloads.
 export const useSaveStatus = create<SaveStatusStore>((set) => ({
   status: "idle",
-  setStatus: (status) => set({ status }),
+  lastSavedAt: null,
+  setStatus: (status) =>
+    set((s) => ({
+      status,
+      lastSavedAt: status === "saved" ? Date.now() : s.lastSavedAt,
+    })),
 }));

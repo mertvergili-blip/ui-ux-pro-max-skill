@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useMotionValue, type PanInfo } from "framer-motion";
+import { haptics } from "./haptics";
 
 const REVEAL_WIDTH = 80;
 const DELETE_THRESHOLD = 60;
@@ -49,7 +50,10 @@ export function useSwipeDelete(onDelete: () => void) {
         dragElastic: { left: 0.15, right: 0 },
         dragSnapToOrigin: true,
         onDragEnd: (_: unknown, info: PanInfo) => {
-          if (info.offset.x < -DELETE_THRESHOLD) onDelete();
+          if (info.offset.x < -DELETE_THRESHOLD) {
+            haptics.delete();
+            onDelete();
+          }
         },
       }
     : {};

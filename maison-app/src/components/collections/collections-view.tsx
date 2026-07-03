@@ -536,6 +536,10 @@ function MoodboardImage({
   const setProjectImageInsight = useStore((s) => s.setProjectImageInsight);
   const showUndo = useUndoStore((s) => s.show);
   const [analyzing, setAnalyzing] = useState(false);
+  // Kept separate from image.insight — a failure shouldn't get written into
+  // the store and rendered back as if it were a real AI insight; it's
+  // session-local UI state with an actual retry action attached.
+  const [failed, setFailed] = useState(false);
 
   const handleRemove = () => {
     removeProjectImage(folderId, image.id);
@@ -544,6 +548,7 @@ function MoodboardImage({
 
   const handleAnalyze = async () => {
     setAnalyzing(true);
+    setFailed(false);
     try {
       const res = await fetch("/api/image-insight", {
         method: "POST",
@@ -551,9 +556,13 @@ function MoodboardImage({
         body: JSON.stringify({ dataUrl: image.dataUrl, projectName }),
       });
       const data = await res.json();
-      setProjectImageInsight(folderId, image.id, data.insight ?? "İnceleme başarısız oldu.");
+      if (data.insight) {
+        setProjectImageInsight(folderId, image.id, data.insight);
+      } else {
+        setFailed(true);
+      }
     } catch {
-      setProjectImageInsight(folderId, image.id, "İnceleme başarısız oldu, tekrar dener misin?");
+      setFailed(true);
     } finally {
       setAnalyzing(false);
     }
@@ -576,6 +585,14 @@ function MoodboardImage({
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 to-transparent p-1.5 pt-5">
         {image.insight ? (
           <p className="text-[9.5px] leading-relaxed text-bone-dim">{image.insight}</p>
+        ) : failed ? (
+          <button
+            onClick={handleAnalyze}
+            disabled={analyzing}
+            className="flex items-center gap-1 text-[8.5px] uppercase tracking-[1.2px] text-rose transition-colors hover:text-bone disabled:opacity-40"
+          >
+            {analyzing ? "İnceleniyor…" : "İnceleme başarısız — tekrar dene"}
+          </button>
         ) : (
           <button
             onClick={handleAnalyze}

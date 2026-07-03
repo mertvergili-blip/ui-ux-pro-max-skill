@@ -16,11 +16,33 @@ import { flushPendingWrite } from "@/lib/db-storage";
 // land directly on top of the nav pill and visually block it. A small
 // status dot that expands into a detail popover on click can never do
 // that, since it takes up the same footprint as the other topbar icons.
+// "az önce" / "3 dk önce" / "2 saat önce" — coarse enough that it doesn't
+// need a live-updating timer while the popover is closed, exact enough to
+// answer "did my last change actually save."
+function relativeTime(ts: number): string {
+  const diffMs = Date.now() - ts;
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "az önce";
+  if (mins < 60) return `${mins} dk önce`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} sa önce`;
+  return `${Math.floor(hours / 24)} gün önce`;
+}
+
 export function OfflineIndicator() {
   const [offline, setOffline] = useState(false);
   const saveStatus = useSaveStatus((s) => s.status);
+  const lastSavedAt = useSaveStatus((s) => s.lastSavedAt);
   const [retrying, setRetrying] = useState(false);
   const [open, setOpen] = useState(false);
+  // Forces relativeTime() to recompute while the popover is open, instead
+  // of freezing at whatever it read on the click that opened it.
+  const [, forceTick] = useState(0);
+  useEffect(() => {
+    if (!open) return;
+    const id = setInterval(() => forceTick((n) => n + 1), 30_000);
+    return () => clearInterval(id);
+  }, [open]);
 
   useEffect(() => {
     const goOffline = () => setOffline(true);
@@ -48,19 +70,35 @@ export function OfflineIndicator() {
   // way to act, so "I wrote something and it vanished" never happens
   // silently.
   const showSaveError = !offline && saveStatus === "error";
-  const active = offline || showSaveError;
+  const trouble = offline || showSaveError;
 
-  if (!active) return null;
+  // Always mounted now (not just on trouble) — a status you can only find
+  // when something's already wrong isn't a status indicator, it's an
+  // alarm. Quiet dot at rest, click to see when the last write actually
+  // landed.
+  const dotColor = trouble ? "bg-rose" : saveStatus === "saving" ? "bg-gold" : "bg-sage/70";
+  const borderColor = trouble ? "border-rose/25 hover:border-rose/50" : "border-white/[0.08] hover:border-white/20";
+  const label = offline
+    ? "Bağlantı yok"
+    : showSaveError
+    ? "Kaydedilemedi"
+    : saveStatus === "saving"
+    ? "Kaydediliyor"
+    : "Senkronizasyon durumu";
 
   return (
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        aria-label={offline ? "Bağlantı yok" : "Kaydedilemedi"}
-        title={offline ? "Bağlantı yok" : "Kaydedilemedi"}
-        className="flex h-8 w-8 items-center justify-center rounded-full border border-rose/25 text-rose transition-colors hover:border-rose/50"
+        aria-label={label}
+        title={label}
+        className={`flex h-8 w-8 items-center justify-center rounded-full border text-muted transition-colors ${borderColor}`}
       >
-        <span className="h-1.5 w-1.5 flex-shrink-0 animate-[pulse-glow_2.4s_infinite] rounded-full bg-rose" />
+        <span
+          className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${dotColor} ${
+            trouble || saveStatus === "saving" ? "animate-[pulse-glow_2.4s_infinite]" : ""
+          }`}
+        />
       </button>
 
       <AnimatePresence>
@@ -75,7 +113,13 @@ export function OfflineIndicator() {
             <p>
               {offline
                 ? "Bağlantı yok — gösterilen veri güncel olmayabilir."
-                : "Kaydedilemedi — bağlantı sorunu."}
+                : showSaveError
+                ? "Kaydedilemedi — bağlantı sorunu."
+                : saveStatus === "saving"
+                ? "Kaydediliyor…"
+                : lastSavedAt
+                ? `Son kayıt: ${relativeTime(lastSavedAt)}`
+                : "Henüz bu oturumda bir değişiklik kaydedilmedi."}
             </p>
             {showSaveError && (
               <button

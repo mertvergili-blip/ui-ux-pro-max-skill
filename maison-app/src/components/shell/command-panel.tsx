@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useStore, type SuggestionType, type ViewName } from "@/lib/store";
 import { HoverBorderGradient } from "@/components/vendor/hover-border-gradient";
 import { useUndoStore } from "@/lib/undo-toast";
+import { haptics } from "@/lib/haptics";
 
 const EASE = [0.32, 0.72, 0, 1] as const;
 
@@ -176,6 +177,7 @@ export function CommandPanel() {
   // adding safety. Everything else still gets the review card.
   useEffect(() => {
     if (pendingSuggestion?.type !== "task") return;
+    haptics.success();
     confirmSuggestion();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery("");
@@ -193,6 +195,7 @@ export function CommandPanel() {
   };
 
   const handleConfirm = () => {
+    haptics.confirm();
     confirmSuggestion();
     setQuery("");
     setEditing(false);

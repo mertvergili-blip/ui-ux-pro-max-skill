@@ -156,6 +156,31 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Everywhere else — a thin, low-contrast bar in the same ink/gold
+   vocabulary as the rest of the shell, instead of the default chrome-gray
+   system scrollbar that reads as unstyled. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 164, 105, 0.28) transparent;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(196, 164, 105, 0.28);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(196, 164, 105, 0.5);
+  background-clip: padding-box;
+}
+
 @keyframes shimmer-sweep {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
@@ -272,6 +297,26 @@
   background:
     radial-gradient(70% 100% at 100% 0%, rgba(100, 140, 190, 0.14), transparent 60%),
     linear-gradient(160deg, #191b1e 0%, #0c0d0e 75%);
+}
+/* Restrained on purpose (numeric data shouldn't compete with color), but a
+   bare flat tile next to five glowing ones read as broken/out of place
+   rather than "quiet." A dim steel orb keeps the same visual grammar as
+   every other tile — same silhouette, just desaturated. */
+.bento-graphite .bento-orb {
+  background: radial-gradient(circle, #b8c4d6, #6c7c93 55%, transparent 75%);
+  opacity: 0.5;
+}
+
+/* Custom cursor (desktop, fine pointer only) — replaces the system arrow
+   with the dot+ring rendered by CustomCursor. Left un-!important so more
+   specific rules (the folder magnifier below, text inputs) still win. */
+.custom-cursor-active * {
+  cursor: none;
+}
+.custom-cursor-active input,
+.custom-cursor-active textarea,
+.custom-cursor-active [contenteditable="true"] {
+  cursor: text;
 }
 
 /* Collections folder hover — a magnifier cursor as the "look closer"

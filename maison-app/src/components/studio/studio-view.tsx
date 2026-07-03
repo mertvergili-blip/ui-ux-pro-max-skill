@@ -7,6 +7,7 @@ import { FinancePulse } from "@/components/shared/finance-pulse";
 import { CapsuleDayCard } from "@/components/studio/capsule-day-card";
 import { AnimateDigits } from "@/components/unlumen-ui/animate-digits";
 import { useUndoStore } from "@/lib/undo-toast";
+import { haptics } from "@/lib/haptics";
 
 function HeadlineReveal() {
   const words = "Bugün sakin bir gün. Bir teslim tarihi *yaklaşıyor.*".split(" ");
@@ -91,7 +92,10 @@ function TaskItem({
     <div className="flex flex-col gap-2">
       <div
         className="group flex cursor-pointer select-none items-center gap-3.5 text-[13.5px]"
-        onClick={() => toggleTask(id)}
+        onClick={() => {
+          haptics.tap();
+          toggleTask(id);
+        }}
       >
         <span className="w-3.5 font-serif text-xs italic text-muted">{idx}</span>
         <span
@@ -319,6 +323,7 @@ export function StudioView() {
         </button>
 
         <div className="bento-tile bento-graphite p-5 lg:col-span-2">
+          <div className="bento-orb" style={{ width: 100, height: 100, top: -35, right: -30 }} />
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
             Finance Pulse
           </p>

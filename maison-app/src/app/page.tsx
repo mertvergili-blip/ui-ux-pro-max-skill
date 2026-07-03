@@ -5,6 +5,7 @@ import { useStore } from "@/lib/store";
 import { IntroScreen } from "@/components/intro/intro-screen";
 import { GrainOverlay } from "@/components/shared/grain-overlay";
 import { Spotlight } from "@/components/shared/spotlight";
+import { CustomCursor } from "@/components/shared/custom-cursor";
 import { ImagePanel } from "@/components/shared/image-panel";
 import { InstallPrompt } from "@/components/shared/install-prompt";
 import { UndoToast } from "@/components/shared/undo-toast";
@@ -67,6 +68,7 @@ export default function Home() {
     <>
       <GrainOverlay />
       <Spotlight />
+      <CustomCursor />
       <IntroScreen />
 
       {!introVisible && (

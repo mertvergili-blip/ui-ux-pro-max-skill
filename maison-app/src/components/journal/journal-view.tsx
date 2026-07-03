@@ -6,6 +6,7 @@ import { useStore, selectTodayEntry, type MoodKey, type JournalDay } from "@/lib
 import { localEditorLetter } from "@/lib/journal-letter";
 import { computeQuarterlyStats, localQuarterlyReview } from "@/lib/quarterly-review";
 import { useTypewriter } from "@/lib/use-typewriter";
+import { haptics } from "@/lib/haptics";
 
 const MOOD_LABEL: Record<MoodKey, string> = {
   flowing: "Flowing",
@@ -177,7 +178,10 @@ export function JournalView() {
                 todayEntry.mood === m.key ? `0 8px 20px -8px ${m.color}` : "none",
               transitionTimingFunction: "cubic-bezier(.3,1.5,.5,1)",
             }}
-            onClick={() => setTodayMood(m.key)}
+            onClick={() => {
+              haptics.tap();
+              setTodayMood(m.key);
+            }}
             title={m.label}
           />
         ))}
