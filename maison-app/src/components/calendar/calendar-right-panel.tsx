@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStore } from "@/lib/store";
+import { useUndoStore } from "@/lib/undo-toast";
 
 const EASE = [0.32, 0.72, 0, 1] as const;
 
@@ -11,6 +12,8 @@ export function CalendarRightPanel() {
   const events = useStore((s) => s.calendarEvents);
   const addCalendarEvent = useStore((s) => s.addCalendarEvent);
   const removeCalendarEvent = useStore((s) => s.removeCalendarEvent);
+  const restoreCalendarEvent = useStore((s) => s.restoreCalendarEvent);
+  const showUndo = useUndoStore((s) => s.show);
 
   const [draft, setDraft] = useState("");
   const [adding, setAdding] = useState(false);
@@ -44,6 +47,12 @@ export function CalendarRightPanel() {
     setAdding(false);
   };
 
+  const handleRemove = (id: string) => {
+    const event = events.find((e) => e.id === id);
+    removeCalendarEvent(id);
+    if (event) showUndo("Etkinlik kaldırıldı", () => restoreCalendarEvent(event));
+  };
+
   return (
     <motion.div
       key={`calendar-day-${selectedDay}`}
@@ -70,7 +79,7 @@ export function CalendarRightPanel() {
               className="group flex items-center gap-2"
             >
               <button
-                onClick={() => removeCalendarEvent(e.id)}
+                onClick={() => handleRemove(e.id)}
                 className="text-[9.5px] uppercase tracking-[1.5px] text-muted opacity-0 transition-opacity hover:text-rose group-hover:opacity-100"
               >
                 Kaldır

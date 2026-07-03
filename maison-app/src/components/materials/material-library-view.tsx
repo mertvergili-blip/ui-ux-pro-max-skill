@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/lib/store";
 import { Tilt } from "@/components/unlumen-ui/tilt";
 import { resizeImageFile } from "@/lib/image-resize";
+import { useUndoStore } from "@/lib/undo-toast";
 
 const SWATCH_PRESETS = [
   "#c4a469", // gold
@@ -333,6 +334,16 @@ function GhostMaterialCard({
 export function MaterialLibraryView() {
   const materials = useStore((s) => s.materials);
   const removeMaterial = useStore((s) => s.removeMaterial);
+  const restoreMaterial = useStore((s) => s.restoreMaterial);
+  const showUndo = useUndoStore((s) => s.show);
+
+  const handleRemove = (id: string) => {
+    const material = materials.find((m) => m.id === id);
+    removeMaterial(id);
+    if (material) {
+      showUndo(`"${material.name}" kaldırıldı`, () => restoreMaterial(material));
+    }
+  };
 
   return (
     <motion.div
@@ -359,7 +370,7 @@ export function MaterialLibraryView() {
             <MaterialCard
               key={m.id}
               {...m}
-              onRemove={() => removeMaterial(m.id)}
+              onRemove={() => handleRemove(m.id)}
             />
           ))}
         </AnimatePresence>

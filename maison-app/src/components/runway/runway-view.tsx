@@ -6,6 +6,7 @@ import { LOCAL_RUNWAY_NEWS, RUNWAY_TAG_COLOR, type RunwayNewsItem } from "@/lib/
 import { useStore } from "@/lib/store";
 import { resizeImageFile } from "@/lib/image-resize";
 import { rankTrendRadar } from "@/lib/trend-radar";
+import { useUndoStore } from "@/lib/undo-toast";
 import { EditorialPlaceholder } from "@/components/shared/editorial-placeholder";
 
 function NewsCard({
@@ -105,7 +106,15 @@ function RunwayGallery() {
   const photos = useStore((s) => s.runwayPhotos);
   const addRunwayPhoto = useStore((s) => s.addRunwayPhoto);
   const removeRunwayPhoto = useStore((s) => s.removeRunwayPhoto);
+  const restoreRunwayPhoto = useStore((s) => s.restoreRunwayPhoto);
+  const showUndo = useUndoStore((s) => s.show);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleRemove = (id: string) => {
+    const photo = photos.find((p) => p.id === id);
+    removeRunwayPhoto(id);
+    if (photo) showUndo("Fotoğraf kaldırıldı", () => restoreRunwayPhoto(photo));
+  };
 
   const [pendingFile, setPendingFile] = useState<{ file: File; preview: string } | null>(null);
   const [designer, setDesigner] = useState("");
@@ -230,7 +239,7 @@ function RunwayGallery() {
                   className="h-full w-full object-cover"
                 />
                 <button
-                  onClick={() => removeRunwayPhoto(p.id)}
+                  onClick={() => handleRemove(p.id)}
                   className="absolute inset-0 flex items-center justify-center bg-ink/70 text-[9.5px] uppercase tracking-[1.5px] text-bone opacity-0 transition-opacity group-hover:opacity-100"
                 >
                   Kaldır

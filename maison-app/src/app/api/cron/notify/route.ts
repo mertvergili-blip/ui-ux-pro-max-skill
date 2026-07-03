@@ -68,8 +68,8 @@ async function runEvening(state: StoredState | null, today: string, sent: string
       const streak = state?.streak ?? 0;
       const body =
         streak > 0
-          ? `Bugün henüz journal girişi yok — ${streak} günlük serini koru.`
-          : "Bugün henüz journal girişi yok.";
+          ? `Bugün henüz journal girişi yok — birkaç kelime yazmaya ne dersin? ${streak} günlük bir ritmin var.`
+          : "Bugün henüz journal girişi yok — birkaç kelime yazmaya ne dersin?";
       await sendPushToAll("Günün Kapanmadan", body);
       sent.push("streak-break");
     }

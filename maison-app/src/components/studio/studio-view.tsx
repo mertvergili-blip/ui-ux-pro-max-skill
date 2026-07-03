@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useStore, selectCreativeEnergy, selectDaysRemaining } from "@/lib/store";
 import { FinancePulse } from "@/components/shared/finance-pulse";
 import { CapsuleDayCard } from "@/components/studio/capsule-day-card";
@@ -41,44 +41,141 @@ function TaskItem({
   idx,
   text,
   done,
+  estimatedMinutes,
+  subtasks,
 }: {
   id: string;
   idx: string;
   text: string;
   done: boolean;
+  estimatedMinutes?: number;
+  subtasks?: { id: string; text: string; done: boolean }[];
 }) {
   const toggleTask = useStore((s) => s.toggleTask);
+  const setTaskSubtasks = useStore((s) => s.setTaskSubtasks);
+  const setTaskEstimate = useStore((s) => s.setTaskEstimate);
+  const toggleSubtask = useStore((s) => s.toggleSubtask);
+  const setFocusTask = useStore((s) => s.setFocusTask);
+  const [breakingDown, setBreakingDown] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const handleBreakdown = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setBreakingDown(true);
+    setExpanded(true);
+    try {
+      const res = await fetch("/api/task-breakdown", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (Array.isArray(data.steps)) {
+        setTaskSubtasks(
+          id,
+          data.steps.map((s: string, i: number) => ({ id: `${id}-sub${i}`, text: s, done: false }))
+        );
+      }
+      if (data.estimatedMinutes) setTaskEstimate(id, data.estimatedMinutes);
+    } finally {
+      setBreakingDown(false);
+    }
+  };
+
+  const hasSubtasks = (subtasks?.length ?? 0) > 0;
 
   return (
-    <div
-      className="group flex cursor-pointer select-none items-center gap-3.5 text-[13.5px]"
-      onClick={() => toggleTask(id)}
-    >
-      <span className="w-3.5 font-serif text-xs italic text-muted">{idx}</span>
-      <span
-        className={`relative flex h-[15px] w-[15px] flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200 group-hover:scale-[1.15] ${
-          done ? "border-bone bg-bone" : "border-bone-dim/40 bg-transparent"
-        }`}
+    <div className="flex flex-col gap-2">
+      <div
+        className="group flex cursor-pointer select-none items-center gap-3.5 text-[13.5px]"
+        onClick={() => toggleTask(id)}
       >
-        <svg viewBox="0 0 16 16" className="h-full w-full">
-          <path
-            d="M4 8.5l2.8 2.8L12 5.5"
-            fill="none"
-            stroke="var(--ink)"
-            strokeWidth="2.4"
-            strokeDasharray="20"
-            strokeDashoffset={done ? 0 : 20}
-            className="transition-all duration-300"
-          />
-        </svg>
-      </span>
-      <span
-        className={`relative transition-colors duration-300 ${
-          done ? "text-[#57503f] line-through" : "text-[#d7cfbc]"
-        }`}
-      >
-        {text}
-      </span>
+        <span className="w-3.5 font-serif text-xs italic text-muted">{idx}</span>
+        <span
+          className={`relative flex h-[15px] w-[15px] flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200 group-hover:scale-[1.15] ${
+            done ? "border-bone bg-bone" : "border-bone-dim/40 bg-transparent"
+          }`}
+        >
+          <svg viewBox="0 0 16 16" className="h-full w-full">
+            <path
+              d="M4 8.5l2.8 2.8L12 5.5"
+              fill="none"
+              stroke="var(--ink)"
+              strokeWidth="2.4"
+              strokeDasharray="20"
+              strokeDashoffset={done ? 0 : 20}
+              className="transition-all duration-300"
+            />
+          </svg>
+        </span>
+        <span
+          className={`relative flex-1 transition-colors duration-300 ${
+            done ? "text-[#57503f] line-through" : "text-[#d7cfbc]"
+          }`}
+        >
+          {text}
+          {estimatedMinutes && !done && (
+            <span className="ml-2 text-[10.5px] text-muted">~{estimatedMinutes} dk</span>
+          )}
+        </span>
+        {!done && (
+          <div
+            className="flex items-center gap-2.5 text-[9.5px] uppercase tracking-[1.5px] opacity-0 transition-opacity group-hover:opacity-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {hasSubtasks ? (
+              <button
+                onClick={() => setExpanded((v) => !v)}
+                className="text-muted hover:text-bone-dim"
+              >
+                {expanded ? "Gizle" : "Adımlar"}
+              </button>
+            ) : (
+              <button
+                onClick={handleBreakdown}
+                disabled={breakingDown}
+                className="text-muted hover:text-bone-dim disabled:opacity-40"
+              >
+                {breakingDown ? "Bölünüyor…" : "Parçala"}
+              </button>
+            )}
+            <button
+              onClick={() => setFocusTask(id)}
+              className="text-gold hover:text-bone"
+            >
+              Odaklan
+            </button>
+          </div>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {expanded && hasSubtasks && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="ml-[26px] flex flex-col gap-1.5 overflow-hidden border-l border-line pl-3.5"
+          >
+            {subtasks!.map((st) => (
+              <div
+                key={st.id}
+                className="flex cursor-pointer items-center gap-2.5 text-[12px]"
+                onClick={() => toggleSubtask(id, st.id)}
+              >
+                <span
+                  className={`h-[11px] w-[11px] flex-shrink-0 rounded-full border ${
+                    st.done ? "border-gold bg-gold" : "border-bone-dim/40"
+                  }`}
+                />
+                <span className={st.done ? "text-muted line-through" : "text-bone-dim"}>
+                  {st.text}
+                </span>
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -86,6 +183,7 @@ function TaskItem({
 export function StudioView() {
   const tasks = useStore((s) => s.tasks);
   const streak = useStore((s) => s.streak);
+  const bestStreak = useStore((s) => s.bestStreak);
   const journalEntries = useStore((s) => s.journalEntries);
   const creativeEnergy = useMemo(
     () => selectCreativeEnergy(journalEntries),
@@ -97,6 +195,16 @@ export function StudioView() {
   const deadlineLabel = useStore((s) => s.deadlineLabel);
   const deadlineDate = useStore((s) => s.deadlineDate);
   const daysRemaining = useMemo(() => selectDaysRemaining(deadlineDate), [deadlineDate]);
+  const setFocusTask = useStore((s) => s.setFocusTask);
+
+  const lastOpenedCollectionId = useStore((s) => s.lastOpenedCollectionId);
+  const collections = useStore((s) => s.collections);
+  const setView = useStore((s) => s.setView);
+  const resumeCollection = collections.find((c) => c.id === lastOpenedCollectionId);
+
+  // The single next actionable thing, not a summary — one undone task
+  // beats a paragraph of options when starting is the hard part.
+  const nextTask = tasks.find((t) => !t.done);
 
   return (
     <motion.div
@@ -112,18 +220,48 @@ export function StudioView() {
 
       <HeadlineReveal />
 
+      {resumeCollection && (
+        <button
+          onClick={() => setView("collections")}
+          className="mb-7 flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-[12px] text-bone-dim transition-colors hover:border-gold/30 hover:text-bone"
+        >
+          <span className="text-gold">↩</span>
+          Kaldığın yerden devam et:{" "}
+          <span className="text-bone">{resumeCollection.name}</span>
+        </button>
+      )}
+
       <div className="mb-9 grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-6">
         <div className="bento-tile bento-gold p-6 sm:col-span-2 lg:col-span-4">
           <div className="bento-orb" style={{ width: 150, height: 150, top: -50, right: -40 }} />
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
             Studio Focus
           </p>
-          <p className="mb-2.5 max-w-[340px] font-serif text-[22px] italic text-[#e4c98f]">
-            Koleksiyon III — Moodboard Revizyonu
-          </p>
-          <p className="max-w-[320px] text-[13px] leading-relaxed text-bone-dim">
-            Kumaş referanslarını gözden geçir, palet notlarını netleştir.
-          </p>
+          {nextTask ? (
+            <>
+              <p className="mb-2.5 max-w-[340px] font-serif text-[22px] italic text-[#e4c98f]">
+                {nextTask.text}
+              </p>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setFocusTask(nextTask.id)}
+                  className="rounded-full bg-[#e4c98f] px-4 py-2 text-[10.5px] uppercase tracking-[1.5px] text-ink transition-opacity hover:opacity-90"
+                >
+                  Şimdi Başla
+                </button>
+                {nextTask.estimatedMinutes && (
+                  <span className="text-[12px] text-bone-dim">
+                    ~{nextTask.estimatedMinutes} dk
+                  </span>
+                )}
+              </div>
+            </>
+          ) : (
+            <p className="max-w-[320px] text-[13px] leading-relaxed text-bone-dim">
+              Bugün için işaretlenmiş her şeyi bitirdin. Yeni bir görev ekle ya
+              da dinlen.
+            </p>
+          )}
         </div>
 
         <div className="bento-tile bento-violet p-5 lg:col-span-2">
@@ -135,6 +273,9 @@ export function StudioView() {
             <AnimateDigits value={String(streak)} enterY={20} />
             <small className="ml-1.5 font-sans text-xs text-white/60">gün</small>
           </p>
+          {bestStreak > 0 && (
+            <p className="mt-1 text-[10.5px] text-white/45">en iyi: {bestStreak} gün</p>
+          )}
         </div>
 
         <div className="bento-tile bento-teal p-5 lg:col-span-2">

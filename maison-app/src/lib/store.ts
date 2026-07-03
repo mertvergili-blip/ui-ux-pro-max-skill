@@ -22,11 +22,19 @@ export type ViewName =
 
 export type MoodKey = "flowing" | "calm" | "stressed" | "grounded" | "tired";
 
+export interface Subtask {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
 export interface Task {
   id: string;
   idx: string;
   text: string;
   done: boolean;
+  estimatedMinutes?: number;
+  subtasks?: Subtask[];
 }
 
 export interface JournalDay {
@@ -120,8 +128,17 @@ interface MaisonStore {
   tasks: Task[];
   toggleTask: (id: string) => void;
   addTask: (text: string) => void;
+  setTaskEstimate: (id: string, minutes: number | undefined) => void;
+  setTaskSubtasks: (id: string, subtasks: Subtask[]) => void;
+  toggleSubtask: (taskId: string, subtaskId: string) => void;
+
+  // The task currently held in a Focus session (single-task mode) — not
+  // persisted, resets on reload, since it's a "right now" concept.
+  focusTaskId: string | null;
+  setFocusTask: (id: string | null) => void;
 
   streak: number;
+  bestStreak: number;
 
   // Next deadline — drives both the Studio stat and the ambient urgency tint
   deadlineLabel: string;
@@ -134,12 +151,14 @@ interface MaisonStore {
   materials: Material[];
   addMaterial: (m: Omit<Material, "id" | "createdAt">) => void;
   removeMaterial: (id: string) => void;
+  restoreMaterial: (m: Material) => void;
   setMaterialImage: (id: string, imageUrl: string) => void;
 
   // Mistake/iteration log — per collection
   iterationLogs: IterationEntry[];
   addIterationEntry: (e: Omit<IterationEntry, "id" | "createdAt">) => void;
   removeIterationEntry: (id: string) => void;
+  restoreIterationEntry: (e: IterationEntry) => void;
 
   // Capsule Day Challenge — tracks which day-challenges were marked done
   completedCapsuleIds: string[];
@@ -149,9 +168,17 @@ interface MaisonStore {
   collections: CollectionFolder[];
   addCollection: (c: Omit<CollectionFolder, "id" | "count">) => void;
   removeCollection: (id: string) => void;
+  restoreCollection: (c: CollectionFolder, index: number) => void;
   addProjectImage: (folderId: string, dataUrl: string) => void;
   removeProjectImage: (folderId: string, imageId: string) => void;
+  restoreProjectImage: (folderId: string, image: ProjectImage) => void;
   setProjectImageInsight: (folderId: string, imageId: string, insight: string) => void;
+
+  // Which collection was last drilled into — read on CollectionsView mount
+  // so switching away mid-task (to check Journal, say) and back drops you
+  // right where you left off instead of back at the grid.
+  lastOpenedCollectionId: string | null;
+  setLastOpenedCollection: (id: string | null) => void;
 
   // Calendar — day-keyed events plus which day is currently open in the
   // right-panel detail view (shared between the grid and ImagePanel)
@@ -160,6 +187,7 @@ interface MaisonStore {
   setSelectedCalendarDay: (day: number | null) => void;
   addCalendarEvent: (day: number, text: string) => void;
   removeCalendarEvent: (id: string) => void;
+  restoreCalendarEvent: (e: CalendarEvent) => void;
 
   // Runway — user-saved reference photos for the Runway right-panel carousel.
   // Real photography can't be auto-fetched (Vogue/WWD/Instagram all block
@@ -167,6 +195,7 @@ interface MaisonStore {
   runwayPhotos: RunwayPhoto[];
   addRunwayPhoto: (p: Omit<RunwayPhoto, "id" | "createdAt">) => void;
   removeRunwayPhoto: (id: string) => void;
+  restoreRunwayPhoto: (p: RunwayPhoto) => void;
 
   // AI Studio panel
   aiPanelOpen: boolean;
@@ -239,8 +268,33 @@ export const useStore = create<MaisonStore>()(
             },
           ],
         })),
+      setTaskEstimate: (id, minutes) =>
+        set((s) => ({
+          tasks: s.tasks.map((t) => (t.id === id ? { ...t, estimatedMinutes: minutes } : t)),
+        })),
+      setTaskSubtasks: (id, subtasks) =>
+        set((s) => ({
+          tasks: s.tasks.map((t) => (t.id === id ? { ...t, subtasks } : t)),
+        })),
+      toggleSubtask: (taskId, subtaskId) =>
+        set((s) => ({
+          tasks: s.tasks.map((t) =>
+            t.id === taskId
+              ? {
+                  ...t,
+                  subtasks: (t.subtasks ?? []).map((st) =>
+                    st.id === subtaskId ? { ...st, done: !st.done } : st
+                  ),
+                }
+              : t
+          ),
+        })),
+
+      focusTaskId: null,
+      setFocusTask: (id) => set({ focusTaskId: id }),
 
       streak: 12,
+      bestStreak: 12,
 
       deadlineLabel: "Koleksiyon III",
       deadlineDate: (() => {
@@ -261,6 +315,8 @@ export const useStore = create<MaisonStore>()(
         })),
       removeMaterial: (id) =>
         set((s) => ({ materials: s.materials.filter((m) => m.id !== id) })),
+      restoreMaterial: (m) =>
+        set((s) => ({ materials: [m, ...s.materials] })),
       setMaterialImage: (id, imageUrl) =>
         set((s) => ({
           materials: s.materials.map((m) => (m.id === id ? { ...m, imageUrl } : m)),
@@ -278,6 +334,8 @@ export const useStore = create<MaisonStore>()(
         set((s) => ({
           iterationLogs: s.iterationLogs.filter((e) => e.id !== id),
         })),
+      restoreIterationEntry: (e) =>
+        set((s) => ({ iterationLogs: [e, ...s.iterationLogs] })),
 
       completedCapsuleIds: [],
       toggleCapsuleComplete: (id) =>
@@ -319,6 +377,12 @@ export const useStore = create<MaisonStore>()(
         })),
       removeCollection: (id) =>
         set((s) => ({ collections: s.collections.filter((c) => c.id !== id) })),
+      restoreCollection: (c, index) =>
+        set((s) => {
+          const next = [...s.collections];
+          next.splice(Math.min(index, next.length), 0, c);
+          return { collections: next };
+        }),
       addProjectImage: (folderId, dataUrl) =>
         set((s) => ({
           collections: s.collections.map((c) =>
@@ -341,6 +405,12 @@ export const useStore = create<MaisonStore>()(
               : c
           ),
         })),
+      restoreProjectImage: (folderId, image) =>
+        set((s) => ({
+          collections: s.collections.map((c) =>
+            c.id === folderId ? { ...c, images: [...(c.images ?? []), image] } : c
+          ),
+        })),
       setProjectImageInsight: (folderId, imageId, insight) =>
         set((s) => ({
           collections: s.collections.map((c) =>
@@ -354,6 +424,9 @@ export const useStore = create<MaisonStore>()(
               : c
           ),
         })),
+
+      lastOpenedCollectionId: null,
+      setLastOpenedCollection: (id) => set({ lastOpenedCollectionId: id }),
 
       calendarEvents: [
         { id: "ce1", day: 1, text: "Brief · Croquis taslakları" },
@@ -375,6 +448,8 @@ export const useStore = create<MaisonStore>()(
         set((s) => ({
           calendarEvents: s.calendarEvents.filter((e) => e.id !== id),
         })),
+      restoreCalendarEvent: (e) =>
+        set((s) => ({ calendarEvents: [...s.calendarEvents, e] })),
 
       runwayPhotos: [],
       addRunwayPhoto: (p) =>
@@ -388,6 +463,8 @@ export const useStore = create<MaisonStore>()(
         set((s) => ({
           runwayPhotos: s.runwayPhotos.filter((p) => p.id !== id),
         })),
+      restoreRunwayPhoto: (p) =>
+        set((s) => ({ runwayPhotos: [p, ...s.runwayPhotos] })),
 
       aiPanelOpen: false,
       toggleAiPanel: () => set((s) => ({ aiPanelOpen: !s.aiPanelOpen })),
@@ -498,6 +575,7 @@ export const useStore = create<MaisonStore>()(
         notes: s.notes,
         journalEntries: s.journalEntries,
         streak: s.streak,
+        bestStreak: s.bestStreak,
         materials: s.materials,
         iterationLogs: s.iterationLogs,
         completedCapsuleIds: s.completedCapsuleIds,
@@ -506,6 +584,7 @@ export const useStore = create<MaisonStore>()(
         collections: s.collections,
         calendarEvents: s.calendarEvents,
         runwayPhotos: s.runwayPhotos,
+        lastOpenedCollectionId: s.lastOpenedCollectionId,
       }),
     }
   )

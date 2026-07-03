@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStore } from "@/lib/store";
+import { useUndoStore } from "@/lib/undo-toast";
 
 const DAYS_OF_WEEK = ["PZT", "SAL", "ÇAR", "PER", "CUM", "CMT", "PAZ"];
 
@@ -17,10 +18,18 @@ function MobileDayPanel({ day }: { day: number }) {
   const events = useStore((s) => s.calendarEvents);
   const addCalendarEvent = useStore((s) => s.addCalendarEvent);
   const removeCalendarEvent = useStore((s) => s.removeCalendarEvent);
+  const restoreCalendarEvent = useStore((s) => s.restoreCalendarEvent);
+  const showUndo = useUndoStore((s) => s.show);
   const [draft, setDraft] = useState("");
   const [adding, setAdding] = useState(false);
 
   const dayEvents = events.filter((e) => e.day === day);
+
+  const handleRemove = (id: string) => {
+    const event = events.find((e) => e.id === id);
+    removeCalendarEvent(id);
+    if (event) showUndo("Etkinlik kaldırıldı", () => restoreCalendarEvent(event));
+  };
 
   const handleAdd = () => {
     if (!draft.trim()) return;
@@ -66,7 +75,7 @@ function MobileDayPanel({ day }: { day: number }) {
               >
                 <p className="text-[13.5px] leading-relaxed text-bone">{e.text}</p>
                 <button
-                  onClick={() => removeCalendarEvent(e.id)}
+                  onClick={() => handleRemove(e.id)}
                   className="text-[9.5px] uppercase tracking-[1.5px] text-muted opacity-60 hover:text-rose"
                 >
                   Kaldır

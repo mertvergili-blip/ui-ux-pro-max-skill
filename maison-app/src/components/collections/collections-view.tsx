@@ -8,6 +8,7 @@ import { useTypewriter } from "@/lib/use-typewriter";
 import { useSpeechRecognition } from "@/lib/use-speech-recognition";
 import { useStore, type CollectionFolder as FolderData } from "@/lib/store";
 import { resizeImageFile } from "@/lib/image-resize";
+import { useUndoStore } from "@/lib/undo-toast";
 import {
   STUDIO_TEAM,
   localStudioTeamFeedback,
@@ -445,8 +446,15 @@ function MoodboardImage({
   spanClassName: string;
 }) {
   const removeProjectImage = useStore((s) => s.removeProjectImage);
+  const restoreProjectImage = useStore((s) => s.restoreProjectImage);
   const setProjectImageInsight = useStore((s) => s.setProjectImageInsight);
+  const showUndo = useUndoStore((s) => s.show);
   const [analyzing, setAnalyzing] = useState(false);
+
+  const handleRemove = () => {
+    removeProjectImage(folderId, image.id);
+    showUndo("Görsel kaldırıldı", () => restoreProjectImage(folderId, image));
+  };
 
   const handleAnalyze = async () => {
     setAnalyzing(true);
@@ -473,7 +481,7 @@ function MoodboardImage({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={image.dataUrl} alt="" className="h-full w-full object-cover" />
       <button
-        onClick={() => removeProjectImage(folderId, image.id)}
+        onClick={handleRemove}
         className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink/70 text-[10px] text-bone-dim opacity-0 transition-opacity group-hover:opacity-100"
         aria-label="Görseli kaldır"
       >
@@ -684,7 +692,15 @@ function IterationLog({ collectionId }: { collectionId: string }) {
   const allEntries = useStore((s) => s.iterationLogs);
   const addIterationEntry = useStore((s) => s.addIterationEntry);
   const removeIterationEntry = useStore((s) => s.removeIterationEntry);
+  const restoreIterationEntry = useStore((s) => s.restoreIterationEntry);
+  const showUndo = useUndoStore((s) => s.show);
   const entries = allEntries.filter((e) => e.collectionId === collectionId);
+
+  const handleRemove = (id: string) => {
+    const entry = allEntries.find((e) => e.id === id);
+    removeIterationEntry(id);
+    if (entry) showUndo("Günlük girişi kaldırıldı", () => restoreIterationEntry(entry));
+  };
 
   const [open, setOpen] = useState(false);
   const [whatDidntWork, setWhatDidntWork] = useState("");
@@ -767,7 +783,7 @@ function IterationLog({ collectionId }: { collectionId: string }) {
               {e.why && <p className="mt-0.5 text-[12px] text-muted">{e.why}</p>}
             </div>
             <button
-              onClick={() => removeIterationEntry(e.id)}
+              onClick={() => handleRemove(e.id)}
               className="flex-shrink-0 text-[10px] uppercase tracking-[1.5px] text-muted opacity-60 transition-opacity hover:text-rose lg:opacity-0 lg:group-hover:opacity-100"
             >
               Kaldır
@@ -780,14 +796,42 @@ function IterationLog({ collectionId }: { collectionId: string }) {
 }
 
 export function CollectionsView() {
-  const [openProjectId, setOpenProjectId] = useState<string | null>(null);
+  const lastOpenedCollectionId = useStore((s) => s.lastOpenedCollectionId);
+  const setLastOpenedCollection = useStore((s) => s.setLastOpenedCollection);
+  // Seeded from the persisted "last opened" id — so leaving mid-task (to
+  // check Journal, say) and coming back to Collections drops you exactly
+  // where you left off instead of back at the folder grid.
+  const [openProjectId, setOpenProjectId] = useState<string | null>(
+    () => lastOpenedCollectionId
+  );
   const collections = useStore((s) => s.collections);
   const addCollection = useStore((s) => s.addCollection);
   const removeCollection = useStore((s) => s.removeCollection);
+  const restoreCollection = useStore((s) => s.restoreCollection);
+  const showUndo = useUndoStore((s) => s.show);
   // Look the open folder up live from the store each render, rather than
   // holding a snapshot object — otherwise mutations like addProjectImage
   // never show up because the held snapshot never updates.
   const openProject = collections.find((c) => c.id === openProjectId) ?? null;
+
+  const openProjectAndRemember = (folder: FolderData) => {
+    setOpenProjectId(folder.id);
+    setLastOpenedCollection(folder.id);
+  };
+
+  const closeProject = () => {
+    setOpenProjectId(null);
+    setLastOpenedCollection(null);
+  };
+
+  const handleRemoveCollection = (id: string) => {
+    const index = collections.findIndex((c) => c.id === id);
+    const folder = collections[index];
+    removeCollection(id);
+    if (folder) {
+      showUndo(`"${folder.name}" kaldırıldı`, () => restoreCollection(folder, index));
+    }
+  };
 
   // Portfolio Autopilot — generates a one-line pitch per collection on
   // demand, always reading live from the collections list, so a project
@@ -841,7 +885,7 @@ export function CollectionsView() {
           <ProjectDetail
             key="detail"
             folder={openProject}
-            onClose={() => setOpenProjectId(null)}
+            onClose={closeProject}
           />
         ) : (
           <motion.div
@@ -873,8 +917,8 @@ export function CollectionsView() {
                 <Folder
                   key={f.id}
                   data={f}
-                  onOpenProject={(folder) => setOpenProjectId(folder.id)}
-                  onRemove={() => removeCollection(f.id)}
+                  onOpenProject={openProjectAndRemember}
+                  onRemove={() => handleRemoveCollection(f.id)}
                   pitch={portfolioMode ? pitches[f.id] : undefined}
                   pitchLoading={portfolioMode && pitchLoadingIds.has(f.id)}
                 />
