@@ -33,6 +33,7 @@ export const createAiPanelSlice: StateCreator<MaisonStore, [], [], AiPanelSlice>
     set({ suggestionLoading: true });
 
     let result: { type: SuggestionType; content: string };
+    let source: "ai" | "local" = "ai";
     try {
       const res = await fetch("/api/classify", {
         method: "POST",
@@ -40,16 +41,22 @@ export const createAiPanelSlice: StateCreator<MaisonStore, [], [], AiPanelSlice>
         body: JSON.stringify({ text: input }),
       });
       if (!res.ok) throw new Error("classify request failed");
-      result = await res.json();
+      const data = await res.json();
+      result = data;
+      // The route itself falls back to a local keyword guess when Gemini is
+      // unavailable but still returns 200 — its own source field is the
+      // only way to tell the two apart from here.
+      if (data.source === "local") source = "local";
     } catch {
       result = localClassify(input);
+      source = "local";
     }
 
     // The input may have changed (or the panel closed) while the request
     // was in flight — only apply a result that's still relevant.
     if (get().suggestionLoading) {
       set({
-        pendingSuggestion: { ...result, rawInput: input },
+        pendingSuggestion: { ...result, rawInput: input, source },
         suggestionLoading: false,
       });
     }

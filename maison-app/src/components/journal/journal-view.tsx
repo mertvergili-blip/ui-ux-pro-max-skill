@@ -7,6 +7,7 @@ import { localEditorLetter } from "@/lib/journal-letter";
 import { computeQuarterlyStats, localQuarterlyReview } from "@/lib/quarterly-review";
 import { useTypewriter } from "@/lib/use-typewriter";
 import { haptics } from "@/lib/haptics";
+import { AiSourceTag } from "@/components/shared/ai-source-tag";
 
 const MOOD_LABEL: Record<MoodKey, string> = {
   flowing: "Flowing",
@@ -136,12 +137,17 @@ export function JournalView() {
   const quarterlyReviewGeneratedAt = useStore((s) => s.quarterlyReviewGeneratedAt);
   const setQuarterlyReview = useStore((s) => s.setQuarterlyReview);
   const [reviewLoading, setReviewLoading] = useState(false);
+  // null until a generation actually happens this session — a review
+  // restored from a previous session has no known source, so it shouldn't
+  // get mislabeled "yerel tahmin" just because this component just mounted.
+  const [reviewSource, setReviewSource] = useState<"ai" | "local" | null>(null);
   const quarterlyReviewDisplay = useTypewriter(quarterlyReviewText ?? "");
 
   const generateQuarterlyReview = async () => {
     setReviewLoading(true);
     const stats = computeQuarterlyStats(journalEntries, streak, collectionsCount);
     let review = localQuarterlyReview(stats);
+    let source: "ai" | "local" = "local";
     try {
       const res = await fetch("/api/quarterly-review", {
         method: "POST",
@@ -151,11 +157,13 @@ export function JournalView() {
       if (res.ok) {
         const data = await res.json();
         if (data.review) review = data.review;
+        if (data.source === "gemini") source = "ai";
       }
     } catch {
       // local review already set above
     }
     setQuarterlyReview(review);
+    setReviewSource(source);
     setReviewLoading(false);
   };
 
@@ -202,8 +210,8 @@ export function JournalView() {
   // it once a fetch for the *current* last7Key resolves, so a fetch that
   // completes after the user has already moved on can't clobber the view.
   const [geminiLetter, setGeminiLetter] = useState<{ key: string; text: string } | null>(null);
-  const editorLetter =
-    geminiLetter && geminiLetter.key === last7Key ? geminiLetter.text : localLetter;
+  const editorLetterIsAi = Boolean(geminiLetter && geminiLetter.key === last7Key);
+  const editorLetter = editorLetterIsAi ? geminiLetter!.text : localLetter;
   const editorLetterDisplay = useTypewriter(editorLetter);
 
   useEffect(() => {
@@ -362,6 +370,7 @@ export function JournalView() {
         <div className="bento-orb" style={{ width: 120, height: 120, top: -35, right: -30 }} />
         <p className="relative mb-2.5 flex items-center gap-2.5 text-[9.5px] uppercase tracking-[3px] text-white/55">
           Weekly Editor Letter
+          {!editorLetterIsAi && <AiSourceTag source="local" />}
         </p>
         <p className="relative font-serif text-[17px] italic leading-relaxed text-[#e7e1fb]">
           {editorLetterDisplay}
@@ -373,6 +382,7 @@ export function JournalView() {
         <div className="relative mb-2.5 flex items-center justify-between">
           <p className="flex items-center gap-2.5 text-[9.5px] uppercase tracking-[3px] text-white/55">
             Üç Aylık Öz-Değerlendirme
+            {reviewSource && !reviewLoading && <AiSourceTag source={reviewSource} />}
           </p>
           <button
             onClick={generateQuarterlyReview}

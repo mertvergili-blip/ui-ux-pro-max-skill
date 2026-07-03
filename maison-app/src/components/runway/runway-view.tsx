@@ -325,7 +325,7 @@ export function RunwayView() {
         {news !== null && newsSource === "local" && "Bağlantı kurulamadı — örnek içerik gösteriliyor."}
       </p>
 
-      {radar.length > 0 && (
+      {radar.length > 0 ? (
         <div className="bento-tile bento-coral mb-7 px-5 py-4 lg:mr-5">
           <div className="bento-orb" style={{ width: 130, height: 130, top: -40, right: -30 }} />
           <p className="relative mb-1.5 text-[9.5px] uppercase tracking-[2.5px] text-[#ffcdb8]">
@@ -338,6 +338,15 @@ export function RunwayView() {
             referanslarınla örtüşüyor.
           </p>
         </div>
+      ) : (
+        tasteLabels.length === 0 &&
+        news !== null && (
+          <p className="mb-7 max-w-[420px] text-[11.5px] leading-relaxed text-muted lg:mr-5">
+            Trend Radar burada boş — koleksiyonlarına kumaş bağladıkça ya da
+            journal&apos;a ruh hali ekledikçe DNA haritan büyür, o zaman
+            haberler kendi tarzına göre işaretlenmeye başlar.
+          </p>
+        )
       )}
 
       <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2 lg:mr-5">

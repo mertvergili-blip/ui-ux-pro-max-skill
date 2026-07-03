@@ -46,6 +46,11 @@ export interface PendingSuggestion {
   type: SuggestionType;
   content: string;
   rawInput: string;
+  // "ai" = a real Gemini classify call answered; "local" = the request
+  // failed/was unavailable and a keyword-based guess filled in instead.
+  // Surfaced so a guess never gets presented with the same confidence as
+  // a real model answer.
+  source: "ai" | "local";
 }
 
 export interface Material {

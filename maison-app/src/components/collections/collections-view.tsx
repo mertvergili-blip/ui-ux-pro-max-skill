@@ -11,6 +11,7 @@ import { resizeImageFile } from "@/lib/image-resize";
 import { useUndoStore } from "@/lib/undo-toast";
 import { useSwipeDelete } from "@/lib/use-swipe-delete";
 import { SwipeDeleteBackdrop } from "@/components/shared/swipe-delete-backdrop";
+import { AiSourceTag } from "@/components/shared/ai-source-tag";
 import {
   STUDIO_TEAM,
   localStudioTeamFeedback,
@@ -109,6 +110,7 @@ function Folder({
   onRemove,
   pitch,
   pitchLoading,
+  pitchSource,
   large,
 }: {
   data: FolderData;
@@ -116,6 +118,7 @@ function Folder({
   onRemove: () => void;
   pitch?: string;
   pitchLoading?: boolean;
+  pitchSource?: "ai" | "local";
   large?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -204,8 +207,9 @@ function Folder({
           <p className={large ? "font-heading text-[20px]" : "font-heading text-[17px]"}>{data.name}</p>
           <p className={large ? "mt-1 text-[13px] text-muted" : "mt-0.5 text-xs text-muted"}>{data.sub}</p>
           {(pitch || pitchLoading) && (
-            <p className="mt-2 font-serif text-[12.5px] italic leading-relaxed text-bone-dim">
+            <p className="mt-2 flex flex-wrap items-center gap-1.5 font-serif text-[12.5px] italic leading-relaxed text-bone-dim">
               {pitchLoading ? "Pitch hazırlanıyor…" : pitchDisplay}
+              {!pitchLoading && pitchSource && <AiSourceTag source={pitchSource} />}
             </p>
           )}
           <span
@@ -336,6 +340,7 @@ function ProjectDetail({
 }) {
   const [notes, setNotes] = useState("");
   const [aiText, setAiText] = useState("");
+  const [aiSource, setAiSource] = useState<"ai" | "local">("local");
   const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const typeText = (str: string) => {
@@ -358,6 +363,7 @@ function ProjectDetail({
     if (wordCount < 3) return;
     noteTimer.current = setTimeout(async () => {
       let insight = localNoteInsight(folder.name);
+      let source: "ai" | "local" = "local";
       try {
         const res = await fetch("/api/note-insight", {
           method: "POST",
@@ -367,10 +373,12 @@ function ProjectDetail({
         if (res.ok) {
           const data = await res.json();
           if (data.insight) insight = data.insight;
+          if (data.source === "gemini") source = "ai";
         }
       } catch {
         // local insight already set above
       }
+      setAiSource(source);
       typeText(insight);
     }, 1400);
   };
@@ -455,7 +463,10 @@ function ProjectDetail({
               className="mt-1 h-1.5 w-1.5 flex-shrink-0 animate-[pulse-glow_2.4s_infinite] rounded-full"
               style={{ background: folder.accent }}
             />
-            <span>{aiText}</span>
+            <span className="flex flex-wrap items-center gap-2">
+              {aiText}
+              <AiSourceTag source={aiSource} />
+            </span>
           </div>
         )}
 
@@ -777,6 +788,7 @@ function PersonaMessage({
 
 function StudioTeam({ notes, accent }: { notes: string; accent: string }) {
   const [feedback, setFeedback] = useState<PersonaFeedback[] | null>(null);
+  const [feedbackSource, setFeedbackSource] = useState<"ai" | "local">("local");
   const [loading, setLoading] = useState(false);
 
   const handleAsk = async () => {
@@ -784,6 +796,7 @@ function StudioTeam({ notes, accent }: { notes: string; accent: string }) {
     setLoading(true);
     setFeedback(null);
     let result = localStudioTeamFeedback(notes);
+    let source: "ai" | "local" = "local";
     try {
       const res = await fetch("/api/studio-team", {
         method: "POST",
@@ -793,20 +806,25 @@ function StudioTeam({ notes, accent }: { notes: string; accent: string }) {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.feedback)) result = data.feedback;
+        if (data.source === "gemini") source = "ai";
       }
     } catch {
       // local result already set above
     }
     setFeedback(result);
+    setFeedbackSource(source);
     setLoading(false);
   };
 
   return (
     <div className="mb-8 border-t border-line pt-6">
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
-          Stüdyo Ekibi
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
+            Stüdyo Ekibi
+          </p>
+          {feedback && <AiSourceTag source={feedbackSource} />}
+        </div>
         <button
           onClick={handleAsk}
           disabled={!notes.trim() || loading}
@@ -990,6 +1008,7 @@ export function CollectionsView() {
   // added/removed here is reflected without any separate portfolio doc.
   const [portfolioMode, setPortfolioMode] = useState(false);
   const [pitches, setPitches] = useState<Record<string, string>>({});
+  const [pitchSources, setPitchSources] = useState<Record<string, "ai" | "local">>({});
   const [pitchLoadingIds, setPitchLoadingIds] = useState<Set<string>>(new Set());
 
   const togglePortfolioMode = () => {
@@ -1003,6 +1022,7 @@ export function CollectionsView() {
     setPitchLoadingIds(new Set(missing.map((c) => c.id)));
     missing.forEach(async (c) => {
       let pitch = localPortfolioPitch(c.name, c.status);
+      let source: "ai" | "local" = "local";
       try {
         const res = await fetch("/api/portfolio-pitch", {
           method: "POST",
@@ -1012,11 +1032,13 @@ export function CollectionsView() {
         if (res.ok) {
           const data = await res.json();
           if (data.pitch) pitch = data.pitch;
+          if (data.source === "gemini") source = "ai";
         }
       } catch {
         // local pitch already set above
       }
       setPitches((prev) => ({ ...prev, [c.id]: pitch }));
+      setPitchSources((prev) => ({ ...prev, [c.id]: source }));
       setPitchLoadingIds((prev) => {
         const next = new Set(prev);
         next.delete(c.id);
@@ -1084,6 +1106,7 @@ export function CollectionsView() {
                   onRemove={() => handleRemoveCollection(f.id)}
                   pitch={portfolioMode ? pitches[f.id] : undefined}
                   pitchLoading={portfolioMode && pitchLoadingIds.has(f.id)}
+                  pitchSource={portfolioMode ? pitchSources[f.id] : undefined}
                   large={collections.length <= 3}
                 />
               ))}

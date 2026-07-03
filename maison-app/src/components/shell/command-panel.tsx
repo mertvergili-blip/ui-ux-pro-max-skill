@@ -6,6 +6,7 @@ import { useStore, type SuggestionType, type ViewName } from "@/lib/store";
 import { HoverBorderGradient } from "@/components/vendor/hover-border-gradient";
 import { useUndoStore } from "@/lib/undo-toast";
 import { haptics } from "@/lib/haptics";
+import { AiSourceTag } from "@/components/shared/ai-source-tag";
 
 const EASE = [0.32, 0.72, 0, 1] as const;
 
@@ -308,12 +309,15 @@ export function CommandPanel() {
                         background: `radial-gradient(90% 90% at 100% 0%, color-mix(in srgb, ${TYPE_COLORS[pendingSuggestion.type]} 30%, transparent), transparent 60%)`,
                       }}
                     >
-                      <p
-                        className="mb-2.5 text-center text-[9.5px] uppercase tracking-[2.5px]"
-                        style={{ color: TYPE_COLORS[pendingSuggestion.type] }}
-                      >
-                        {TYPE_LABELS[pendingSuggestion.type]} olarak algıladım
-                      </p>
+                      <div className="mb-2.5 flex items-center justify-center gap-2">
+                        <p
+                          className="text-center text-[9.5px] uppercase tracking-[2.5px]"
+                          style={{ color: TYPE_COLORS[pendingSuggestion.type] }}
+                        >
+                          {TYPE_LABELS[pendingSuggestion.type]} olarak algıladım
+                        </p>
+                        <AiSourceTag source={pendingSuggestion.source} />
+                      </div>
                       {editing ? (
                         <textarea
                           value={pendingSuggestion.content}
