@@ -48,9 +48,11 @@ export function Topbar() {
       </div>
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
 
-      {/* Below lg the pill becomes a horizontal scroll rail — all eight tabs
-          stay reachable without wrapping or shrinking below tap size. */}
-      <nav className="no-scrollbar flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-white/[0.07] bg-white/[0.025] p-1.5 shadow-[0_12px_32px_-16px_rgba(0,0,0,0.7)] backdrop-blur-xl lg:overflow-visible">
+      {/* Below lg, BottomNav (Studio/Calendar/Collections/Journal, plus a
+          "More" sheet for the rest) is the only navigation — having the
+          same tabs reachable up here too read as redundant/cluttered on a
+          small screen instead of premium. This rail is desktop-only now. */}
+      <nav className="no-scrollbar hidden max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-white/[0.07] bg-white/[0.025] p-1.5 shadow-[0_12px_32px_-16px_rgba(0,0,0,0.7)] backdrop-blur-xl lg:flex lg:overflow-visible">
         {TABS.map(({ label, view }) => {
           const active = currentView === view;
           return (
