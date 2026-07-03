@@ -1,0 +1,66 @@
+import type { Metadata, Viewport } from "next";
+import { Josefin_Sans, Instrument_Serif, Manrope } from "next/font/google";
+import "./globals.css";
+
+const josefin = Josefin_Sans({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const instrument = Instrument_Serif({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  weight: "400",
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+// Manrope over Inter — Inter is the default-everywhere UI font; Manrope has
+// the same legibility at small sizes but a more crafted, editorial character
+// that fits the atelier aesthetic instead of reading as a template.
+const manrope = Manrope({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "Maison — Your Creative Studio",
+  description:
+    "A fashion-forward personal life management app. Your atelier, digitized.",
+  appleWebApp: {
+    capable: true,
+    title: "Maison",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#100d09",
+  colorScheme: "dark",
+  // Lets the app draw under the notch/Dynamic Island/home indicator instead
+  // of leaving a hard system-drawn bar — every env(safe-area-inset-*) below
+  // is a no-op without this.
+  viewportFit: "cover",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="tr"
+      className={`${josefin.variable} ${instrument.variable} ${manrope.variable} h-full antialiased`}
+    >
+      <body className="min-h-full bg-ink text-bone overflow-x-hidden">
+        {children}
+      </body>
+    </html>
+  );
+}

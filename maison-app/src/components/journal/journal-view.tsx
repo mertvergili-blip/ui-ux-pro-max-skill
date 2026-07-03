@@ -1,0 +1,424 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useStore, selectTodayEntry, type MoodKey, type JournalDay } from "@/lib/store";
+import { localEditorLetter } from "@/lib/journal-letter";
+import { computeQuarterlyStats, localQuarterlyReview } from "@/lib/quarterly-review";
+import { useTypewriter } from "@/lib/use-typewriter";
+import { haptics } from "@/lib/haptics";
+import { AiSourceTag } from "@/components/shared/ai-source-tag";
+
+const MOOD_LABEL: Record<MoodKey, string> = {
+  flowing: "Flowing",
+  calm: "Calm",
+  stressed: "Stressed",
+  grounded: "Grounded",
+  tired: "Tired",
+};
+
+const MOODS: { key: MoodKey; label: string; gradient: string; color: string }[] = [
+  { key: "flowing", label: "Flowing", gradient: "radial-gradient(circle at 35% 30%, #e7c98f, #7a5a24)", color: "#c4a469" },
+  { key: "calm", label: "Calm", gradient: "radial-gradient(circle at 35% 30%, #9bb0c4, #3d5a6c)", color: "#3d5a6c" },
+  { key: "stressed", label: "Stressed", gradient: "radial-gradient(circle at 35% 30%, #c98f98, #7a2e2e)", color: "#7a2e2e" },
+  { key: "grounded", label: "Grounded", gradient: "radial-gradient(circle at 35% 30%, #b8c9a3, #4f5c42)", color: "#5c6b52" },
+  { key: "tired", label: "Tired", gradient: "radial-gradient(circle at 35% 30%, #cfc4b0, #57503f)", color: "#786f5c" },
+];
+
+const MOOD_HEIGHT: Record<MoodKey, number> = {
+  flowing: 0.9,
+  grounded: 0.75,
+  calm: 0.6,
+  tired: 0.35,
+  stressed: 0.25,
+};
+
+const WAVE_W = 140;
+const WAVE_H = 56;
+
+// Catmull-Rom → cubic Bezier — turns the week's discrete mood heights into
+// one continuous curve instead of disconnected bars, closer to how a
+// rhythm actually reads (an ongoing wave, not seven isolated events).
+function smoothPath(points: { x: number; y: number }[]): string {
+  if (points.length < 2) return "";
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i - 1] ?? points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2] ?? p2;
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
+
+// The one generative visual in Journal — a week's worth of real mood data
+// as a single glowing wave, in the same soft-blur/glow language as the DNA
+// Map, instead of a flat bar chart.
+function CreativeRhythmWave({ rhythm }: { rhythm: { h: number; color: string }[] }) {
+  const points = rhythm.map((bar, i) => ({
+    x: (i / Math.max(1, rhythm.length - 1)) * WAVE_W,
+    y: WAVE_H - bar.h * (WAVE_H - 6) - 3,
+  }));
+  const path = smoothPath(points);
+  const gradientId = "creative-rhythm-gradient";
+
+  return (
+    <svg
+      viewBox={`0 0 ${WAVE_W} ${WAVE_H}`}
+      className="h-16 w-full max-w-[260px]"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
+          {rhythm.map((bar, i) => (
+            <stop
+              key={i}
+              offset={`${(i / Math.max(1, rhythm.length - 1)) * 100}%`}
+              stopColor={bar.color}
+            />
+          ))}
+        </linearGradient>
+      </defs>
+      {/* Soft blurred duplicate underneath — the same glow-orb language as
+          DNA Map's nodes, rather than a flat crisp line alone. */}
+      <path
+        d={path}
+        fill="none"
+        stroke={`url(#${gradientId})`}
+        strokeWidth={7}
+        strokeLinecap="round"
+        opacity={0.35}
+        style={{ filter: "blur(5px)" }}
+      />
+      <motion.path
+        d={path}
+        fill="none"
+        stroke={`url(#${gradientId})`}
+        strokeWidth={2}
+        strokeLinecap="round"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 1 }}
+        transition={{ duration: 1.1, ease: [0.2, 0.8, 0.2, 1] }}
+      />
+      {points.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r={rhythm[i].h > 0.1 ? 1.6 : 0} fill={rhythm[i].color} />
+      ))}
+    </svg>
+  );
+}
+
+// Real calendar days, most-recent last — a fixed noise pattern used to
+// live here, decorating the page with fake activity instead of reflecting
+// what the user actually wrote, which is exactly the "just for show"
+// problem with a mood/reflection tracker.
+function last30Dates(): string[] {
+  const out: string[] = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    out.push(d.toISOString().slice(0, 10));
+  }
+  return out;
+}
+
+export function JournalView() {
+  const journalEntries = useStore((s) => s.journalEntries);
+  const todayEntry = useMemo(() => selectTodayEntry(journalEntries), [journalEntries]);
+  const setTodayMood = useStore((s) => s.setTodayMood);
+  const setTodayReflection = useStore((s) => s.setTodayReflection);
+  const streak = useStore((s) => s.streak);
+  const collectionsCount = useStore((s) => s.collections.length);
+  const quarterlyReviewText = useStore((s) => s.quarterlyReviewText);
+  const quarterlyReviewGeneratedAt = useStore((s) => s.quarterlyReviewGeneratedAt);
+  const setQuarterlyReview = useStore((s) => s.setQuarterlyReview);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  // null until a generation actually happens this session — a review
+  // restored from a previous session has no known source, so it shouldn't
+  // get mislabeled "yerel tahmin" just because this component just mounted.
+  const [reviewSource, setReviewSource] = useState<"ai" | "local" | null>(null);
+  const quarterlyReviewDisplay = useTypewriter(quarterlyReviewText ?? "");
+
+  const generateQuarterlyReview = async () => {
+    setReviewLoading(true);
+    const stats = computeQuarterlyStats(journalEntries, streak, collectionsCount);
+    let review = localQuarterlyReview(stats);
+    let source: "ai" | "local" = "local";
+    try {
+      const res = await fetch("/api/quarterly-review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(stats),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.review) review = data.review;
+        if (data.source === "gemini") source = "ai";
+      }
+    } catch {
+      // local review already set above
+    }
+    setQuarterlyReview(review);
+    setReviewSource(source);
+    setReviewLoading(false);
+  };
+
+  const [selectedHistoryDate, setSelectedHistoryDate] = useState<string | null>(null);
+
+  const entryByDate = useMemo(
+    () => new Map(journalEntries.map((e) => [e.date, e])),
+    [journalEntries]
+  );
+
+  const heatData = useMemo(
+    () =>
+      last30Dates().map((date) => {
+        const entry = entryByDate.get(date);
+        const hasEntry = Boolean(entry?.mood || entry?.reflection?.trim());
+        return { date, entry, hasEntry };
+      }),
+    [entryByDate]
+  );
+
+  const selectedHistoryEntry = selectedHistoryDate ? entryByDate.get(selectedHistoryDate) : null;
+
+  const rhythm = useMemo(() => {
+    const last7 = journalEntries.slice(-7);
+    const moodColor = (key: MoodKey) =>
+      MOODS.find((m) => m.key === key)?.color ?? "var(--color-bone-dim)";
+    if (last7.length === 0) {
+      // Thin baseline ticks — chunky gray blocks read as broken data.
+      return Array.from({ length: 7 }, () => ({ h: 0.06, color: "var(--color-line)" }));
+    }
+    return Array.from({ length: 7 }, (_, i) => {
+      const e = last7[i];
+      return e?.mood
+        ? { h: MOOD_HEIGHT[e.mood], color: moodColor(e.mood) }
+        : { h: 0.18, color: "var(--color-line)" };
+    });
+  }, [journalEntries]);
+
+  const last7 = useMemo(() => journalEntries.slice(-7), [journalEntries]);
+  const last7Key = useMemo(() => JSON.stringify(last7), [last7]);
+  const localLetter = useMemo(() => localEditorLetter(last7), [last7]);
+
+  // Shows the instant local summary right away; geminiLetter only overrides
+  // it once a fetch for the *current* last7Key resolves, so a fetch that
+  // completes after the user has already moved on can't clobber the view.
+  const [geminiLetter, setGeminiLetter] = useState<{ key: string; text: string } | null>(null);
+  const editorLetterIsAi = Boolean(geminiLetter && geminiLetter.key === last7Key);
+  const editorLetter = editorLetterIsAi ? geminiLetter!.text : localLetter;
+  const editorLetterDisplay = useTypewriter(editorLetter);
+
+  useEffect(() => {
+    const key = last7Key;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/editor-letter", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ entries: last7 satisfies JournalDay[] }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.letter) setGeminiLetter({ key, text: data.letter });
+      } catch {
+        // local summary already showing — nothing to do
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [last7Key]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
+      className="lg:pr-14"
+    >
+      <p className="mb-[18px] flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3.5px] text-muted">
+        <span className="h-px w-7 bg-gradient-to-r from-gold/70 to-transparent" />
+        Journal
+      </p>
+      <h1 className="mb-2 font-heading text-[28px] font-normal leading-[1.12] text-[#f7f2e6] lg:text-[34px]">
+        Bugün nasılsın?
+      </h1>
+
+      <div className="my-2 mb-8 flex gap-3 sm:gap-4">
+        {MOODS.map((m) => (
+          <div
+            key={m.key}
+            className={`h-14 w-14 cursor-pointer rounded-full transition-all duration-250 ${
+              todayEntry.mood === m.key
+                ? "scale-[1.18] -translate-y-1.5 opacity-100"
+                : "opacity-50 hover:scale-[1.12] hover:-translate-y-1 hover:opacity-[0.85]"
+            }`}
+            style={{
+              background: m.gradient,
+              boxShadow:
+                todayEntry.mood === m.key ? `0 8px 20px -8px ${m.color}` : "none",
+              transitionTimingFunction: "cubic-bezier(.3,1.5,.5,1)",
+            }}
+            onClick={() => {
+              haptics.tap();
+              setTodayMood(m.key);
+            }}
+            title={m.label}
+          />
+        ))}
+      </div>
+
+      <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
+        Reflection
+      </p>
+      <textarea
+        className="w-full max-w-[520px] border-b border-line bg-transparent pb-3.5 text-sm leading-relaxed text-bone-dim outline-none placeholder:text-muted"
+        style={{ minHeight: 80, resize: "none" }}
+        placeholder="Bugünü birkaç cümleyle anlat…"
+        value={todayEntry.reflection}
+        onChange={(e) => setTodayReflection(e.target.value)}
+      />
+
+      <div className="mt-9 grid max-w-[520px] grid-cols-1 gap-10 sm:grid-cols-2">
+        <div>
+          <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
+            Energy Rhythm
+          </p>
+          <CreativeRhythmWave rhythm={rhythm} />
+          {journalEntries.length === 0 && (
+            <p className="mt-2 text-[10.5px] italic text-muted">
+              Mood seçtikçe burada birikecek.
+            </p>
+          )}
+        </div>
+        <div>
+          <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
+            30 Günlük Ritim
+          </p>
+          <div className="grid grid-cols-10 gap-1">
+            {heatData.map(({ date, entry, hasEntry }) => {
+              const color = entry?.mood
+                ? MOODS.find((m) => m.key === entry.mood)?.color
+                : undefined;
+              return (
+                <button
+                  key={date}
+                  onClick={() => hasEntry && setSelectedHistoryDate(selectedHistoryDate === date ? null : date)}
+                  disabled={!hasEntry}
+                  title={new Date(date + "T00:00:00").toLocaleDateString("tr-TR", {
+                    day: "numeric",
+                    month: "long",
+                  })}
+                  className={`aspect-square rounded-[1px] transition-transform ${
+                    hasEntry ? "cursor-pointer hover:scale-125" : "cursor-default"
+                  } ${selectedHistoryDate === date ? "ring-1 ring-gold" : ""}`}
+                  style={{
+                    background: hasEntry
+                      ? color ?? "color-mix(in srgb, var(--color-bone-dim) 55%, var(--color-line))"
+                      : "var(--color-line)",
+                    opacity: hasEntry ? 0.85 : 1,
+                  }}
+                />
+              );
+            })}
+          </div>
+          {journalEntries.length === 0 && (
+            <p className="mt-2 text-[10.5px] italic text-muted">
+              Her gün bir ruh hali seç, burada bir ritme dönüşsün.
+            </p>
+          )}
+          <AnimatePresence mode="wait">
+            {selectedHistoryEntry && (
+              <motion.div
+                key={selectedHistoryDate}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.2 }}
+                className="mt-3.5 rounded-[0.75rem] border border-line p-3"
+              >
+                <p className="mb-1 text-[10px] uppercase tracking-[1.5px] text-muted">
+                  {new Date(selectedHistoryEntry.date + "T00:00:00").toLocaleDateString("tr-TR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                  {selectedHistoryEntry.mood && (
+                    <span className="text-gold"> · {MOOD_LABEL[selectedHistoryEntry.mood]}</span>
+                  )}
+                </p>
+                {selectedHistoryEntry.reflection ? (
+                  <p className="text-[12.5px] leading-relaxed text-bone-dim">
+                    {selectedHistoryEntry.reflection}
+                  </p>
+                ) : (
+                  <p className="text-[12px] italic text-muted">Sadece ruh hali kaydedildi.</p>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <div className="bento-tile bento-violet relative mt-10 max-w-[520px] px-6 py-6">
+        <div className="bento-orb" style={{ width: 120, height: 120, top: -35, right: -30 }} />
+        <p className="relative mb-2.5 flex items-center gap-2.5 text-[9.5px] uppercase tracking-[3px] text-white/55">
+          Weekly Editor Letter
+          {!editorLetterIsAi && <AiSourceTag source="local" />}
+        </p>
+        <p className="relative font-serif text-[17px] italic leading-relaxed text-[#e7e1fb]">
+          {editorLetterDisplay}
+        </p>
+      </div>
+
+      <div className="bento-tile bento-teal relative mt-6 max-w-[520px] px-6 py-6">
+        <div className="bento-orb" style={{ width: 120, height: 120, bottom: -35, left: -30 }} />
+        <div className="relative mb-2.5 flex items-center justify-between">
+          <p className="flex items-center gap-2.5 text-[9.5px] uppercase tracking-[3px] text-white/55">
+            Üç Aylık Öz-Değerlendirme
+            {reviewSource && !reviewLoading && <AiSourceTag source={reviewSource} />}
+          </p>
+          <button
+            onClick={generateQuarterlyReview}
+            disabled={reviewLoading}
+            className="text-[10px] uppercase tracking-[1.5px] text-white/60 transition-colors hover:text-[#d3fff2] disabled:opacity-40"
+          >
+            {reviewLoading
+              ? "Hazırlanıyor…"
+              : quarterlyReviewText
+              ? "Yenile"
+              : "Oluştur"}
+          </button>
+        </div>
+        {quarterlyReviewText ? (
+          <>
+            <p className="relative font-serif text-[17px] italic leading-relaxed text-[#d3fff2]">
+              {quarterlyReviewDisplay}
+            </p>
+            {quarterlyReviewGeneratedAt && (
+              <p className="relative mt-2.5 text-[10.5px] text-white/50">
+                {new Date(quarterlyReviewGeneratedAt).toLocaleDateString("tr-TR", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}{" "}
+                tarihinde oluşturuldu
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="relative text-[12.5px] leading-relaxed text-white/60">
+            Günlük ritmini, ruh hali dağılımını ve koleksiyon ilerlemeni
+            özetleyen, üç ayda bir güncellediğin daha geniş bir yansıma.
+          </p>
+        )}
+      </div>
+    </motion.div>
+  );
+}
