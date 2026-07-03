@@ -60,7 +60,7 @@ async function fetchWwdItems(): Promise<RawFeedItem[]> {
   const rawItems = parsed?.rss?.channel?.item;
   const list = Array.isArray(rawItems) ? rawItems : rawItems ? [rawItems] : [];
 
-  return list.slice(0, 8).map((item) => {
+  return list.slice(0, 5).map((item) => {
     const description = decodeHtmlEntities(
       textOf(item.description).replace(/<[^>]+>/g, "")
     ).trim();

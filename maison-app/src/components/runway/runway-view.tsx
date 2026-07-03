@@ -40,7 +40,7 @@ function NewsCard({
         } as React.CSSProperties
       }
     >
-      <div className="relative" style={{ height: large ? 200 : 120 }}>
+      <div className="relative" style={{ height: large ? 168 : 108 }}>
         {image && !imgFailed ? (
           <>
             {!imgLoaded && <div className="skeleton-block absolute inset-0" />}
@@ -97,7 +97,7 @@ function NewsCardSkeleton({ large }: { large?: boolean }) {
     <div
       className={`overflow-hidden rounded border border-line ${large ? "sm:col-span-2" : ""}`}
     >
-      <div className="skeleton-block" style={{ height: large ? 200 : 120 }} />
+      <div className="skeleton-block" style={{ height: large ? 168 : 108 }} />
       <div className="mx-4 mt-3.5 mb-1.5 h-2.5 w-16 rounded-sm bg-white/[0.04]" />
       <div
         className={`mx-4 mb-1.5 rounded-sm bg-white/[0.05] ${large ? "h-5 w-3/4" : "h-4 w-full"}`}

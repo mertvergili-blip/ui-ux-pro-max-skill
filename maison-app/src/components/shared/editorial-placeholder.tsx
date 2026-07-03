@@ -52,6 +52,16 @@ export function EditorialPlaceholder({
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
         }}
       />
+      {/* A faint plain-weave grid on top of the noise — reads as fabric under
+          low light rather than a flat marketing gradient, closer to what
+          this space is standing in for (a garment/material photo). */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M0 0h10M0 5h10M0 0v10M5 0v10' stroke='white' stroke-width='0.5'/%3E%3C/svg%3E")`,
+          backgroundSize: "10px 10px",
+        }}
+      />
 
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 px-6 text-center">
         <p className="font-serif text-lg italic leading-snug text-bone-dim">{label}</p>
