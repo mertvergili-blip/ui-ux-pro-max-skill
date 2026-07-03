@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback } from "react";
 import { useStore } from "@/lib/store";
+import { useEdgeSwipeNav } from "@/lib/use-edge-swipe-nav";
 import { IntroScreen } from "@/components/intro/intro-screen";
 import { GrainOverlay } from "@/components/shared/grain-overlay";
 import { Spotlight } from "@/components/shared/spotlight";
@@ -60,6 +61,8 @@ export default function Home() {
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [handleMouseMove]);
+
+  useEdgeSwipeNav();
 
   const ActiveView = VIEW_MAP[currentView as keyof typeof VIEW_MAP] ?? StudioView;
   const fullWidth = FULL_WIDTH_VIEWS.has(currentView);
