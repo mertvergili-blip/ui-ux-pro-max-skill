@@ -42,6 +42,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: "#100d09",
   colorScheme: "dark",
+  // Lets the app draw under the notch/Dynamic Island/home indicator instead
+  // of leaving a hard system-drawn bar — every env(safe-area-inset-*) below
+  // is a no-op without this.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

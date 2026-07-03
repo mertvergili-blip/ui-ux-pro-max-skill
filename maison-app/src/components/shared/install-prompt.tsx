@@ -69,7 +69,7 @@ export function InstallPrompt() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 16 }}
           transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
-          className="fixed bottom-5 left-5 right-5 z-50 sm:left-auto sm:right-5 sm:w-[340px]"
+          className="fixed bottom-[max(1.25rem,calc(env(safe-area-inset-bottom)+0.75rem))] left-[max(1.25rem,env(safe-area-inset-left))] right-[max(1.25rem,env(safe-area-inset-right))] z-50 sm:left-auto sm:right-[max(1.25rem,env(safe-area-inset-right))] sm:w-[340px]"
         >
           {/* .bento-tile sets position:relative, which would otherwise
               cascade-override the .fixed positioning above if applied to

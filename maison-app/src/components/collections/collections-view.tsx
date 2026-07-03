@@ -346,94 +346,103 @@ function ProjectDetail({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-      className="max-w-[520px]"
+      className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-14"
     >
-      <span
-        className="cursor-pointer text-[10.5px] uppercase tracking-[2px] text-muted hover:text-bone"
-        onClick={onClose}
-      >
-        ← Collections
-      </span>
-      <p
-        className="mb-[18px] mt-5 flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3px]"
-        style={{ color: folder.accent }}
-      >
-        <span className="h-px w-7" style={{ background: folder.accent }} />
-        {folder.status}
-      </p>
-      <h1 className="mb-6 font-heading text-[32px] font-normal leading-[1.12] text-[#f7f2e6]">
-        {folder.name}
-      </h1>
-      <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
-        Notlarım
-      </p>
-      <div className="bento-tile bento-graphite relative mb-5">
-        <textarea
-          className={`min-h-[136px] w-full resize-none border-none bg-transparent p-[18px] text-sm leading-relaxed text-bone-dim outline-none placeholder:text-muted ${
-            micSupported ? "pr-12" : ""
-          }`}
-          placeholder={micListening ? "Dinliyorum…" : "Bu proje için fikrini yaz — AI kategorize etsin…"}
-          value={notes}
-          onChange={(e) => handleNoteInput(e.target.value)}
-        />
-        {micSupported && (
-          <button
-            type="button"
-            onClick={() => (micListening ? stopMic() : startMic(notes))}
-            aria-label={micListening ? "Sesli girişi durdur" : "Sesle yaz"}
-            title={micListening ? "Sesli girişi durdur" : "Sesle yaz"}
-            className={`absolute right-3.5 top-3.5 flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
-              micListening
-                ? "border-rose/40 text-rose"
-                : "border-white/[0.08] text-muted hover:border-white/20 hover:text-gold"
+      <div className="max-w-[520px] lg:flex-shrink-0">
+        <span
+          className="cursor-pointer text-[10.5px] uppercase tracking-[2px] text-muted hover:text-bone"
+          onClick={onClose}
+        >
+          ← Collections
+        </span>
+        <p
+          className="mb-[18px] mt-5 flex items-center gap-2.5 text-[10.5px] uppercase tracking-[3px]"
+          style={{ color: folder.accent }}
+        >
+          <span className="h-px w-7" style={{ background: folder.accent }} />
+          {folder.status}
+        </p>
+        <h1 className="mb-6 font-heading text-[32px] font-normal leading-[1.12] text-[#f7f2e6]">
+          {folder.name}
+        </h1>
+        <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
+          Notlarım
+        </p>
+        <div className="bento-tile bento-graphite relative mb-5">
+          <textarea
+            className={`min-h-[136px] w-full resize-none border-none bg-transparent p-[18px] text-sm leading-relaxed text-bone-dim outline-none placeholder:text-muted ${
+              micSupported ? "pr-12" : ""
             }`}
-          >
-            <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none">
-              <path
-                d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3zM19 11a7 7 0 01-14 0M12 18v3"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            {micListening && (
-              <motion.span
-                className="pointer-events-none absolute inset-0 rounded-full border border-rose/40"
-                animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
-                transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
-              />
-            )}
-          </button>
-        )}
-      </div>
-      {aiText && (
-        <div className="mb-8 flex items-start gap-3 border-t border-line pt-4 text-[13px] leading-relaxed text-bone-dim">
-          <span
-            className="mt-1 h-1.5 w-1.5 flex-shrink-0 animate-[pulse-glow_2.4s_infinite] rounded-full"
-            style={{ background: folder.accent }}
+            placeholder={micListening ? "Dinliyorum…" : "Bu proje için fikrini yaz — AI kategorize etsin…"}
+            value={notes}
+            onChange={(e) => handleNoteInput(e.target.value)}
           />
-          <span>{aiText}</span>
+          {micSupported && (
+            <button
+              type="button"
+              onClick={() => (micListening ? stopMic() : startMic(notes))}
+              aria-label={micListening ? "Sesli girişi durdur" : "Sesle yaz"}
+              title={micListening ? "Sesli girişi durdur" : "Sesle yaz"}
+              className={`absolute right-3.5 top-3.5 flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
+                micListening
+                  ? "border-rose/40 text-rose"
+                  : "border-white/[0.08] text-muted hover:border-white/20 hover:text-gold"
+              }`}
+            >
+              <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none">
+                <path
+                  d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3zM19 11a7 7 0 01-14 0M12 18v3"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {micListening && (
+                <motion.span
+                  className="pointer-events-none absolute inset-0 rounded-full border border-rose/40"
+                  animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                />
+              )}
+            </button>
+          )}
         </div>
-      )}
+        {aiText && (
+          <div className="mb-8 flex items-start gap-3 border-t border-line pt-4 text-[13px] leading-relaxed text-bone-dim">
+            <span
+              className="mt-1 h-1.5 w-1.5 flex-shrink-0 animate-[pulse-glow_2.4s_infinite] rounded-full"
+              style={{ background: folder.accent }}
+            />
+            <span>{aiText}</span>
+          </div>
+        )}
 
-      <ProjectMoodboard folder={folder} />
+        <StudioTeam notes={notes} accent={folder.accent} />
 
-      <StudioTeam notes={notes} accent={folder.accent} />
+        <IterationLog collectionId={folder.id} />
+      </div>
 
-      <IterationLog collectionId={folder.id} />
+      <ProjectGallery folder={folder} />
     </motion.div>
   );
 }
+
+// Bento span pattern cycled across the gallery for visual variety — every
+// 5th and 8th tile in a run gets to be the "hero" of its row, the rest stay
+// small squares, echoing a masonry moodboard rather than a plain grid.
+const GALLERY_SPAN_PATTERN = ["", "", "col-span-2 row-span-2", "", "", ""];
 
 function MoodboardImage({
   folderId,
   image,
   projectName,
+  spanClassName,
 }: {
   folderId: string;
   image: NonNullable<FolderData["images"]>[number];
   projectName: string;
+  spanClassName: string;
 }) {
   const removeProjectImage = useStore((s) => s.removeProjectImage);
   const setProjectImageInsight = useStore((s) => s.setProjectImageInsight);
@@ -457,25 +466,27 @@ function MoodboardImage({
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-[0.85rem] bg-black/20">
+    <div
+      className={`group relative overflow-hidden rounded-[0.7rem] bg-black/20 ${spanClassName}`}
+    >
       {/* User-uploaded data URL, not a remote asset. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={image.dataUrl} alt="" className="aspect-square w-full object-cover" />
+      <img src={image.dataUrl} alt="" className="h-full w-full object-cover" />
       <button
         onClick={() => removeProjectImage(folderId, image.id)}
-        className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-ink/70 text-[11px] text-bone-dim opacity-0 transition-opacity group-hover:opacity-100"
+        className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink/70 text-[10px] text-bone-dim opacity-0 transition-opacity group-hover:opacity-100"
         aria-label="Görseli kaldır"
       >
         ✕
       </button>
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 to-transparent p-2 pt-6">
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 to-transparent p-1.5 pt-5">
         {image.insight ? (
-          <p className="text-[10.5px] leading-relaxed text-bone-dim">{image.insight}</p>
+          <p className="text-[9.5px] leading-relaxed text-bone-dim">{image.insight}</p>
         ) : (
           <button
             onClick={handleAnalyze}
             disabled={analyzing}
-            className="text-[9.5px] uppercase tracking-[1.5px] text-gold transition-colors hover:text-bone disabled:opacity-40"
+            className="text-[8.5px] uppercase tracking-[1.2px] text-gold transition-colors hover:text-bone disabled:opacity-40"
           >
             {analyzing ? "İnceleniyor…" : "AI ile incele"}
           </button>
@@ -485,7 +496,7 @@ function MoodboardImage({
   );
 }
 
-function ProjectMoodboard({ folder }: { folder: FolderData }) {
+function ProjectGallery({ folder }: { folder: FolderData }) {
   const addProjectImage = useStore((s) => s.addProjectImage);
   const uploadRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
@@ -507,25 +518,27 @@ function ProjectMoodboard({ folder }: { folder: FolderData }) {
   const images = folder.images ?? [];
 
   return (
-    <div className="mb-8 border-t border-line pt-6">
-      <div className="mb-3.5 flex items-center justify-between">
+    <div className="lg:min-w-0 lg:flex-1">
+      <div className="mb-3 flex items-center justify-between">
         <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
           Moodboard &amp; Referanslar
         </p>
-        <div className="flex gap-3 text-[10px] uppercase tracking-[1.5px]">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => cameraRef.current?.click()}
             disabled={uploading}
-            className="text-muted transition-colors hover:text-gold disabled:opacity-40"
+            aria-label="Fotoğraf çek"
+            title="Fotoğraf çek"
+            className="flex h-6 w-6 items-center justify-center rounded-full border border-line text-[11px] leading-none text-muted transition-colors hover:border-gold/50 hover:text-gold disabled:opacity-40"
           >
-            Fotoğraf Çek
+            📷
           </button>
           <button
             onClick={() => uploadRef.current?.click()}
             disabled={uploading}
-            className="text-gold transition-colors hover:text-bone disabled:opacity-40"
+            className="text-[9.5px] uppercase tracking-[1.5px] text-gold transition-colors hover:text-bone disabled:opacity-40"
           >
-            {uploading ? "Yükleniyor…" : "Yükle"}
+            {uploading ? "…" : "Yükle"}
           </button>
         </div>
         <input
@@ -545,21 +558,28 @@ function ProjectMoodboard({ folder }: { folder: FolderData }) {
         />
       </div>
       {images.length > 0 ? (
-        <div className="grid grid-cols-3 gap-2.5">
-          {images.map((img) => (
+        <div className="grid auto-rows-[92px] grid-cols-3 gap-2 sm:auto-rows-[110px] sm:grid-cols-4 lg:grid-cols-3">
+          {images.map((img, i) => (
             <MoodboardImage
               key={img.id}
               folderId={folder.id}
               image={img}
               projectName={folder.name}
+              spanClassName={GALLERY_SPAN_PATTERN[i % GALLERY_SPAN_PATTERN.length]}
             />
           ))}
         </div>
       ) : (
-        <p className="text-[12.5px] leading-relaxed text-muted">
-          Moodboard, bir manipülasyon denemesi ya da ilham aldığın bir nesnenin
-          fotoğrafını ekle — AI görsele bakıp yorumlayabilir.
-        </p>
+        <button
+          onClick={() => uploadRef.current?.click()}
+          className="flex min-h-[180px] w-full flex-col items-center justify-center gap-2 rounded-[1rem] border border-dashed border-line px-6 text-center text-muted transition-colors hover:border-gold/40 hover:text-gold"
+        >
+          <span className="text-lg">🖼️</span>
+          <span className="max-w-[220px] text-[11.5px] leading-relaxed">
+            Moodboard, bir manipülasyon denemesi ya da ilham aldığın bir nesnenin
+            fotoğrafını ekle — AI görsele bakıp yorumlayabilir.
+          </span>
+        </button>
       )}
     </div>
   );

@@ -34,7 +34,7 @@ export function OfflineIndicator() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-          className="fixed left-1/2 top-4 z-50 -translate-x-1/2"
+          className="fixed left-1/2 top-[max(1rem,calc(env(safe-area-inset-top)+0.4rem))] z-50 -translate-x-1/2"
         >
           <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink/90 px-4 py-2 text-[10.5px] uppercase tracking-[1.5px] text-bone-dim shadow-[0_12px_32px_-16px_rgba(0,0,0,0.8)] backdrop-blur-xl">
             <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose" />
