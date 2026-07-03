@@ -12,7 +12,7 @@ import { FocusTimerHost } from "@/components/studio/focus-timer";
 import { Topbar } from "@/components/shell/topbar";
 import { BottomNav } from "@/components/shell/bottom-nav";
 import { PullToRefresh } from "@/components/shell/pull-to-refresh";
-import { AiStudioPanel } from "@/components/shell/ai-studio-panel";
+import { CommandPanel } from "@/components/shell/command-panel";
 import { StudioView } from "@/components/studio/studio-view";
 import { CollectionsView } from "@/components/collections/collections-view";
 import { CalendarView } from "@/components/calendar/calendar-view";
@@ -47,7 +47,6 @@ export default function Home() {
   const currentView = useStore((s) => s.currentView);
   const introVisible = useStore((s) => s.introVisible);
   const setMousePos = useStore((s) => s.setMousePos);
-  const toggleAiPanel = useStore((s) => s.toggleAiPanel);
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -60,24 +59,6 @@ export default function Home() {
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [handleMouseMove]);
-
-  // Global quick-capture shortcut — a thought shouldn't require finding and
-  // clicking the right button first. "/" mirrors the search-bar convention
-  // most apps already use; ignored while typing so it doesn't hijack real
-  // text input.
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
-      const target = e.target as HTMLElement;
-      const typing =
-        target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
-      if (typing) return;
-      e.preventDefault();
-      toggleAiPanel();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggleAiPanel]);
 
   const ActiveView = VIEW_MAP[currentView as keyof typeof VIEW_MAP] ?? StudioView;
   const fullWidth = FULL_WIDTH_VIEWS.has(currentView);
@@ -104,7 +85,7 @@ export default function Home() {
           </div>
           <BottomNav />
           <PullToRefresh />
-          <AiStudioPanel />
+          <CommandPanel />
           <InstallPrompt />
           <UndoToast />
           <FocusTimerHost />
