@@ -107,12 +107,14 @@ function Folder({
   onRemove,
   pitch,
   pitchLoading,
+  large,
 }: {
   data: FolderData;
   onOpenProject: (folder: FolderData) => void;
   onRemove: () => void;
   pitch?: string;
   pitchLoading?: boolean;
+  large?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const pitchDisplay = useTypewriter(pitch ?? "");
@@ -120,7 +122,7 @@ function Folder({
   return (
     <div className="group folder-hover-zoom cursor-pointer transition-transform duration-300 lg:hover:-translate-y-0.5 lg:hover:scale-[1.015]">
       <div
-        className="relative h-[118px]"
+        className={large ? "relative h-[150px]" : "relative h-[118px]"}
         style={{ perspective: "800px" }}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -158,7 +160,7 @@ function Folder({
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className={large ? "mt-5" : "mt-4"}>
         <div className="mb-1 flex items-center justify-between">
           <p
             className="text-[9.5px] uppercase tracking-[2.5px]"
@@ -176,8 +178,8 @@ function Folder({
             Kaldır
           </button>
         </div>
-        <p className="font-heading text-[17px]">{data.name}</p>
-        <p className="mt-0.5 text-xs text-muted">{data.sub}</p>
+        <p className={large ? "font-heading text-[20px]" : "font-heading text-[17px]"}>{data.name}</p>
+        <p className={large ? "mt-1 text-[13px] text-muted" : "mt-0.5 text-xs text-muted"}>{data.sub}</p>
         {(pitch || pitchLoading) && (
           <p className="mt-2 font-serif text-[12.5px] italic leading-relaxed text-bone-dim">
             {pitchLoading ? "Pitch hazırlanıyor…" : pitchDisplay}
@@ -200,8 +202,10 @@ function Folder({
 
 function AddFolderCard({
   onAdd,
+  large,
 }: {
   onAdd: (f: Omit<FolderData, "id" | "count">) => void;
+  large?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -230,7 +234,7 @@ function AddFolderCard({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex h-[118px] flex-col items-center justify-center gap-2 self-start rounded-[4px_8px_8px_4px] border border-dashed border-line text-muted transition-colors hover:border-gold/40 hover:text-gold"
+        className={`flex ${large ? "h-[150px]" : "h-[118px]"} flex-col items-center justify-center gap-2 self-start rounded-[4px_8px_8px_4px] border border-dashed border-line text-muted transition-colors hover:border-gold/40 hover:text-gold`}
       >
         <span className="text-2xl font-light">+</span>
         <span className="text-[10px] uppercase tracking-[1.5px]">
@@ -419,6 +423,8 @@ function ProjectDetail({
           </div>
         )}
 
+        <LinkedMaterials collectionId={folder.id} />
+
         <StudioTeam notes={notes} accent={folder.accent} />
 
         <IterationLog collectionId={folder.id} />
@@ -426,6 +432,50 @@ function ProjectDetail({
 
       <ProjectGallery folder={folder} />
     </motion.div>
+  );
+}
+
+// The reverse side of Materials' "+ Koleksiyona bağla" control — shows
+// which fabrics were tagged as used in this specific project, so the two
+// archives aren't completely isolated from each other.
+function LinkedMaterials({ collectionId }: { collectionId: string }) {
+  const materials = useStore((s) => s.materials);
+  const setView = useStore((s) => s.setView);
+  const linked = materials.filter((m) => m.linkedCollectionIds?.includes(collectionId));
+
+  if (linked.length === 0) return null;
+
+  return (
+    <div className="mb-8 border-t border-line pt-6">
+      <div className="mb-3.5 flex items-center justify-between">
+        <p className="text-[9.5px] uppercase tracking-[3px] text-muted">Kumaşlar</p>
+        <button
+          onClick={() => setView("materials")}
+          className="text-[10px] uppercase tracking-[1.5px] text-muted transition-colors hover:text-bone-dim"
+        >
+          Arşive Git
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-2.5">
+        {linked.map((m) => (
+          <div
+            key={m.id}
+            className="flex items-center gap-2 rounded-full border border-line py-1 pl-1 pr-3"
+          >
+            <span
+              className="h-5 w-5 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-white/10"
+              style={m.imageUrl ? undefined : { background: m.colorTag }}
+            >
+              {m.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={m.imageUrl} alt="" className="h-full w-full object-cover" />
+              )}
+            </span>
+            <span className="text-[12px] text-bone-dim">{m.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -931,7 +981,18 @@ export function CollectionsView() {
             <h1 className="mb-7 font-heading text-[28px] font-normal leading-[1.12] text-[#f7f2e6] lg:text-[34px]">
               Klasörü aç, içindeki parçaları gör.
             </h1>
-            <div className="mt-12 grid grid-cols-1 gap-x-[26px] gap-y-[34px] sm:grid-cols-2 lg:mt-[90px] lg:grid-cols-3 xl:grid-cols-4">
+            {/* Few projects get larger cards in a width-capped, left-anchored
+                row instead of spreading thin across the full-width grid —
+                that's what used to read as a mostly-empty admin panel with
+                only 3-4 collections. Once the archive grows past 3, it
+                reverts to the dense multi-column grid. */}
+            <div
+              className={`mt-12 grid grid-cols-1 gap-x-[26px] gap-y-[34px] sm:grid-cols-2 lg:mt-[90px] ${
+                collections.length <= 3
+                  ? "lg:max-w-[700px] lg:grid-cols-2"
+                  : "lg:grid-cols-3 xl:grid-cols-4"
+              }`}
+            >
               {collections.map((f) => (
                 <Folder
                   key={f.id}
@@ -940,9 +1001,10 @@ export function CollectionsView() {
                   onRemove={() => handleRemoveCollection(f.id)}
                   pitch={portfolioMode ? pitches[f.id] : undefined}
                   pitchLoading={portfolioMode && pitchLoadingIds.has(f.id)}
+                  large={collections.length <= 3}
                 />
               ))}
-              <AddFolderCard onAdd={addCollection} />
+              <AddFolderCard onAdd={addCollection} large={collections.length <= 3} />
             </div>
           </motion.div>
         )}

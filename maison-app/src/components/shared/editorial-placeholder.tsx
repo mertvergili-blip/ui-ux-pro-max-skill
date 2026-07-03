@@ -8,19 +8,27 @@ export function EditorialPlaceholder({
   palette,
   label,
   sublabel,
+  seed = 0,
   className = "",
 }: {
   palette: [string, string];
   label: string;
   sublabel?: string;
+  // Nudges the gradient's focal point per-card so a run of same-tag
+  // placeholders (e.g. an RSS feed that couldn't classify most headlines)
+  // doesn't render as 4 visually-identical tiles in a row.
+  seed?: number;
   className?: string;
 }) {
+  const focusX = 50 + ((seed * 37) % 30) - 15;
+  const focusY = 40 + ((seed * 23) % 24) - 12;
+
   return (
     <div
       className={`relative overflow-hidden ${className}`}
       style={{
         background: `
-          radial-gradient(ellipse 70% 90% at 50% 40%, color-mix(in srgb, ${palette[0]} 18%, transparent), transparent 70%),
+          radial-gradient(ellipse 70% 90% at ${focusX}% ${focusY}%, color-mix(in srgb, ${palette[0]} 18%, transparent), transparent 70%),
           linear-gradient(175deg, color-mix(in srgb, ${palette[1]} 85%, var(--color-ink)) 0%, var(--color-ink) 78%)
         `,
       }}

@@ -20,6 +20,24 @@ export const RUNWAY_TAG_COLOR: Record<RunwayTag, string> = {
   Trend: "var(--color-gold)",
 };
 
+// Used when Gemini couldn't classify each headline (no key, quota, or a
+// summarization failure) but the raw RSS titles are still real/live — a
+// crude keyword guess beats tagging every single item "Trend", which made
+// all 4 cards render with the identical gold placeholder when their
+// og:images also failed to fetch.
+const TAG_KEYWORDS: [RunwayTag, RegExp][] = [
+  ["Materyal & Zanaat", /fabric|leather|textile|recycled|sustainable|material|craft|denim|silk|cotton|wool|weav/i],
+  ["Marka Haberi", /appoints|names|ceo|acqui|ipo|revenue|sales|opens|store|launch|campaign|ambassador|partnership|stake/i],
+  ["Tasarımcı", /designer|creative director|founder|debut collection|farewell|departs|steps down/i],
+];
+
+export function guessRunwayTag(title: string): RunwayTag {
+  for (const [tag, pattern] of TAG_KEYWORDS) {
+    if (pattern.test(title)) return tag;
+  }
+  return "Trend";
+}
+
 // Fallback content — shown if the RSS fetch or Gemini summarization fails,
 // so Runway never renders empty.
 export const LOCAL_RUNWAY_NEWS: RunwayNewsItem[] = [

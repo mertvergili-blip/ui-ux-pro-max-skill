@@ -3,7 +3,7 @@ import { Type } from "@google/genai";
 import { getGeminiClient, generateWithFallback } from "@/lib/gemini";
 import { decodeHtmlEntities } from "@/lib/html-entities";
 import { fetchOgImage } from "@/lib/og-image";
-import { LOCAL_RUNWAY_NEWS, type RunwayNewsItem, type RunwayTag } from "@/lib/runway-news";
+import { LOCAL_RUNWAY_NEWS, guessRunwayTag, type RunwayNewsItem, type RunwayTag } from "@/lib/runway-news";
 import { requireSession } from "@/lib/auth";
 
 // The "Fashion" category feed, not WWD's general firehose — the general
@@ -140,7 +140,7 @@ yüksek modaya dair olan ${ITEM_COUNT} tanesini seç ve her biri için:
 // for the hardcoded placeholder.
 function buildRssOnlySummary(items: RawFeedItem[]): RunwayNewsItem[] {
   return items.slice(0, ITEM_COUNT).map((it, i) => ({
-    tag: "Trend" as RunwayTag,
+    tag: guessRunwayTag(it.title),
     title: it.title,
     sub: i === 0 ? it.description : undefined,
     link: it.link,

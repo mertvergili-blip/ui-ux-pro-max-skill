@@ -47,6 +47,7 @@ export function DnaMapView() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [activeCategory, setActiveCategory] = useState<DnaCategory | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   // Metadata-only lookup (label/category/note) — never touched by physics.
   const nodeById = useMemo(() => new Map(DNA_NODES.map((n) => [n.id, n])), []);
@@ -286,14 +287,40 @@ export function DnaMapView() {
         })}
       </div>
 
-      <div className="flex flex-col gap-8 lg:flex-row">
+      <div
+        className={
+          expanded
+            ? "fixed inset-0 z-[90] flex flex-col items-center justify-center gap-8 bg-ink/95 p-6 backdrop-blur-xl lg:flex-row lg:p-12"
+            : "flex flex-col gap-8 lg:flex-row"
+        }
+      >
         <div className="bento-tile bento-blue relative">
           <div className="bento-orb" style={{ width: 200, height: 200, bottom: -60, right: -60 }} />
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            aria-label={expanded ? "Haritayı küçült" : "Haritayı genişlet"}
+            title={expanded ? "Haritayı küçült" : "Haritayı genişlet"}
+            className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-ink/60 text-muted transition-colors hover:border-gold/40 hover:text-gold"
+          >
+            {expanded ? (
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
+                <path d="M9 4v4a1 1 0 01-1 1H4M15 4v4a1 1 0 001 1h4M9 20v-4a1 1 0 00-1-1H4M15 20v-4a1 1 0 011-1h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
+                <path d="M4 9V5a1 1 0 011-1h4M15 4h4a1 1 0 011 1v4M20 15v4a1 1 0 01-1 1h-4M9 20H5a1 1 0 01-1-1v-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </button>
           <div className="relative">
             <svg
               ref={svgRef}
               viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-              className="h-auto w-full lg:h-[460px] lg:w-[620px]"
+              className={
+                expanded
+                  ? "h-auto w-full lg:h-[82vh] lg:w-[calc(82vh*900/560)]"
+                  : "h-auto w-full lg:h-[460px] lg:w-[620px]"
+              }
             >
               {DNA_EDGES.map((e, i) => {
                 const a = initialById.get(e.from);
@@ -370,7 +397,7 @@ export function DnaMapView() {
                       x={n.x}
                       y={n.y - r - 8}
                       textAnchor="middle"
-                      fontSize={n.category === "collection" ? 13 : 11}
+                      fontSize={n.category === "collection" ? 15 : 12.5}
                       fill={dim ? "transparent" : "var(--color-bone-dim)"}
                       style={{
                         fontFamily: "var(--font-sans)",

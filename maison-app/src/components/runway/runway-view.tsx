@@ -16,8 +16,10 @@ function NewsCard({
   link,
   large,
   image,
+  source,
   matchedLabels,
-}: RunwayNewsItem & { matchedLabels?: string[] }) {
+  seed = 0,
+}: RunwayNewsItem & { matchedLabels?: string[]; seed?: number }) {
   const color = RUNWAY_TAG_COLOR[tag];
   const Wrapper = link ? "a" : "div";
   // A fetched og:image URL can still fail at render time (CDN hiccup,
@@ -59,6 +61,8 @@ function NewsCard({
           <EditorialPlaceholder
             palette={[color, "#100d09"]}
             label={tag}
+            sublabel={source}
+            seed={seed}
             className="h-full w-full"
           />
         )}
@@ -334,7 +338,7 @@ export function RunwayView() {
               <NewsCardSkeleton key={i} large={i === 0} />
             ))
           : news.map((n, i) => (
-              <NewsCard key={i} {...n} matchedLabels={matchedByTitle.get(n.title)} />
+              <NewsCard key={i} {...n} seed={i} matchedLabels={matchedByTitle.get(n.title)} />
             ))}
       </div>
 

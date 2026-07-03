@@ -7,6 +7,76 @@ import { Tilt } from "@/components/unlumen-ui/tilt";
 import { resizeImageFile } from "@/lib/image-resize";
 import { useUndoStore } from "@/lib/undo-toast";
 
+// Shared by every MaterialCard — lets a fabric be tagged with which
+// project(s) it's actually used in, so Collections can show "kumaşlar
+// used here" instead of the two archives living in total isolation.
+function CollectionLinkControl({ materialId }: { materialId: string }) {
+  const collections = useStore((s) => s.collections);
+  const materials = useStore((s) => s.materials);
+  const toggleMaterialCollectionLink = useStore((s) => s.toggleMaterialCollectionLink);
+  const [open, setOpen] = useState(false);
+
+  const linkedIds = materials.find((m) => m.id === materialId)?.linkedCollectionIds ?? [];
+  const linkedCollections = collections.filter((c) => linkedIds.includes(c.id));
+
+  if (collections.length === 0) return null;
+
+  return (
+    <div className="relative mt-3 border-t border-line pt-3">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {linkedCollections.map((c) => (
+          <span
+            key={c.id}
+            className="rounded-full border px-2 py-0.5 text-[9.5px] uppercase tracking-[1px]"
+            style={{ borderColor: c.accent, color: c.accent }}
+          >
+            {c.name}
+          </span>
+        ))}
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="text-[9.5px] uppercase tracking-[1.5px] text-muted transition-colors hover:text-gold"
+        >
+          {linkedCollections.length > 0 ? "Düzenle" : "+ Koleksiyona bağla"}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.18 }}
+            className="absolute left-0 top-full z-20 mt-2 w-56 rounded-[0.9rem] border border-white/10 bg-ink/95 p-2.5 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.85)] backdrop-blur-xl"
+          >
+            {collections.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => toggleMaterialCollectionLink(materialId, c.id)}
+                className="flex w-full items-center gap-2 rounded-[0.6rem] px-2 py-1.5 text-left text-[12px] text-bone-dim transition-colors hover:bg-white/[0.04]"
+              >
+                <span
+                  className={`flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center rounded-[3px] border ${
+                    linkedIds.includes(c.id) ? "border-gold bg-gold" : "border-white/20"
+                  }`}
+                >
+                  {linkedIds.includes(c.id) && (
+                    <svg viewBox="0 0 16 16" className="h-2.5 w-2.5">
+                      <path d="M4 8.5l2.8 2.8L12 5.5" fill="none" stroke="var(--color-ink)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </span>
+                {c.name}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 const SWATCH_PRESETS = [
   "#c4a469", // gold
   "#7a2e2e", // wine
@@ -27,6 +97,7 @@ function MaterialCard({
   colorTag,
   imageUrl,
   onRemove,
+  large,
 }: {
   id: string;
   name: string;
@@ -36,6 +107,7 @@ function MaterialCard({
   colorTag: string;
   imageUrl?: string;
   onRemove: () => void;
+  large?: boolean;
 }) {
   const setMaterialImage = useStore((s) => s.setMaterialImage);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -66,13 +138,15 @@ function MaterialCard({
       <Tilt
         rotationFactor={5}
         springOptions={{ stiffness: 200, damping: 22 }}
-        className="p-5"
+        className={large ? "p-7" : "p-5"}
       >
-        <div className="mb-4 flex items-center justify-between">
+        <div className={large ? "mb-5 flex items-center justify-between" : "mb-4 flex items-center justify-between"}>
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="group/swatch relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-white/10"
+            className={`group/swatch relative flex-shrink-0 overflow-hidden rounded-full ring-1 ring-white/10 ${
+              large ? "h-14 w-14" : "h-10 w-10"
+            }`}
             style={imageUrl ? undefined : { background: colorTag }}
             aria-label={imageUrl ? "Fotoğrafı değiştir" : "Kumaş fotoğrafı ekle"}
             title={imageUrl ? "Fotoğrafı değiştir" : "Kumaş fotoğrafı ekle"}
@@ -99,8 +173,8 @@ function MaterialCard({
             Kaldır
           </button>
         </div>
-        <p className="mb-1 font-heading text-[16px] text-bone">{name}</p>
-        {supplier && <p className="mb-3 text-xs text-muted">{supplier}</p>}
+        <p className={large ? "mb-1.5 font-heading text-[20px] text-bone" : "mb-1 font-heading text-[16px] text-bone"}>{name}</p>
+        {supplier && <p className={large ? "mb-4 text-[13px] text-muted" : "mb-3 text-xs text-muted"}>{supplier}</p>}
         {costNote && (
           <p className="mb-1 text-[12px] leading-relaxed text-bone-dim">
             <span className="text-muted">Maliyet · </span>
@@ -113,12 +187,13 @@ function MaterialCard({
             {sampleNote}
           </p>
         )}
+        <CollectionLinkControl materialId={id} />
       </Tilt>
     </motion.div>
   );
 }
 
-function AddMaterialCard() {
+function AddMaterialCard({ large }: { large?: boolean }) {
   const addMaterial = useStore((s) => s.addMaterial);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -170,7 +245,7 @@ function AddMaterialCard() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-[1.25rem] border border-dashed border-line text-muted transition-colors hover:border-gold/40 hover:text-gold"
+        className={`flex ${large ? "min-h-[220px]" : "min-h-[180px]"} flex-col items-center justify-center gap-2 rounded-[1.25rem] border border-dashed border-line text-muted transition-colors hover:border-gold/40 hover:text-gold`}
       >
         <span className="text-2xl font-light">+</span>
         <span className="text-[10.5px] uppercase tracking-[2px]">Kumaş Ekle</span>
@@ -313,13 +388,13 @@ function GhostMaterialCard({
       <span className="absolute right-4 top-4 text-[8.5px] uppercase tracking-[2px] text-muted">
         Örnek
       </span>
-      <div className="rounded-[1rem] p-5">
+      <div className="rounded-[1rem] p-7">
         <div
-          className="mb-4 h-10 w-10 rounded-full opacity-70 ring-1 ring-white/10"
+          className="mb-5 h-14 w-14 rounded-full opacity-70 ring-1 ring-white/10"
           style={{ background: colorTag }}
         />
-        <p className="mb-1 font-heading text-[16px] text-bone-dim">{name}</p>
-        <p className="mb-3 text-xs text-muted">{supplier}</p>
+        <p className="mb-1.5 font-heading text-[20px] text-bone-dim">{name}</p>
+        <p className="mb-4 text-[13px] text-muted">{supplier}</p>
         <p className="mb-1 text-[12px] leading-relaxed text-muted">
           Maliyet · {costNote}
         </p>
@@ -364,17 +439,27 @@ export function MaterialLibraryView() {
         tedarikçi, maliyet, numune notları.
       </p>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {/* Same content-aware sizing as Collections — a young archive gets a
+          few larger, width-capped cards instead of getting lost in a
+          full-width grid built for dozens of swatches. */}
+      <div
+        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${
+          materials.length <= 2
+            ? "lg:max-w-[700px] lg:grid-cols-2"
+            : "lg:grid-cols-3 xl:grid-cols-4"
+        }`}
+      >
         <AnimatePresence mode="popLayout">
           {materials.map((m) => (
             <MaterialCard
               key={m.id}
               {...m}
               onRemove={() => handleRemove(m.id)}
+              large={materials.length <= 2}
             />
           ))}
         </AnimatePresence>
-        <AddMaterialCard />
+        <AddMaterialCard large={materials.length <= 2} />
         {materials.length === 0 &&
           GHOST_EXAMPLES.map((g) => <GhostMaterialCard key={g.name} {...g} />)}
       </div>

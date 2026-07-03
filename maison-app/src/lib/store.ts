@@ -66,6 +66,7 @@ export interface Material {
   colorTag: string; // hex or css color, used as the swatch
   imageUrl?: string; // real fabric photo, when uploaded — falls back to colorTag dot
   createdAt: number;
+  linkedCollectionIds?: string[]; // which projects this fabric is used in
 }
 
 export interface IterationEntry {
@@ -165,6 +166,7 @@ interface MaisonStore {
   removeMaterial: (id: string) => void;
   restoreMaterial: (m: Material) => void;
   setMaterialImage: (id: string, imageUrl: string) => void;
+  toggleMaterialCollectionLink: (materialId: string, collectionId: string) => void;
 
   // Mistake/iteration log — per collection
   iterationLogs: IterationEntry[];
@@ -353,6 +355,19 @@ export const useStore = create<MaisonStore>()(
       setMaterialImage: (id, imageUrl) =>
         set((s) => ({
           materials: s.materials.map((m) => (m.id === id ? { ...m, imageUrl } : m)),
+        })),
+      toggleMaterialCollectionLink: (materialId, collectionId) =>
+        set((s) => ({
+          materials: s.materials.map((m) => {
+            if (m.id !== materialId) return m;
+            const linked = m.linkedCollectionIds ?? [];
+            return {
+              ...m,
+              linkedCollectionIds: linked.includes(collectionId)
+                ? linked.filter((id) => id !== collectionId)
+                : [...linked, collectionId],
+            };
+          }),
         })),
 
       iterationLogs: [],

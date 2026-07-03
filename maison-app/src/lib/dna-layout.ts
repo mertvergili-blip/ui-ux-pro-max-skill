@@ -94,9 +94,11 @@ export function layoutDnaGraph(
 // whole graph huddled in the middle with tiny unreadable labels. Shared by
 // both the one-shot initial settle above and the live simulation below so
 // the graph doesn't visibly "jump" the moment physics takes over.
-const REPULSION = 4400;
+// Bumped again from 4400/170 — still too tight, adjacent node labels
+// overlapped each other at the map's rendered on-screen size.
+const REPULSION = 5800;
 const SPRING = 0.02;
-const SPRING_LENGTH = 170;
+const SPRING_LENGTH = 190;
 const CENTER_PULL = 0.008;
 
 // Live-sim-only tuning — a continuous sim needs momentum + damping (an

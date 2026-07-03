@@ -1,11 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useStore, selectTodayEntry, type MoodKey, type JournalDay } from "@/lib/store";
 import { localEditorLetter } from "@/lib/journal-letter";
 import { computeQuarterlyStats, localQuarterlyReview } from "@/lib/quarterly-review";
 import { useTypewriter } from "@/lib/use-typewriter";
+
+const MOOD_LABEL: Record<MoodKey, string> = {
+  flowing: "Flowing",
+  calm: "Calm",
+  stressed: "Stressed",
+  grounded: "Grounded",
+  tired: "Tired",
+};
 
 const MOODS: { key: MoodKey; label: string; gradient: string; color: string }[] = [
   { key: "flowing", label: "Flowing", gradient: "radial-gradient(circle at 35% 30%, #e7c98f, #7a5a24)", color: "#c4a469" },
@@ -22,6 +30,20 @@ const MOOD_HEIGHT: Record<MoodKey, number> = {
   tired: 0.35,
   stressed: 0.25,
 };
+
+// Real calendar days, most-recent last — a fixed noise pattern used to
+// live here, decorating the page with fake activity instead of reflecting
+// what the user actually wrote, which is exactly the "just for show"
+// problem with a mood/reflection tracker.
+function last30Dates(): string[] {
+  const out: string[] = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    out.push(d.toISOString().slice(0, 10));
+  }
+  return out;
+}
 
 export function JournalView() {
   const journalEntries = useStore((s) => s.journalEntries);
@@ -57,17 +79,24 @@ export function JournalView() {
     setReviewLoading(false);
   };
 
+  const [selectedHistoryDate, setSelectedHistoryDate] = useState<string | null>(null);
+
+  const entryByDate = useMemo(
+    () => new Map(journalEntries.map((e) => [e.date, e])),
+    [journalEntries]
+  );
+
   const heatData = useMemo(
     () =>
-      Array.from({ length: 40 }, (_, i) => {
-        const pseudo = Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 1;
-        if (pseudo > 0.4) {
-          return i > 34 ? 100 : Math.round(pseudo * 70 + 15);
-        }
-        return 0;
+      last30Dates().map((date) => {
+        const entry = entryByDate.get(date);
+        const hasEntry = Boolean(entry?.mood || entry?.reflection?.trim());
+        return { date, entry, hasEntry };
       }),
-    []
+    [entryByDate]
   );
+
+  const selectedHistoryEntry = selectedHistoryDate ? entryByDate.get(selectedHistoryDate) : null;
 
   const rhythm = useMemo(() => {
     const last7 = journalEntries.slice(-7);
@@ -190,19 +219,62 @@ export function JournalView() {
             30 Günlük Ritim
           </p>
           <div className="grid grid-cols-10 gap-1">
-            {heatData.map((intensity, i) => (
-              <div
-                key={i}
-                className="aspect-square rounded-[1px]"
-                style={{
-                  background:
-                    intensity > 0
-                      ? `color-mix(in srgb, var(--color-bone-dim) ${intensity}%, var(--color-line))`
+            {heatData.map(({ date, entry, hasEntry }) => {
+              const color = entry?.mood
+                ? MOODS.find((m) => m.key === entry.mood)?.color
+                : undefined;
+              return (
+                <button
+                  key={date}
+                  onClick={() => hasEntry && setSelectedHistoryDate(selectedHistoryDate === date ? null : date)}
+                  disabled={!hasEntry}
+                  title={new Date(date + "T00:00:00").toLocaleDateString("tr-TR", {
+                    day: "numeric",
+                    month: "long",
+                  })}
+                  className={`aspect-square rounded-[1px] transition-transform ${
+                    hasEntry ? "cursor-pointer hover:scale-125" : "cursor-default"
+                  } ${selectedHistoryDate === date ? "ring-1 ring-gold" : ""}`}
+                  style={{
+                    background: hasEntry
+                      ? color ?? "color-mix(in srgb, var(--color-bone-dim) 55%, var(--color-line))"
                       : "var(--color-line)",
-                }}
-              />
-            ))}
+                    opacity: hasEntry ? 0.85 : 1,
+                  }}
+                />
+              );
+            })}
           </div>
+          <AnimatePresence mode="wait">
+            {selectedHistoryEntry && (
+              <motion.div
+                key={selectedHistoryDate}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.2 }}
+                className="mt-3.5 rounded-[0.75rem] border border-line p-3"
+              >
+                <p className="mb-1 text-[10px] uppercase tracking-[1.5px] text-muted">
+                  {new Date(selectedHistoryEntry.date + "T00:00:00").toLocaleDateString("tr-TR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                  {selectedHistoryEntry.mood && (
+                    <span className="text-gold"> · {MOOD_LABEL[selectedHistoryEntry.mood]}</span>
+                  )}
+                </p>
+                {selectedHistoryEntry.reflection ? (
+                  <p className="text-[12.5px] leading-relaxed text-bone-dim">
+                    {selectedHistoryEntry.reflection}
+                  </p>
+                ) : (
+                  <p className="text-[12px] italic text-muted">Sadece ruh hali kaydedildi.</p>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
