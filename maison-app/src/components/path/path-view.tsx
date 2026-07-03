@@ -98,6 +98,7 @@ export function PathView() {
   const journalEntries = useStore((s) => s.journalEntries);
   const streak = useStore((s) => s.streak);
   const [archiveText, setArchiveText] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const handleGenerateArchive = () => {
     const text = compileYearArchive({
@@ -107,6 +108,28 @@ export function PathView() {
       year: new Date().getFullYear(),
     });
     setArchiveText(text);
+  };
+
+  // Full raw backup, not the curated year-archive summary above — every
+  // task, note, journal entry, material and DNA reference the app holds,
+  // as the same JSON blob Postgres stores. Meant to be re-importable, not
+  // just readable.
+  const handleExportAllData = async () => {
+    setExporting(true);
+    try {
+      const res = await fetch("/api/state");
+      const { data } = await res.json();
+      const json = JSON.stringify(data ?? {}, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `maison-yedek-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -160,6 +183,26 @@ export function PathView() {
             arşiv dosyasında derle — indirip saklayabilirsin.
           </p>
         )}
+      </div>
+
+      <div className="mt-9 max-w-[520px] border-t border-line pt-7">
+        <div className="mb-2.5 flex items-center justify-between">
+          <p className="text-[9.5px] uppercase tracking-[3px] text-muted">
+            Tüm Verini Yedekle
+          </p>
+          <button
+            onClick={handleExportAllData}
+            disabled={exporting}
+            className="text-[10px] uppercase tracking-[1.5px] text-gold transition-colors hover:text-bone disabled:opacity-40"
+          >
+            {exporting ? "Hazırlanıyor…" : "İndir (.json)"}
+          </button>
+        </div>
+        <p className="text-[12.5px] leading-relaxed text-muted">
+          Görevler, notlar, journal kayıtların, materyaller ve DNA
+          referansların dahil, uygulamanın tuttuğu her şeyin ham bir
+          yedeği — kendi arşivin için sakla.
+        </p>
       </div>
     </motion.div>
   );

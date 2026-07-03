@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { localNoteInsight } from "@/lib/note-insight";
 import { localPortfolioPitch } from "@/lib/portfolio-pitch";
 import { useTypewriter } from "@/lib/use-typewriter";
+import { useSpeechRecognition } from "@/lib/use-speech-recognition";
 import { useStore, type CollectionFolder as FolderData } from "@/lib/store";
 import {
   STUDIO_TEAM,
@@ -295,6 +296,18 @@ function ProjectDetail({
   const [aiText, setAiText] = useState("");
   const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
+  const typeText = (str: string) => {
+    let i = 0;
+    const iv = setInterval(() => {
+      setAiText(str.slice(0, i) + "▌");
+      i++;
+      if (i > str.length) {
+        clearInterval(iv);
+        setAiText(str);
+      }
+    }, 16);
+  };
+
   const handleNoteInput = (text: string) => {
     setNotes(text);
     setAiText("");
@@ -320,17 +333,12 @@ function ProjectDetail({
     }, 1400);
   };
 
-  const typeText = (str: string) => {
-    let i = 0;
-    const iv = setInterval(() => {
-      setAiText(str.slice(0, i) + "▌");
-      i++;
-      if (i > str.length) {
-        clearInterval(iv);
-        setAiText(str);
-      }
-    }, 16);
-  };
+  const {
+    isSupported: micSupported,
+    listening: micListening,
+    start: startMic,
+    stop: stopMic,
+  } = useSpeechRecognition(handleNoteInput);
 
   return (
     <motion.div
@@ -358,13 +366,45 @@ function ProjectDetail({
       <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
         Notlarım
       </p>
-      <div className="bento-tile bento-graphite mb-5">
+      <div className="bento-tile bento-graphite relative mb-5">
         <textarea
-          className="min-h-[136px] w-full resize-none border-none bg-transparent p-[18px] text-sm leading-relaxed text-bone-dim outline-none placeholder:text-muted"
-          placeholder="Bu proje için fikrini yaz — AI kategorize etsin…"
+          className={`min-h-[136px] w-full resize-none border-none bg-transparent p-[18px] text-sm leading-relaxed text-bone-dim outline-none placeholder:text-muted ${
+            micSupported ? "pr-12" : ""
+          }`}
+          placeholder={micListening ? "Dinliyorum…" : "Bu proje için fikrini yaz — AI kategorize etsin…"}
           value={notes}
           onChange={(e) => handleNoteInput(e.target.value)}
         />
+        {micSupported && (
+          <button
+            type="button"
+            onClick={() => (micListening ? stopMic() : startMic(notes))}
+            aria-label={micListening ? "Sesli girişi durdur" : "Sesle yaz"}
+            title={micListening ? "Sesli girişi durdur" : "Sesle yaz"}
+            className={`absolute right-3.5 top-3.5 flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
+              micListening
+                ? "border-rose/40 text-rose"
+                : "border-white/[0.08] text-muted hover:border-white/20 hover:text-gold"
+            }`}
+          >
+            <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none">
+              <path
+                d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3zM19 11a7 7 0 01-14 0M12 18v3"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {micListening && (
+              <motion.span
+                className="pointer-events-none absolute inset-0 rounded-full border border-rose/40"
+                animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+              />
+            )}
+          </button>
+        )}
       </div>
       {aiText && (
         <div className="mb-8 flex items-start gap-3 border-t border-line pt-4 text-[13px] leading-relaxed text-bone-dim">

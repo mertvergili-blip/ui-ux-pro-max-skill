@@ -7,6 +7,7 @@ import { GrainOverlay } from "@/components/shared/grain-overlay";
 import { Spotlight } from "@/components/shared/spotlight";
 import { ImagePanel } from "@/components/shared/image-panel";
 import { InstallPrompt } from "@/components/shared/install-prompt";
+import { OfflineIndicator } from "@/components/shared/offline-indicator";
 import { Topbar } from "@/components/shell/topbar";
 import { AiStudioPanel } from "@/components/shell/ai-studio-panel";
 import { StudioView } from "@/components/studio/studio-view";
@@ -56,6 +57,7 @@ export default function Home() {
       <GrainOverlay />
       <Spotlight />
       <IntroScreen />
+      <OfflineIndicator />
 
       {!introVisible && (
         <>

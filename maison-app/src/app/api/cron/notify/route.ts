@@ -3,6 +3,8 @@ import { loadAppState, claimNotificationOnce } from "@/lib/db";
 import { sendPushToAll } from "@/lib/push";
 import { getTodayCapsuleChallenge } from "@/lib/capsule-challenges";
 import { selectDaysRemaining, todayKey } from "@/lib/deadline";
+import { computeQuarterlyStats, localQuarterlyReview } from "@/lib/quarterly-review";
+import type { JournalDay, CollectionFolder } from "@/lib/store";
 
 // Days-out thresholds worth interrupting the user for — not every day
 // counting down, just the moments a real deadline reminder should land.
@@ -11,6 +13,9 @@ const DEADLINE_WARNING_DAYS = [3, 1, 0];
 interface StoredState {
   deadlineDate?: string;
   deadlineLabel?: string;
+  journalEntries?: JournalDay[];
+  collections?: CollectionFolder[];
+  streak?: number;
 }
 
 function isAuthorized(request: Request): boolean {
@@ -25,14 +30,7 @@ function isAuthorized(request: Request): boolean {
   return timingSafeEqual(a, b);
 }
 
-export async function GET(request: Request) {
-  if (!isAuthorized(request)) {
-    return Response.json({ error: "unauthorized" }, { status: 401 });
-  }
-
-  const today = todayKey();
-  const sent: string[] = [];
-
+async function runMorning(state: StoredState | null, today: string, sent: string[]) {
   const challenge = getTodayCapsuleChallenge();
   if (challenge) {
     const claimed = await claimNotificationOnce("capsule", today);
@@ -42,7 +40,6 @@ export async function GET(request: Request) {
     }
   }
 
-  const state = (await loadAppState()) as StoredState | null;
   if (state?.deadlineDate && state.deadlineLabel) {
     const daysLeft = selectDaysRemaining(state.deadlineDate);
     if (DEADLINE_WARNING_DAYS.includes(daysLeft)) {
@@ -58,6 +55,62 @@ export async function GET(request: Request) {
       }
     }
   }
+}
 
-  return Response.json({ ok: true, sent });
+async function runEvening(state: StoredState | null, today: string, sent: string[]) {
+  const journalEntries = state?.journalEntries ?? [];
+  const todayEntry = journalEntries.find((e) => e.date === today);
+  const hasActivityToday = Boolean(todayEntry?.mood || todayEntry?.reflection?.trim());
+
+  if (!hasActivityToday) {
+    const claimed = await claimNotificationOnce("streak-break", today);
+    if (claimed) {
+      const streak = state?.streak ?? 0;
+      const body =
+        streak > 0
+          ? `Bugün henüz journal girişi yok — ${streak} günlük serini koru.`
+          : "Bugün henüz journal girişi yok.";
+      await sendPushToAll("Günün Kapanmadan", body);
+      sent.push("streak-break");
+    }
+  }
+
+  // Sunday in both UTC and Turkey time at this hour (18:00 UTC = 21:00
+  // TRT — same calendar day, no rollover to check for).
+  const isSunday = new Date().getUTCDay() === 0;
+  if (isSunday) {
+    const claimed = await claimNotificationOnce("weekly-summary", today);
+    if (claimed) {
+      const collections = state?.collections ?? [];
+      const stats = computeQuarterlyStats(
+        journalEntries.slice(-7),
+        state?.streak ?? 0,
+        collections.length
+      );
+      const body = localQuarterlyReview(stats);
+      await sendPushToAll("Haftalık Özet", body);
+      sent.push("weekly-summary");
+    }
+  }
+}
+
+export async function GET(request: Request) {
+  if (!isAuthorized(request)) {
+    return Response.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const slot = searchParams.get("slot") === "evening" ? "evening" : "morning";
+
+  const today = todayKey();
+  const sent: string[] = [];
+  const state = (await loadAppState()) as StoredState | null;
+
+  if (slot === "morning") {
+    await runMorning(state, today, sent);
+  } else {
+    await runEvening(state, today, sent);
+  }
+
+  return Response.json({ ok: true, slot, sent });
 }
