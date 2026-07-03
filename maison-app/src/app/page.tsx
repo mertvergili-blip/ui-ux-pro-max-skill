@@ -96,7 +96,7 @@ export default function Home() {
               used to be inside the width-toggling container, which made
               the whole nav bar visibly jump sideways switching between a
               panel view and a full-width one. */}
-          <div className="relative z-5 min-h-screen w-full px-[max(1.25rem,env(safe-area-inset-left))] pb-[max(10.5rem,calc(env(safe-area-inset-bottom)+9rem))] sm:px-[max(2.25rem,env(safe-area-inset-left))] lg:pb-[max(6rem,calc(env(safe-area-inset-bottom)+4.5rem))] lg:pl-[max(72px,calc(env(safe-area-inset-left)+72px))] lg:pr-[env(safe-area-inset-right)]">
+          <div className="relative z-5 min-h-screen w-full px-[max(1.25rem,env(safe-area-inset-left))] pb-[calc(var(--bottom-nav-h,0px)+4.5rem)] sm:px-[max(2.25rem,env(safe-area-inset-left))] lg:pb-[max(6rem,calc(env(safe-area-inset-bottom)+4.5rem))] lg:pl-[max(72px,calc(env(safe-area-inset-left)+72px))] lg:pr-[env(safe-area-inset-right)]">
             <Topbar />
             <div className={`pt-[38px] ${fullWidth ? "" : "lg:w-[60%]"}`}>
               <ActiveView />

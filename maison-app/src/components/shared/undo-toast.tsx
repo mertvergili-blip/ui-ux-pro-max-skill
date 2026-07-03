@@ -43,7 +43,7 @@ export function UndoToast() {
   const queue = useUndoStore((s) => s.queue);
 
   return (
-    <div className="fixed bottom-[max(5.5rem,calc(env(safe-area-inset-bottom)+5rem))] left-1/2 z-[90] flex -translate-x-1/2 flex-col-reverse items-center gap-2 lg:bottom-[max(1.25rem,calc(env(safe-area-inset-bottom)+0.75rem))]">
+    <div className="fixed bottom-[calc(var(--bottom-nav-h,0px)+1.25rem)] left-1/2 z-[90] flex -translate-x-1/2 flex-col-reverse items-center gap-2 lg:bottom-[max(1.25rem,calc(env(safe-area-inset-bottom)+0.75rem))]">
       <AnimatePresence>
         {queue.map((p) => (
           <ToastRow key={p.id} id={p.id} label={p.label} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useStore, type ViewName } from "@/lib/store";
 
@@ -70,9 +71,28 @@ const TABS: { label: string; view: ViewName; icon: (active: boolean) => React.Re
 export function BottomNav() {
   const currentView = useStore((s) => s.currentView);
   const setView = useStore((s) => s.setView);
+  const navRef = useRef<HTMLElement>(null);
+
+  // Every other fixed-bottom element (AI panel trigger, undo toast, install
+  // prompt, focus timer) needs to clear this bar's real rendered height —
+  // that height varies by device (safe-area-inset-bottom differs) and isn't
+  // safe to hardcode, so it's measured and published as a CSS var those
+  // elements read via calc(). Collapses to 0 automatically on desktop since
+  // lg:hidden makes this element's own box zero-sized there.
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+    const setVar = () =>
+      document.documentElement.style.setProperty("--bottom-nav-h", `${el.offsetHeight}px`);
+    setVar();
+    const ro = new ResizeObserver(setVar);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   return (
     <nav
+      ref={navRef}
       className="fixed inset-x-0 bottom-0 z-30 flex justify-center border-t border-white/[0.07] bg-ink/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
       aria-label="Ana gezinme"
     >

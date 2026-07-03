@@ -76,7 +76,7 @@ export function AiStudioPanel() {
       <HoverBorderGradient
         onClick={toggleAiPanel}
         duration={1.4}
-        containerClassName="fixed bottom-[max(88px,calc(env(safe-area-inset-bottom)+80px))] left-[max(22px,env(safe-area-inset-left))] z-50 backdrop-blur-xl lg:bottom-[max(22px,calc(env(safe-area-inset-bottom)+14px))]"
+        containerClassName="fixed bottom-[calc(var(--bottom-nav-h,0px)+22px)] left-[max(22px,env(safe-area-inset-left))] z-50 backdrop-blur-xl lg:bottom-[max(22px,calc(env(safe-area-inset-bottom)+14px))]"
         innerClassName="flex items-center gap-2.5 py-2 pl-2 pr-4 text-[10.5px] uppercase tracking-[2px] text-muted transition-colors hover:text-bone"
       >
         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06]">

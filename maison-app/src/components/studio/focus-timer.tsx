@@ -45,7 +45,7 @@ export function FocusTimer({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 8, scale: 0.98 }}
       transition={{ duration: 0.35, ease: EASE }}
-      className="fixed bottom-[max(5.5rem,calc(env(safe-area-inset-bottom)+5rem))] right-[max(1.25rem,env(safe-area-inset-right))] z-[80] w-[280px] overflow-hidden rounded-[1.25rem] border border-white/[0.08] bg-[#100d09]/95 p-5 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.85)] backdrop-blur-xl lg:bottom-[max(1.25rem,calc(env(safe-area-inset-bottom)+0.75rem))]"
+      className="fixed bottom-[calc(var(--bottom-nav-h,0px)+1.25rem)] right-[max(1.25rem,env(safe-area-inset-right))] z-[80] w-[280px] overflow-hidden rounded-[1.25rem] border border-white/[0.08] bg-[#100d09]/95 p-5 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.85)] backdrop-blur-xl lg:bottom-[max(1.25rem,calc(env(safe-area-inset-bottom)+0.75rem))]"
     >
       <p className="mb-1 text-[9.5px] uppercase tracking-[2.5px] text-muted">
         {done ? "Süre doldu" : "Odak Seansı"}
