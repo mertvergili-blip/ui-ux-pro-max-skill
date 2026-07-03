@@ -104,6 +104,19 @@ function buildJourney(collections: CollectionFolder[]): TimelineEntry[] {
   return entries;
 }
 
+// Turkish month names for the pull-quote's date caption — matches the
+// format already used elsewhere (Calendar, Studio) rather than a raw
+// YYYY-MM-DD.
+const MONTH_NAMES = [
+  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık",
+];
+
+function formatEntryDate(dateStr: string): string {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return `${day} ${MONTH_NAMES[month - 1]} ${year}`;
+}
+
 export function PathView() {
   const collections = useStore((s) => s.collections);
   const journalEntries = useStore((s) => s.journalEntries);
@@ -111,6 +124,13 @@ export function PathView() {
   const [archiveText, setArchiveText] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const journey = buildJourney(collections);
+
+  // The one editorial "magazine spread" moment on this page — pulled from
+  // your own words rather than invented copy, so it stays true as long as
+  // Journal does.
+  const latestReflection = [...journalEntries]
+    .reverse()
+    .find((e) => e.reflection.trim().length > 0);
 
   const handleGenerateArchive = () => {
     const text = compileYearArchive({
@@ -160,6 +180,18 @@ export function PathView() {
       </h1>
 
       <Timeline data={journey} />
+
+      {latestReflection && (
+        <div className="my-14 max-w-[620px]">
+          <span className="mb-3 block h-px w-14 bg-gradient-to-r from-gold/70 to-transparent" />
+          <p className="font-serif text-[26px] italic leading-[1.35] text-[#f7f2e6] lg:text-[32px]">
+            &ldquo;{latestReflection.reflection}&rdquo;
+          </p>
+          <p className="mt-4 text-[10.5px] uppercase tracking-[2.5px] text-muted">
+            {formatEntryDate(latestReflection.date)} · Journal
+          </p>
+        </div>
+      )}
 
       <div className="mt-12 max-w-[520px] border-t border-line pt-7">
         <div className="mb-2.5 flex items-center justify-between">

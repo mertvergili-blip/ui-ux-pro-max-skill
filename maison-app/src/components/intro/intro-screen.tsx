@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useStore } from "@/lib/store";
+import { hasSeenIntro } from "@/lib/intro-seen";
 import { EntranceMonogram } from "./entrance-monogram";
 
 const LiquidEther = dynamic(() => import("@/components/vendor/LiquidEther"), {
@@ -21,6 +22,14 @@ export function IntroScreen() {
   const introVisible = useStore((s) => s.introVisible);
   const dismissIntro = useStore((s) => s.dismissIntro);
   const downPos = useRef({ x: 0, y: 0 });
+
+  // First render always matches the server (introVisible true, entrance
+  // shown) — this is what skips the replay on every subsequent visit, the
+  // instant hydration finishes rather than making a daily user sit through
+  // the same multi-second entrance again and again.
+  useEffect(() => {
+    if (hasSeenIntro()) dismissIntro();
+  }, [dismissIntro]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     downPos.current = { x: e.clientX, y: e.clientY };

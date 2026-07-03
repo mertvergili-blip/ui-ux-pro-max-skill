@@ -226,9 +226,11 @@ export function StudioView() {
   const daysRemaining = deadline ? selectDaysRemaining(deadline.date) : null;
   const deadlineCollection =
     collections.find((c) => c.status === "In Progress") ?? resumeCollection ?? collections[0];
+  // With no active deadline, the card still has one honest destination: go
+  // set one — landing on Collections empty-handed beats a dead disabled
+  // button that goes nowhere.
   const openDeadlineCollection = () => {
-    if (!deadlineCollection) return;
-    setLastOpenedCollection(deadlineCollection.id);
+    if (deadlineCollection) setLastOpenedCollection(deadlineCollection.id);
     setView("collections");
   };
 
@@ -332,8 +334,7 @@ export function StudioView() {
 
         <button
           onClick={openDeadlineCollection}
-          disabled={!deadlineCollection}
-          className="bento-tile bento-blue w-full p-5 text-left transition-transform duration-200 hover:-translate-y-0.5 disabled:pointer-events-none lg:col-span-2"
+          className="bento-tile bento-blue w-full p-5 text-left transition-transform duration-200 hover:-translate-y-0.5 lg:col-span-2"
         >
           <div className="bento-orb" style={{ width: 100, height: 100, bottom: -35, right: -30 }} />
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
@@ -359,7 +360,7 @@ export function StudioView() {
             </>
           ) : (
             <p className="font-heading text-[13.5px] text-[#e2f0ff]/70">
-              Yaklaşan bir teslim tarihi yok.
+              Yaklaşan bir teslim tarihi yok — bir tane belirle →
             </p>
           )}
         </button>

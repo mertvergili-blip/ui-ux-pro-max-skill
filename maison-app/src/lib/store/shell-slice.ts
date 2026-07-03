@@ -1,6 +1,7 @@
 import type { StateCreator } from "zustand";
 import type { MaisonStore } from "./index";
 import type { ViewName } from "./types";
+import { markIntroSeen } from "../intro-seen";
 
 export interface ShellSlice {
   currentView: ViewName;
@@ -18,7 +19,10 @@ export const createShellSlice: StateCreator<MaisonStore, [], [], ShellSlice> = (
   setView: (view) => set({ currentView: view }),
 
   introVisible: true,
-  dismissIntro: () => set({ introVisible: false }),
+  dismissIntro: () => {
+    markIntroSeen();
+    set({ introVisible: false });
+  },
 
   mousePos: { x: 0.5, y: 0.5 },
   setMousePos: (x, y) => set({ mousePos: { x, y } }),

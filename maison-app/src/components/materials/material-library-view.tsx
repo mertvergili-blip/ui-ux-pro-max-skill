@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/lib/store";
 import { Tilt } from "@/components/unlumen-ui/tilt";
 import { resizeImageFile } from "@/lib/image-resize";
+import { dominantColorFromImage } from "@/lib/image-color";
 import { useUndoStore } from "@/lib/undo-toast";
 import { useSwipeDelete } from "@/lib/use-swipe-delete";
 import { SwipeDeleteBackdrop } from "@/components/shared/swipe-delete-backdrop";
@@ -279,7 +280,12 @@ function AddMaterialCard({ large }: { large?: boolean }) {
     if (!file) return;
     setUploading(true);
     try {
-      setImageUrl(await resizeImageFile(file));
+      const resized = await resizeImageFile(file);
+      setImageUrl(resized);
+      // Best-effort — the swatch presets stay clickable if this comes back
+      // null (canvas unavailable) or the user just prefers a preset.
+      const dominant = await dominantColorFromImage(resized);
+      if (dominant) setColor(dominant);
     } finally {
       setUploading(false);
     }
@@ -334,17 +340,24 @@ function AddMaterialCard({ large }: { large?: boolean }) {
               </span>
             )}
           </button>
-          <div className="flex gap-1.5">
+          <div className="flex items-center gap-1.5">
             {SWATCH_PRESETS.map((c) => (
               <button
                 key={c}
                 onClick={() => setColor(c)}
                 className={`h-6 w-6 rounded-full ring-2 transition-transform hover:scale-110 ${
-                  color === c && !imageUrl ? "ring-bone" : "ring-transparent"
+                  color === c ? "ring-bone" : "ring-transparent"
                 }`}
                 style={{ background: c }}
               />
             ))}
+            {imageUrl && !SWATCH_PRESETS.includes(color as (typeof SWATCH_PRESETS)[number]) && (
+              <span
+                title="Fotoğraftan alınan renk"
+                className="h-6 w-6 rounded-full ring-2 ring-bone"
+                style={{ background: color }}
+              />
+            )}
           </div>
           <input
             ref={uploadRef}
@@ -439,7 +452,13 @@ function GhostMaterialCard({
   costNote,
   sampleNote,
   colorTag,
-}: (typeof GHOST_EXAMPLES)[number]) {
+}: {
+  name: string;
+  supplier: string;
+  costNote: string;
+  sampleNote: string;
+  colorTag: string;
+}) {
   return (
     <div className="relative rounded-[1.25rem] border border-dashed border-line/80 p-1.5 opacity-60">
       <span className="absolute right-4 top-4 text-[8.5px] uppercase tracking-[2px] text-muted">
@@ -465,9 +484,19 @@ function GhostMaterialCard({
 
 export function MaterialLibraryView() {
   const materials = useStore((s) => s.materials);
+  const collections = useStore((s) => s.collections);
   const removeMaterial = useStore((s) => s.removeMaterial);
   const restoreMaterial = useStore((s) => s.restoreMaterial);
   const showUndo = useUndoStore((s) => s.show);
+
+  // The two example swatches are otherwise invented colors with no
+  // relationship to this archive — tinting them with your own collections'
+  // accents (when any exist) at least previews the empty state in your own
+  // palette instead of an arbitrary one.
+  const ghostExamples = GHOST_EXAMPLES.map((g, i) => ({
+    ...g,
+    colorTag: collections[i]?.accent ?? g.colorTag,
+  }));
 
   const handleRemove = (id: string) => {
     const material = materials.find((m) => m.id === id);
@@ -518,7 +547,7 @@ export function MaterialLibraryView() {
         </AnimatePresence>
         <AddMaterialCard large={materials.length <= 2} />
         {materials.length === 0 &&
-          GHOST_EXAMPLES.map((g) => <GhostMaterialCard key={g.name} {...g} />)}
+          ghostExamples.map((g) => <GhostMaterialCard key={g.name} {...g} />)}
       </div>
       {materials.length === 0 && (
         <p className="mt-4 max-w-[420px] text-[11.5px] leading-relaxed text-muted">
