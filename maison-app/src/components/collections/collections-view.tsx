@@ -234,11 +234,13 @@ function AddFolderCard({
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [sub, setSub] = useState("");
+  const [deadlineDate, setDeadlineDate] = useState("");
   const [accent, setAccent] = useState(ACCENT_PRESETS[0]);
 
   const reset = () => {
     setName("");
     setSub("");
+    setDeadlineDate("");
     setAccent(ACCENT_PRESETS[0]);
     setOpen(false);
   };
@@ -250,6 +252,7 @@ function AddFolderCard({
       status: "In Progress",
       accent,
       sub: sub.trim() || "Yeni proje",
+      deadlineDate: deadlineDate || undefined,
     });
     reset();
   };
@@ -300,6 +303,15 @@ function AddFolderCard({
         placeholder="Not (örn. Okul projesi)"
         className="border-b border-line bg-transparent pb-1.5 text-[11.5px] text-bone-dim outline-none placeholder:text-muted focus:border-gold/50"
       />
+      <label className="flex items-center justify-between gap-2 border-b border-line pb-1.5 text-[11.5px] text-bone-dim">
+        <span className="text-muted">Teslim tarihi (opsiyonel)</span>
+        <input
+          type="date"
+          value={deadlineDate}
+          onChange={(e) => setDeadlineDate(e.target.value)}
+          className="bg-transparent text-bone-dim outline-none [color-scheme:dark]"
+        />
+      </label>
       <div className="mt-1 flex gap-2 text-[10px] uppercase tracking-[1.5px]">
         <button onClick={handleSave} className="rounded-full bg-gold px-3.5 py-1.5 text-ink">
           Kaydet

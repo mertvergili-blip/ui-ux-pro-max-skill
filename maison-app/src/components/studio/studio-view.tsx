@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useStore, selectCreativeEnergy, selectDaysRemaining } from "@/lib/store";
+import { useStore, selectActiveDeadline, selectCreativeEnergy, selectDaysRemaining } from "@/lib/store";
 import { FinancePulse } from "@/components/shared/finance-pulse";
 import { CapsuleDayCard } from "@/components/studio/capsule-day-card";
 import { AnimateDigits } from "@/components/unlumen-ui/animate-digits";
@@ -198,9 +198,6 @@ export function StudioView() {
   const notes = useStore((s) => s.notes);
   const toggleAiPanel = useStore((s) => s.toggleAiPanel);
   const latestNote = notes[notes.length - 1];
-  const deadlineLabel = useStore((s) => s.deadlineLabel);
-  const deadlineDate = useStore((s) => s.deadlineDate);
-  const daysRemaining = useMemo(() => selectDaysRemaining(deadlineDate), [deadlineDate]);
   const startFocusTask = useStore((s) => s.startFocusTask);
   const removeTask = useStore((s) => s.removeTask);
   const restoreTask = useStore((s) => s.restoreTask);
@@ -219,10 +216,10 @@ export function StudioView() {
   const setLastOpenedCollection = useStore((s) => s.setLastOpenedCollection);
   const resumeCollection = collections.find((c) => c.id === lastOpenedCollectionId);
 
-  // The deadline card names a collection by label ("Koleksiyon III") rather
-  // than id, so resolve it the same loose way a person would read it —
-  // the one still actively "In Progress" — falling back to whichever
-  // collection is currently open if none matches.
+  // Same source Path's "Şimdi" section and the Calendar marker read from —
+  // one collection's real deadlineDate, not a separate hardcoded field.
+  const deadline = useMemo(() => selectActiveDeadline(collections), [collections]);
+  const daysRemaining = deadline ? selectDaysRemaining(deadline.date) : null;
   const deadlineCollection =
     collections.find((c) => c.status === "In Progress") ?? resumeCollection ?? collections[0];
   const openDeadlineCollection = () => {
@@ -337,21 +334,29 @@ export function StudioView() {
           <p className="mb-3.5 text-[9.5px] uppercase tracking-[2px] text-white/55">
             Next Deadline
           </p>
-          <p className="font-heading text-[15px] text-[#e2f0ff]">{deadlineLabel}</p>
-          <p className="mt-0.5 flex items-baseline text-[11.5px] text-white/60">
-            {daysRemaining === 0 ? (
-              "Bugün teslim"
-            ) : (
-              <>
-                <AnimateDigits
-                  value={String(daysRemaining)}
-                  enterY={14}
-                  className="text-[11.5px]"
-                />
-                <span className="ml-1">gün kaldı</span>
-              </>
-            )}
-          </p>
+          {deadline ? (
+            <>
+              <p className="font-heading text-[15px] text-[#e2f0ff]">{deadline.label}</p>
+              <p className="mt-0.5 flex items-baseline text-[11.5px] text-white/60">
+                {daysRemaining === 0 ? (
+                  "Bugün teslim"
+                ) : (
+                  <>
+                    <AnimateDigits
+                      value={String(daysRemaining)}
+                      enterY={14}
+                      className="text-[11.5px]"
+                    />
+                    <span className="ml-1">gün kaldı</span>
+                  </>
+                )}
+              </p>
+            </>
+          ) : (
+            <p className="font-heading text-[13.5px] text-[#e2f0ff]/70">
+              Yaklaşan bir teslim tarihi yok.
+            </p>
+          )}
         </button>
       </div>
 

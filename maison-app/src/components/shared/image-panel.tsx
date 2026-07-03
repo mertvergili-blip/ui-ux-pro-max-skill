@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   useStore,
+  selectActiveDeadline,
   selectDaysRemaining,
   selectTodayEntry,
   selectUrgency,
@@ -60,16 +61,14 @@ function InsightRow({ label, value }: { label: string; value: string }) {
 // hydration mismatches.
 function PanelInsight({ view }: { view: ViewName }) {
   const tasks = useStore((s) => s.tasks);
-  const deadlineLabel = useStore((s) => s.deadlineLabel);
-  const deadlineDate = useStore((s) => s.deadlineDate);
   const journalEntries = useStore((s) => s.journalEntries);
   const collections = useStore((s) => s.collections);
   const materials = useStore((s) => s.materials);
+  const deadline = selectActiveDeadline(collections);
 
   if (view === "studio") {
     const now = new Date();
     const done = tasks.filter((t) => t.done).length;
-    const daysLeft = selectDaysRemaining(deadlineDate);
     return (
       <div className="mb-7">
         <p className="font-serif text-[52px] italic leading-none text-bone">
@@ -80,10 +79,16 @@ function PanelInsight({ view }: { view: ViewName }) {
         </p>
         <div className="my-4 ml-auto h-px w-10 bg-white/10" />
         <InsightRow label="Bugün" value={`${done}/${tasks.length} görev tamam`} />
-        <InsightRow
-          label={deadlineLabel}
-          value={daysLeft === 0 ? "bugün teslim" : `${daysLeft} gün kaldı`}
-        />
+        {deadline && (
+          <InsightRow
+            label={deadline.label}
+            value={
+              selectDaysRemaining(deadline.date) === 0
+                ? "bugün teslim"
+                : `${selectDaysRemaining(deadline.date)} gün kaldı`
+            }
+          />
+        )}
       </div>
     );
   }
@@ -154,7 +159,7 @@ function PanelInsight({ view }: { view: ViewName }) {
 
 export function ImagePanel() {
   const { currentView, mousePos } = useStore();
-  const deadlineDate = useStore((s) => s.deadlineDate);
+  const collections = useStore((s) => s.collections);
   const calendarViewMonth = useStore((s) => s.calendarViewMonth);
   const [eyebrow, staticTitle] = VIEW_CAPTIONS[currentView];
   // Calendar's caption tracks whichever month is currently being browsed,
@@ -167,7 +172,8 @@ export function ImagePanel() {
   // Ambient urgency: as the deadline approaches, the atmosphere quietly
   // shifts from this cool blue toward the warm wine tone already present
   // in the same gradient — no banners, no red flashes, just weather changing.
-  const urgency = useMemo(() => selectUrgency(deadlineDate), [deadlineDate]);
+  const deadline = useMemo(() => selectActiveDeadline(collections), [collections]);
+  const urgency = useMemo(() => (deadline ? selectUrgency(deadline.date) : 0), [deadline]);
   const blueAlpha = 0.42 - urgency * 0.28;
   const wineAlpha = 0.34 + urgency * 0.24;
 

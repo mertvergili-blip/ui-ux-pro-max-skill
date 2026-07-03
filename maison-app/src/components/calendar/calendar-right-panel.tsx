@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useStore } from "@/lib/store";
+import { useStore, selectActiveDeadline } from "@/lib/store";
 import { useUndoStore } from "@/lib/undo-toast";
+
+function dateParts(dateStr: string): { day: number; month: number; year: number } {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return { day, month: month - 1, year };
+}
 
 const EASE = [0.32, 0.72, 0, 1] as const;
 const MONTH_NAMES = [
@@ -14,6 +19,7 @@ const MONTH_NAMES = [
 export function CalendarRightPanel() {
   const selectedDay = useStore((s) => s.selectedCalendarDay);
   const events = useStore((s) => s.calendarEvents);
+  const collections = useStore((s) => s.collections);
   const addCalendarEvent = useStore((s) => s.addCalendarEvent);
   const removeCalendarEvent = useStore((s) => s.removeCalendarEvent);
   const restoreCalendarEvent = useStore((s) => s.restoreCalendarEvent);
@@ -23,6 +29,14 @@ export function CalendarRightPanel() {
 
   const [draft, setDraft] = useState("");
   const [adding, setAdding] = useState(false);
+
+  const deadline = useMemo(() => selectActiveDeadline(collections), [collections]);
+  const deadlineParts = useMemo(() => (deadline ? dateParts(deadline.date) : null), [deadline]);
+  const isDeadlineDay =
+    deadlineParts &&
+    deadlineParts.day === selectedDay &&
+    deadlineParts.month === viewMonth &&
+    deadlineParts.year === viewYear;
 
   if (!selectedDay) {
     return (
@@ -73,6 +87,13 @@ export function CalendarRightPanel() {
       <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[9.5px] uppercase tracking-[2.5px] text-bone-dim backdrop-blur-sm">
         {MONTH_NAMES[viewMonth]} {selectedDay}
       </p>
+
+      {isDeadlineDay && (
+        <p className="mb-2 flex items-center justify-end gap-1.5 text-[13px] text-[#e4c98f]">
+          {deadline?.label} teslim
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#e4c98f]" />
+        </p>
+      )}
 
       <div className="flex flex-col items-end gap-2.5">
         <AnimatePresence mode="popLayout">

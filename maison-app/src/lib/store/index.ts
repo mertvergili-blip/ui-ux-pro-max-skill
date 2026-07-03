@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { dbStorage } from "../db-storage";
-import { selectDaysRemaining, selectUrgency } from "../deadline";
+import { selectDaysRemaining, selectUrgency, selectActiveDeadline } from "../deadline";
 
 import { createShellSlice, type ShellSlice } from "./shell-slice";
 import { createTasksSlice, type TasksSlice } from "./tasks-slice";
@@ -15,7 +15,7 @@ import { createRunwaySlice, type RunwaySlice } from "./runway-slice";
 import { createAiPanelSlice, type AiPanelSlice } from "./ai-panel-slice";
 import { createMiscSlice, type MiscSlice } from "./misc-slice";
 
-export { selectDaysRemaining, selectUrgency };
+export { selectDaysRemaining, selectUrgency, selectActiveDeadline };
 export { selectTodayEntry, selectCreativeEnergy } from "./journal-slice";
 
 export type {

@@ -82,6 +82,7 @@ export interface CollectionFolder {
   accent: string;
   count: number;
   sub: string;
+  deadlineDate?: string; // YYYY-MM-DD — drives Studio's Next Deadline, the Calendar marker and Path together
   images?: ProjectImage[]; // moodboard / manipulation / reference photos
 }
 

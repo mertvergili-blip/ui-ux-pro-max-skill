@@ -2,7 +2,7 @@ import { timingSafeEqual } from "crypto";
 import { loadAppState, claimNotificationOnce } from "@/lib/db";
 import { sendPushToAll } from "@/lib/push";
 import { getTodayCapsuleChallenge } from "@/lib/capsule-challenges";
-import { selectDaysRemaining, todayKey } from "@/lib/deadline";
+import { selectActiveDeadline, selectDaysRemaining, todayKey } from "@/lib/deadline";
 import { computeQuarterlyStats, localQuarterlyReview } from "@/lib/quarterly-review";
 import type { JournalDay, CollectionFolder } from "@/lib/store";
 
@@ -11,8 +11,6 @@ import type { JournalDay, CollectionFolder } from "@/lib/store";
 const DEADLINE_WARNING_DAYS = [3, 1, 0];
 
 interface StoredState {
-  deadlineDate?: string;
-  deadlineLabel?: string;
   journalEntries?: JournalDay[];
   collections?: CollectionFolder[];
   streak?: number;
@@ -40,16 +38,17 @@ async function runMorning(state: StoredState | null, today: string, sent: string
     }
   }
 
-  if (state?.deadlineDate && state.deadlineLabel) {
-    const daysLeft = selectDaysRemaining(state.deadlineDate);
+  const deadline = selectActiveDeadline(state?.collections ?? []);
+  if (deadline) {
+    const daysLeft = selectDaysRemaining(deadline.date);
     if (DEADLINE_WARNING_DAYS.includes(daysLeft)) {
       const kind = `deadline-${daysLeft}`;
       const claimed = await claimNotificationOnce(kind, today);
       if (claimed) {
         const body =
           daysLeft === 0
-            ? `${state.deadlineLabel} bugün teslim.`
-            : `${state.deadlineLabel} için ${daysLeft} gün kaldı.`;
+            ? `${deadline.label} bugün teslim.`
+            : `${deadline.label} için ${daysLeft} gün kaldı.`;
         await sendPushToAll("Teslim Tarihi Yaklaşıyor", body);
         sent.push(kind);
       }

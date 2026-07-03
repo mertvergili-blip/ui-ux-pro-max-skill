@@ -2,8 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useStore } from "@/lib/store";
+import { useStore, selectActiveDeadline } from "@/lib/store";
 import { useUndoStore } from "@/lib/undo-toast";
+
+// A date string ("YYYY-MM-DD") parsed with the local calendar fields it was
+// built from, rather than Date parsing (which reads plain date strings as
+// UTC midnight and can land a day off depending on the viewer's timezone).
+function dateParts(dateStr: string): { day: number; month: number; year: number } {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return { day, month: month - 1, year };
+}
 
 const DAYS_OF_WEEK = ["PZT", "SAL", "ÇAR", "PER", "CUM", "CMT", "PAZ"];
 const MONTH_NAMES = [
@@ -25,7 +33,19 @@ function leadingBlanks(month: number, year: number): number {
 
 // Below lg the ImagePanel (and the day-detail panel that lives in it) is
 // hidden, so the same select-a-day flow renders inline under the grid.
-function MobileDayPanel({ day, month, year, monthLabel }: { day: number; month: number; year: number; monthLabel: string }) {
+function MobileDayPanel({
+  day,
+  month,
+  year,
+  monthLabel,
+  deadlineLabel,
+}: {
+  day: number;
+  month: number;
+  year: number;
+  monthLabel: string;
+  deadlineLabel?: string;
+}) {
   const events = useStore((s) => s.calendarEvents);
   const addCalendarEvent = useStore((s) => s.addCalendarEvent);
   const removeCalendarEvent = useStore((s) => s.removeCalendarEvent);
@@ -71,6 +91,13 @@ function MobileDayPanel({ day, month, year, monthLabel }: { day: number; month: 
             </button>
           )}
         </div>
+
+        {deadlineLabel && (
+          <p className="mb-2.5 flex items-center gap-1.5 text-[13px] text-[#e4c98f]">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#e4c98f]" />
+            {deadlineLabel} teslim
+          </p>
+        )}
 
         <div className="flex flex-col gap-2.5">
           <AnimatePresence mode="popLayout">
@@ -143,6 +170,7 @@ export function CalendarView() {
   const selectedDay = useStore((s) => s.selectedCalendarDay);
   const setSelectedDay = useStore((s) => s.setSelectedCalendarDay);
   const calendarEvents = useStore((s) => s.calendarEvents);
+  const collections = useStore((s) => s.collections);
   const viewMonth = useStore((s) => s.calendarViewMonth);
   const viewYear = useStore((s) => s.calendarViewYear);
   const shiftCalendarMonth = useStore((s) => s.shiftCalendarMonth);
@@ -166,6 +194,19 @@ export function CalendarView() {
     () => new Set(eventsThisMonth.map((e) => e.day)),
     [eventsThisMonth]
   );
+
+  // Same deadline Studio's "Next Deadline" card and Path's "Şimdi" section
+  // read — surfaced on its actual date here instead of being invisible on
+  // the calendar entirely.
+  const deadline = useMemo(() => selectActiveDeadline(collections), [collections]);
+  const deadlineParts = useMemo(
+    () => (deadline ? dateParts(deadline.date) : null),
+    [deadline]
+  );
+  const deadlineDayThisMonth =
+    deadlineParts && deadlineParts.month === viewMonth && deadlineParts.year === viewYear
+      ? deadlineParts.day
+      : null;
 
   // Client-only — the server render can't know the viewer's actual date.
   const [today, setToday] = useState<number | null>(null);
@@ -246,6 +287,12 @@ export function CalendarView() {
               {d === today && (
                 <span className="absolute left-1.5 top-1.5 h-1 w-1 rounded-full bg-gold/60" />
               )}
+              {d === deadlineDayThisMonth && (
+                <span
+                  className="absolute inset-0 rounded-[3px] ring-1 ring-[#e4c98f]/60"
+                  title={`${deadline?.label} teslim`}
+                />
+              )}
               {daysWithEvents.has(d) && (
                 <span className="absolute bottom-[7px] h-1 w-1 rounded-full bg-gold" />
               )}
@@ -256,7 +303,14 @@ export function CalendarView() {
 
       <AnimatePresence>
         {selectedDay && (
-          <MobileDayPanel key={`${viewYear}-${viewMonth}-${selectedDay}`} day={selectedDay} month={viewMonth} year={viewYear} monthLabel={MONTH_NAMES[viewMonth]} />
+          <MobileDayPanel
+            key={`${viewYear}-${viewMonth}-${selectedDay}`}
+            day={selectedDay}
+            month={viewMonth}
+            year={viewYear}
+            monthLabel={MONTH_NAMES[viewMonth]}
+            deadlineLabel={selectedDay === deadlineDayThisMonth ? deadline?.label : undefined}
+          />
         )}
       </AnimatePresence>
     </motion.div>

@@ -37,6 +37,11 @@ export const createCollectionsSlice: StateCreator<MaisonStore, [], [], Collectio
       accent: "var(--color-gold)",
       count: 12,
       sub: "6 gün kaldı",
+      deadlineDate: (() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 6);
+        return d.toISOString().slice(0, 10);
+      })(),
     },
     {
       id: "verre-bleu",

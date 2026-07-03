@@ -2,6 +2,30 @@
 // (client-only) and the notification cron route (server-only) both need
 // these, and neither should have to import across that boundary.
 
+// Shaped like CollectionFolder, but kept minimal here so this file doesn't
+// need to import from lib/store (which is "use client").
+interface DeadlineSource {
+  status: string;
+  name: string;
+  deadlineDate?: string;
+}
+
+// Studio's "Next Deadline" card, the Calendar's deadline marker and Path's
+// "Şimdi" section all used to each read their own idea of what's due next —
+// a hardcoded global field, an editable-but-disconnected date, and the raw
+// collection list. This is the one place that answers it, from the same
+// collections everything else already reads.
+export function selectActiveDeadline(
+  collections: DeadlineSource[]
+): { label: string; date: string } | null {
+  const withDates = collections.filter(
+    (c) => c.status !== "Archived" && c.deadlineDate
+  ) as (DeadlineSource & { deadlineDate: string })[];
+  if (withDates.length === 0) return null;
+  const soonest = withDates.reduce((a, b) => (a.deadlineDate < b.deadlineDate ? a : b));
+  return { label: soonest.name, date: soonest.deadlineDate };
+}
+
 export function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
