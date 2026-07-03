@@ -7,6 +7,7 @@ import { HoverBorderGradient } from "@/components/vendor/hover-border-gradient";
 import { useUndoStore } from "@/lib/undo-toast";
 import { haptics } from "@/lib/haptics";
 import { AiSourceTag } from "@/components/shared/ai-source-tag";
+import { MiniComposer } from "./mini-composer";
 
 const EASE = [0.32, 0.72, 0, 1] as const;
 
@@ -69,6 +70,7 @@ export function useCommandPanelShortcut() {
 export function CommandPanel() {
   const open = useStore((s) => s.aiPanelOpen);
   const toggleAiPanel = useStore((s) => s.toggleAiPanel);
+  const closeAiPanel = useStore((s) => s.closeAiPanel);
   const pendingSuggestion = useStore((s) => s.pendingSuggestion);
   const suggestionLoading = useStore((s) => s.suggestionLoading);
   const proposeSuggestion = useStore((s) => s.proposeSuggestion);
@@ -182,13 +184,16 @@ export function CommandPanel() {
     confirmSuggestion();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery("");
-    toggleAiPanel();
+    // Unconditional close (not toggle) — this same effect also fires for
+    // a task captured through the always-visible mini composer, where the
+    // panel was never open to begin with; toggling it there would open it.
+    closeAiPanel();
     const currentTasks = useStore.getState().tasks;
     const added = currentTasks[currentTasks.length - 1];
     if (added) {
       showUndo(`"${added.text}" eklendi`, () => removeTask(added.id));
     }
-  }, [pendingSuggestion, confirmSuggestion, toggleAiPanel, removeTask, showUndo]);
+  }, [pendingSuggestion, confirmSuggestion, closeAiPanel, removeTask, showUndo]);
 
   const handleSelect = (r: SearchResult) => {
     r.onSelect();
@@ -208,7 +213,7 @@ export function CommandPanel() {
   };
 
   const handleClose = () => {
-    toggleAiPanel();
+    closeAiPanel();
     setQuery("");
     setEditing(false);
     if (pendingSuggestion) cancelSuggestion();
@@ -220,19 +225,7 @@ export function CommandPanel() {
 
   return (
     <>
-      {/* Trigger — bottom-left, mirrors the old Finance Pulse corner so it never
-          collides with the image panel's caption on the right */}
-      <HoverBorderGradient
-        onClick={toggleAiPanel}
-        duration={1.4}
-        containerClassName="fixed bottom-[calc(var(--bottom-nav-h,0px)+22px)] left-[max(22px,env(safe-area-inset-left))] z-50 backdrop-blur-xl lg:bottom-[max(22px,calc(env(safe-area-inset-bottom)+14px))]"
-        innerClassName="flex items-center gap-2.5 py-2 pl-2 pr-4 text-[10.5px] uppercase tracking-[2px] text-muted transition-colors hover:text-bone"
-      >
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06]">
-          <span className="h-1.5 w-1.5 animate-[pulse-glow_2.4s_infinite] rounded-full bg-gold" />
-        </span>
-        Talk to your Studio
-      </HoverBorderGradient>
+      <MiniComposer onExpand={toggleAiPanel} />
 
       <AnimatePresence>
         {open && (

@@ -10,6 +10,7 @@ export interface AiPanelSlice {
 
   aiPanelOpen: boolean;
   toggleAiPanel: () => void;
+  closeAiPanel: () => void;
   pendingSuggestion: PendingSuggestion | null;
   suggestionLoading: boolean;
   proposeSuggestion: (input: string) => Promise<void>;
@@ -26,6 +27,7 @@ export const createAiPanelSlice: StateCreator<MaisonStore, [], [], AiPanelSlice>
 
   aiPanelOpen: false,
   toggleAiPanel: () => set((s) => ({ aiPanelOpen: !s.aiPanelOpen })),
+  closeAiPanel: () => set({ aiPanelOpen: false }),
   pendingSuggestion: null,
   suggestionLoading: false,
   proposeSuggestion: async (input) => {
