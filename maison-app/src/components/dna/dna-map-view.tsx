@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { animate, stagger } from "animejs";
 import {
@@ -365,13 +366,24 @@ export function DnaMapView() {
         })}
       </div>
 
-      <div
-        className={
-          expanded
-            ? "fixed inset-0 z-[90] flex flex-col items-center justify-center gap-8 bg-ink/95 p-6 backdrop-blur-xl lg:flex-row lg:p-12"
-            : "flex flex-col gap-8 lg:flex-row"
-        }
-      >
+      {(() => {
+        // Framer Motion leaves an inline `transform` on this component's
+        // root motion.div even once its enter animation settles, which
+        // creates a new CSS containing block — so a plain `fixed inset-0`
+        // nested inside it would be positioned relative to that ancestor,
+        // not the viewport, and wouldn't actually cover the screen (most
+        // visible on mobile, where there's no room to spare). Portal the
+        // expanded overlay straight to <body> to escape that; refs stay
+        // valid across the portal since it's the same React tree, just a
+        // different DOM mount point.
+        const mapPanel = (
+          <div
+            className={
+              expanded
+                ? "fixed inset-0 z-[90] flex flex-col items-center gap-8 overflow-y-auto bg-ink/95 p-6 py-10 backdrop-blur-xl lg:flex-row lg:justify-center lg:overflow-visible lg:p-12"
+                : "flex flex-col gap-8 lg:flex-row"
+            }
+          >
         <div className="bento-tile bento-blue relative">
           <div className="bento-orb" style={{ width: 200, height: 200, bottom: -60, right: -60 }} />
           <button
@@ -565,7 +577,13 @@ export function DnaMapView() {
             </p>
           )}
         </div>
-      </div>
+          </div>
+        );
+
+        return expanded && typeof document !== "undefined"
+          ? createPortal(mapPanel, document.body)
+          : mapPanel;
+      })()}
     </motion.div>
   );
 }
