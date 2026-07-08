@@ -73,6 +73,15 @@ export interface IterationEntry {
   createdAt: number;
 }
 
+export interface ProjectNote {
+  id: string;
+  collectionId: string;
+  text: string;
+  insight?: string;
+  insightSource?: "ai" | "local";
+  createdAt: number;
+}
+
 export interface ProjectImage {
   id: string;
   dataUrl: string;

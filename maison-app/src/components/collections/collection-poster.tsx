@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStore, type CollectionFolder as FolderData } from "@/lib/store";
 
@@ -23,7 +24,7 @@ export function CollectionPoster({
   const images = folder.images ?? [];
   const [hero, ...rest] = images;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <motion.div
         className="fixed inset-0 z-[97] flex items-center justify-center bg-ink/90 p-4 backdrop-blur-xl sm:p-8"
@@ -150,6 +151,7 @@ export function CollectionPoster({
           </div>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

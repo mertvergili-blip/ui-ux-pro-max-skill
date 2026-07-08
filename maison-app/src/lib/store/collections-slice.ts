@@ -1,6 +1,6 @@
 import type { StateCreator } from "zustand";
 import type { MaisonStore } from "./index";
-import type { CollectionFolder, ProjectImage, IterationEntry } from "./types";
+import type { CollectionFolder, ProjectImage, IterationEntry, ProjectNote } from "./types";
 
 export interface CollectionsSlice {
   // Collections — projects/folders, user-extensible beyond the seeded three
@@ -24,6 +24,14 @@ export interface CollectionsSlice {
   addIterationEntry: (e: Omit<IterationEntry, "id" | "createdAt">) => void;
   removeIterationEntry: (id: string) => void;
   restoreIterationEntry: (e: IterationEntry) => void;
+
+  // Free-text project notes — previously only a transient AI-insight
+  // preview shown while typing, with the actual note text never saved
+  // anywhere. Now a real, persisted, removable list per collection.
+  projectNotes: ProjectNote[];
+  addProjectNote: (n: Omit<ProjectNote, "id" | "createdAt">) => void;
+  removeProjectNote: (id: string) => void;
+  restoreProjectNote: (n: ProjectNote, index: number) => void;
 }
 
 export const createCollectionsSlice: StateCreator<MaisonStore, [], [], CollectionsSlice> = (
@@ -131,4 +139,23 @@ export const createCollectionsSlice: StateCreator<MaisonStore, [], [], Collectio
     })),
   restoreIterationEntry: (e) =>
     set((s) => ({ iterationLogs: [e, ...s.iterationLogs] })),
+
+  projectNotes: [],
+  addProjectNote: (n) =>
+    set((s) => ({
+      projectNotes: [
+        { ...n, id: `note${Date.now()}`, createdAt: Date.now() },
+        ...s.projectNotes,
+      ],
+    })),
+  removeProjectNote: (id) =>
+    set((s) => ({
+      projectNotes: s.projectNotes.filter((n) => n.id !== id),
+    })),
+  restoreProjectNote: (n, index) =>
+    set((s) => {
+      const next = [...s.projectNotes];
+      next.splice(Math.min(index, next.length), 0, n);
+      return { projectNotes: next };
+    }),
 });

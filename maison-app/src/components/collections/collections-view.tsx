@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { localNoteInsight } from "@/lib/note-insight";
 import { localPortfolioPitch } from "@/lib/portfolio-pitch";
@@ -344,6 +345,7 @@ function ProjectDetail({
   const [aiSource, setAiSource] = useState<"ai" | "local">("local");
   const [posterOpen, setPosterOpen] = useState(false);
   const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const addProjectNote = useStore((s) => s.addProjectNote);
 
   const typeText = (str: string) => {
     let i = 0;
@@ -391,6 +393,23 @@ function ProjectDetail({
     start: startMic,
     stop: stopMic,
   } = useSpeechRecognition(handleNoteInput);
+
+  // The textarea used to be a write-only scratchpad — whatever you typed
+  // fed a live AI preview but was never actually kept anywhere, so
+  // navigating away lost it silently. This is the one explicit moment it
+  // actually lands somewhere.
+  const handleSaveNote = () => {
+    if (!notes.trim()) return;
+    if (noteTimer.current) clearTimeout(noteTimer.current);
+    addProjectNote({
+      collectionId: folder.id,
+      text: notes.trim(),
+      insight: aiText || undefined,
+      insightSource: aiText ? aiSource : undefined,
+    });
+    setNotes("");
+    setAiText("");
+  };
 
   return (
     <motion.div
@@ -471,7 +490,7 @@ function ProjectDetail({
           )}
         </div>
         {aiText && (
-          <div className="mb-8 flex items-start gap-3 border-t border-line pt-4 text-[13px] leading-relaxed text-bone-dim">
+          <div className="mb-3 flex items-start gap-3 border-t border-line pt-4 text-[13px] leading-relaxed text-bone-dim">
             <span
               className="mt-1 h-1.5 w-1.5 flex-shrink-0 animate-[pulse-glow_2.4s_infinite] rounded-full"
               style={{ background: folder.accent }}
@@ -482,6 +501,17 @@ function ProjectDetail({
             </span>
           </div>
         )}
+        {notes.trim() && (
+          <button
+            onClick={handleSaveNote}
+            className="mb-8 rounded-full px-4 py-1.5 text-[10px] uppercase tracking-[1.5px] text-ink transition-opacity hover:opacity-90"
+            style={{ background: folder.accent }}
+          >
+            Notu Ekle
+          </button>
+        )}
+
+        <ProjectNotesList collectionId={folder.id} />
 
         <LinkedMaterials collectionId={folder.id} />
 
@@ -492,6 +522,70 @@ function ProjectDetail({
 
       <ProjectGallery folder={folder} />
     </motion.div>
+  );
+}
+
+// The persisted history of notes saved via "Notu Ekle" above — previously
+// nothing here ever actually stuck, so this list is new, not a redesign.
+function ProjectNotesList({ collectionId }: { collectionId: string }) {
+  const allNotes = useStore((s) => s.projectNotes);
+  const removeProjectNote = useStore((s) => s.removeProjectNote);
+  const restoreProjectNote = useStore((s) => s.restoreProjectNote);
+  const showUndo = useUndoStore((s) => s.show);
+  const notes = allNotes.filter((n) => n.collectionId === collectionId);
+
+  if (notes.length === 0) return null;
+
+  const handleRemove = (id: string) => {
+    const index = allNotes.findIndex((n) => n.id === id);
+    const note = allNotes[index];
+    removeProjectNote(id);
+    if (note) showUndo("Not kaldırıldı", () => restoreProjectNote(note, index));
+  };
+
+  return (
+    <div className="mb-8 border-t border-line pt-6">
+      <p className="mb-3.5 text-[9.5px] uppercase tracking-[3px] text-muted">
+        Kaydedilen Notlar
+      </p>
+      <AnimatePresence mode="popLayout">
+        <div className="flex flex-col gap-4">
+          {notes.map((n) => (
+            <motion.div
+              key={n.id}
+              layout
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, x: -8 }}
+              transition={{ duration: 0.25 }}
+              className="group"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-[13px] leading-relaxed text-bone-dim">{n.text}</p>
+                <button
+                  onClick={() => handleRemove(n.id)}
+                  className="shrink-0 text-[9.5px] uppercase tracking-[1.5px] text-muted opacity-0 transition-opacity hover:text-rose group-hover:opacity-100"
+                >
+                  Kaldır
+                </button>
+              </div>
+              {n.insight && (
+                <p className="mt-1.5 flex flex-wrap items-center gap-2 text-[11.5px] leading-relaxed text-muted">
+                  {n.insight}
+                  {n.insightSource && <AiSourceTag source={n.insightSource} />}
+                </p>
+              )}
+              <p className="mt-1.5 text-[9.5px] uppercase tracking-[1.5px] text-muted/70">
+                {new Date(n.createdAt).toLocaleDateString("tr-TR", {
+                  day: "numeric",
+                  month: "long",
+                })}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -564,6 +658,7 @@ function MoodboardImage({
   // the store and rendered back as if it were a real AI insight; it's
   // session-local UI state with an actual retry action attached.
   const [failed, setFailed] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const handleRemove = () => {
     removeProjectImage(folderId, image.id);
@@ -593,41 +688,151 @@ function MoodboardImage({
   };
 
   return (
-    <div
-      className={`group relative overflow-hidden rounded-[0.7rem] bg-black/20 ${spanClassName}`}
+    <>
+      <div
+        className={`group relative overflow-hidden rounded-[0.7rem] bg-black/20 ${spanClassName}`}
+      >
+        <button
+          onClick={() => setLightboxOpen(true)}
+          className="block h-full w-full cursor-zoom-in"
+          aria-label="Görseli büyüt"
+        >
+          {/* User-uploaded data URL, not a remote asset. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image.dataUrl} alt="" className="h-full w-full object-cover" />
+        </button>
+        <button
+          onClick={handleRemove}
+          className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink/70 text-[10px] text-bone-dim opacity-0 transition-opacity group-hover:opacity-100"
+          aria-label="Görseli kaldır"
+        >
+          ✕
+        </button>
+        {/* A short badge only — the full insight text lives in the lightbox
+            now, not stacked on the photo itself where a real (often
+            multi-sentence) Gemini response used to swallow the whole image. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/85 to-transparent p-1.5 pt-6">
+          {image.insight ? (
+            <span className="pointer-events-auto inline-flex items-center gap-1 text-[8.5px] uppercase tracking-[1.2px] text-gold">
+              ✦ İncelendi
+            </span>
+          ) : failed ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAnalyze();
+              }}
+              disabled={analyzing}
+              className="pointer-events-auto flex items-center gap-1 text-[8.5px] uppercase tracking-[1.2px] text-rose transition-colors hover:text-bone disabled:opacity-40"
+            >
+              {analyzing ? "İnceleniyor…" : "İnceleme başarısız — tekrar dene"}
+            </button>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAnalyze();
+              }}
+              disabled={analyzing}
+              className="pointer-events-auto text-[8.5px] uppercase tracking-[1.2px] text-gold transition-colors hover:text-bone disabled:opacity-40"
+            >
+              {analyzing ? "İnceleniyor…" : "AI ile incele"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {lightboxOpen && (
+          <ImageLightbox
+            image={image}
+            analyzing={analyzing}
+            failed={failed}
+            onAnalyze={handleAnalyze}
+            onClear={() => setProjectImageInsight(folderId, image.id, "")}
+            onClose={() => setLightboxOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+function ImageLightbox({
+  image,
+  analyzing,
+  failed,
+  onAnalyze,
+  onClear,
+  onClose,
+}: {
+  image: NonNullable<FolderData["images"]>[number];
+  analyzing: boolean;
+  failed: boolean;
+  onAnalyze: () => void;
+  onClear: () => void;
+  onClose: () => void;
+}) {
+  return createPortal(
+    <motion.div
+      className="fixed inset-0 z-[97] flex flex-col bg-ink/95 backdrop-blur-xl"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
-      {/* User-uploaded data URL, not a remote asset. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={image.dataUrl} alt="" className="h-full w-full object-cover" />
       <button
-        onClick={handleRemove}
-        className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink/70 text-[10px] text-bone-dim opacity-0 transition-opacity group-hover:opacity-100"
-        aria-label="Görseli kaldır"
+        onClick={onClose}
+        className="fixed right-6 top-6 z-[98] flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-muted hover:text-bone"
+        aria-label="Kapat"
       >
         ✕
       </button>
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 to-transparent p-1.5 pt-5">
+      <div className="flex flex-1 items-center justify-center overflow-hidden p-6 pb-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image.dataUrl}
+          alt=""
+          className="max-h-full max-w-full rounded-[0.4rem] object-contain"
+        />
+      </div>
+      <div className="mx-auto w-full max-w-[560px] p-6">
         {image.insight ? (
-          <p className="text-[9.5px] leading-relaxed text-bone-dim">{image.insight}</p>
-        ) : failed ? (
-          <button
-            onClick={handleAnalyze}
-            disabled={analyzing}
-            className="flex items-center gap-1 text-[8.5px] uppercase tracking-[1.2px] text-rose transition-colors hover:text-bone disabled:opacity-40"
-          >
-            {analyzing ? "İnceleniyor…" : "İnceleme başarısız — tekrar dene"}
-          </button>
+          <div className="rounded-[1rem] border border-white/[0.08] bg-white/[0.03] p-4">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-[9px] uppercase tracking-[2px] text-gold">AI İncelemesi</p>
+              <button
+                onClick={onClear}
+                className="text-[9px] uppercase tracking-[1.5px] text-muted hover:text-rose"
+              >
+                Sil
+              </button>
+            </div>
+            <p className="text-[13px] leading-relaxed text-bone-dim">{image.insight}</p>
+          </div>
         ) : (
           <button
-            onClick={handleAnalyze}
+            onClick={onAnalyze}
             disabled={analyzing}
-            className="text-[8.5px] uppercase tracking-[1.2px] text-gold transition-colors hover:text-bone disabled:opacity-40"
+            className={`w-full rounded-[1rem] border border-dashed px-4 py-3 text-[11px] uppercase tracking-[1.5px] transition-colors disabled:opacity-40 ${
+              failed
+                ? "border-rose/30 text-rose hover:border-rose/50"
+                : "border-white/15 text-gold hover:border-gold/40"
+            }`}
           >
-            {analyzing ? "İnceleniyor…" : "AI ile incele"}
+            {analyzing
+              ? "İnceleniyor…"
+              : failed
+              ? "İnceleme başarısız — tekrar dene"
+              : "AI ile incele"}
           </button>
         )}
       </div>
-    </div>
+    </motion.div>,
+    document.body
   );
 }
 
